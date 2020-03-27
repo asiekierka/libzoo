@@ -31,13 +31,13 @@ typedef struct s_zoo_io_handle {
 	void *p;
 	int len;
 	int len_orig;
-	uint8_t (*getc)(struct s_zoo_io_handle *h);
-	size_t (*read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
-	size_t (*putc)(struct s_zoo_io_handle *h, uint8_t v);
-	size_t (*write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
-	size_t (*skip)(struct s_zoo_io_handle *h, size_t len);
-	size_t (*tell)(struct s_zoo_io_handle *h);
-	void (*close)(struct s_zoo_io_handle *h);
+	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
+	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
+	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
+	size_t (*func_write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
+	size_t (*func_skip)(struct s_zoo_io_handle *h, size_t len);
+	size_t (*func_tell)(struct s_zoo_io_handle *h);
+	void (*func_close)(struct s_zoo_io_handle *h);
 } zoo_io_handle;
 
 static uint8_t zoo_io_mem_getc(zoo_io_handle *h) {
@@ -95,13 +95,13 @@ static zoo_io_handle zoo_io_mem_open(uint8_t *ptr, size_t len) {
 	h.p = ptr;
 	h.len = len;
 	h.len_orig = len;
-	h.getc = zoo_io_mem_getc;
-	h.putc = zoo_io_mem_putc;
-	h.read = zoo_io_mem_read;
-	h.write = zoo_io_mem_write;
-	h.skip = zoo_io_mem_skip;
-	h.tell = zoo_io_mem_tell;
-	h.close = zoo_io_mem_close;
+	h.func_getc = zoo_io_mem_getc;
+	h.func_putc = zoo_io_mem_putc;
+	h.func_read = zoo_io_mem_read;
+	h.func_write = zoo_io_mem_write;
+	h.func_skip = zoo_io_mem_skip;
+	h.func_tell = zoo_io_mem_tell;
+	h.func_close = zoo_io_mem_close;
 	return h;
 }
 
@@ -148,51 +148,51 @@ static void zoo_io_file_close(zoo_io_handle *h) {
 static zoo_io_handle zoo_io_file_open(FILE *file) {
 	zoo_io_handle h;
 	h.p = file;
-	h.getc = zoo_io_file_getc;
-	h.putc = zoo_io_file_putc;
-	h.read = zoo_io_file_read;
-	h.write = zoo_io_file_write;
-	h.skip = zoo_io_file_skip;
-	h.tell = zoo_io_file_tell;
-	h.close = zoo_io_file_close;
+	h.func_getc = zoo_io_file_getc;
+	h.func_putc = zoo_io_file_putc;
+	h.func_read = zoo_io_file_read;
+	h.func_write = zoo_io_file_write;
+	h.func_skip = zoo_io_file_skip;
+	h.func_tell = zoo_io_file_tell;
+	h.func_close = zoo_io_file_close;
 	return h;
 }
 
 #endif
 
-#define zoo_io_read_byte(h) (h)->getc((h))
+#define zoo_io_read_byte(h) (h)->func_getc((h))
 
 static int16_t zoo_io_read_short(zoo_io_handle *h) {
-	uint8_t v = h->getc(h);
-	return v | ((uint16_t) h->getc(h) << 8);
+	uint8_t v = h->func_getc(h);
+	return v | ((uint16_t) h->func_getc(h) << 8);
 }
 
 static zoo_tile zoo_io_read_tile(zoo_io_handle *h) {
 	zoo_tile tile;
-	tile.element = h->getc(h);
-	tile.color = h->getc(h);
+	tile.element = h->func_getc(h);
+	tile.color = h->func_getc(h);
 	return tile;
 }
 
 static void zoo_io_read_pstring(zoo_io_handle *h, int p_len, char *str, int str_len) {
-	int len = h->getc(h);
+	int len = h->func_getc(h);
 	if (len > p_len) len = p_len;
 	if (len > str_len) len = str_len;
-	int slen = h->read(h, (uint8_t*) str, len);
-	h->skip(h, p_len - len);
+	int slen = h->func_read(h, (uint8_t*) str, len);
+	h->func_skip(h, p_len - len);
 	str[slen] = 0;
 }
 
-#define zoo_io_write_byte(h, v) (h)->putc((h), (v))
+#define zoo_io_write_byte(h, v) (h)->func_putc((h), (v))
 
 static void zoo_io_write_short(zoo_io_handle *h, int16_t v) {
-	h->putc(h, (v & 0xFF));
-	h->putc(h, (v >> 8));
+	h->func_putc(h, (v & 0xFF));
+	h->func_putc(h, (v >> 8));
 }
 
 static void zoo_io_write_tile(zoo_io_handle *h, zoo_tile tile) {
-	h->putc(h, tile.element);
-	h->putc(h, tile.color);
+	h->func_putc(h, tile.element);
+	h->func_putc(h, tile.color);
 }
 
 static void zoo_io_write_pstring(zoo_io_handle *h, int p_len, const char *str, int str_len) {
@@ -201,9 +201,9 @@ static void zoo_io_write_pstring(zoo_io_handle *h, int p_len, const char *str, i
 	str_len = strnlen(str, str_len);
 	if (str_len > p_len) str_len = p_len;
 
-	h->putc(h, str_len);
-	h->write(h, (uint8_t *) str, str_len);
-	h->skip(h, p_len - str_len);
+	h->func_putc(h, str_len);
+	h->func_write(h, (uint8_t *) str, str_len);
+	h->func_skip(h, p_len - str_len);
 }
 
 static void zoo_stat_io_read(zoo_io_handle *h, zoo_stat *stat) {
@@ -218,10 +218,10 @@ static void zoo_stat_io_read(zoo_io_handle *h, zoo_stat *stat) {
 	stat->follower = zoo_io_read_short(h);
 	stat->leader = zoo_io_read_short(h);
 	stat->under = zoo_io_read_tile(h);
-	stat->data = NULL; h->skip(h, 4);
+	stat->data = NULL; h->func_skip(h, 4);
 	stat->data_pos = zoo_io_read_short(h);
 	stat->data_len = zoo_io_read_short(h);
-	h->skip(h, 8);
+	h->func_skip(h, 8);
 }
 
 static void zoo_stat_io_write(zoo_io_handle *h, zoo_stat *stat) {
@@ -236,10 +236,10 @@ static void zoo_stat_io_write(zoo_io_handle *h, zoo_stat *stat) {
 	zoo_io_write_short(h, stat->follower);
 	zoo_io_write_short(h, stat->leader);
 	zoo_io_write_tile(h, stat->under);
-	h->skip(h, 4); // stat->data
+	h->func_skip(h, 4); // stat->data
 	zoo_io_write_short(h, stat->data_pos);
 	zoo_io_write_short(h, stat->data_len);
-	h->skip(h, 8);
+	h->func_skip(h, 8);
 }
 
 static size_t zoo_board_io_max_len(zoo_state *state) {
@@ -305,7 +305,7 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 	zoo_io_write_byte(h, state->board.info.start_player_x);
 	zoo_io_write_byte(h, state->board.info.start_player_y);
 	zoo_io_write_short(h, state->board.info.time_limit_sec);
-	h->skip(h, 16);
+	h->func_skip(h, 16);
 
 	zoo_io_write_short(h, state->board.stat_count);
 	stat = &state->board.stats[0];
@@ -319,7 +319,7 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 		}
 		zoo_stat_io_write(h, stat);
 		if (stat->data_len > 0) {
-			h->write(h, (uint8_t *) stat->data, stat->data_len);
+			h->func_write(h, (uint8_t *) stat->data, stat->data_len);
 			free(stat->data);
 		}
 	}
@@ -358,7 +358,7 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 	state->board.info.start_player_x = zoo_io_read_byte(h);
 	state->board.info.start_player_y = zoo_io_read_byte(h);
 	state->board.info.time_limit_sec = zoo_io_read_short(h);
-	h->skip(h, 16);
+	h->func_skip(h, 16);
 
 	state->board.stat_count = zoo_io_read_short(h);
 	stat = &state->board.stats[0];
@@ -368,7 +368,7 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 		if (stat->data_len > 0) {
 			// TODO: malloc check
 			stat->data = malloc(stat->data_len);
-			h->read(h, (uint8_t *) stat->data, stat->data_len);
+			h->func_read(h, (uint8_t *) stat->data, stat->data_len);
 		} else if (stat->data_len < 0) {
 			// TODO: bounds check
 			stat->data = state->board.stats[-stat->data_len].data;
@@ -395,14 +395,14 @@ void zoo_board_close(zoo_state *state) {
 	handle = zoo_io_mem_open(state->world.board_data[board_id], buf_len);
 
 	zoo_board_io_close(state, &handle);
-	if (handle.tell(&handle) != buf_len) {
-		state->world.board_len[board_id] = handle.tell(&handle);
+	if (handle.func_tell(&handle) != buf_len) {
+		state->world.board_len[board_id] = handle.func_tell(&handle);
 		// TODO: realloc check?
 		state->world.board_data[board_id] =
 			realloc(state->world.board_data[board_id], state->world.board_len[board_id]);
 	}
 
-	handle.close(&handle);
+	handle.func_close(&handle);
 }
 
 void zoo_board_open(zoo_state *state, int16_t board_id) {
@@ -419,7 +419,7 @@ void zoo_board_open(zoo_state *state, int16_t board_id) {
 	zoo_board_io_open(state, &handle);
 	state->world.info.current_board = board_id;
 
-	handle.close(&handle);
+	handle.func_close(&handle);
 }
 
 //
@@ -454,7 +454,7 @@ static bool zoo_world_io_load(zoo_state *state, zoo_io_handle *h, bool title_onl
 	state->world.info.torches = zoo_io_read_short(h);
 	state->world.info.torch_ticks = zoo_io_read_short(h);
 	state->world.info.energizer_ticks = zoo_io_read_short(h);
-	h->skip(h, 2);
+	h->func_skip(h, 2);
 	state->world.info.score = zoo_io_read_short(h);
 	zoo_io_read_pstring(h, 20, state->world.info.name, sizeof(state->world.info.name) - 1);
 	for (i = 0; i < 10; i++)
@@ -462,7 +462,7 @@ static bool zoo_world_io_load(zoo_state *state, zoo_io_handle *h, bool title_onl
 	state->world.info.board_time_sec = zoo_io_read_short(h);
 	state->world.info.board_time_hsec = zoo_io_read_short(h);
 	state->world.info.is_save = zoo_io_read_byte(h);
-	h->skip(h, 247);
+	h->func_skip(h, 247);
 
 	if (title_only) {
 		state->world.board_count = 0;
@@ -473,7 +473,7 @@ static bool zoo_world_io_load(zoo_state *state, zoo_io_handle *h, bool title_onl
 	for (i = 0; i <= state->world.board_count; i++) {
 		state->world.board_len[i] = zoo_io_read_short(h);
 		state->world.board_data[i] = malloc(state->world.board_len[i]);
-		h->read(h, state->world.board_data[i], state->world.board_len[i]);
+		h->func_read(h, state->world.board_data[i], state->world.board_len[i]);
 	}
 
 	zoo_board_open(state, state->world.info.current_board);
@@ -485,7 +485,7 @@ bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool ti
 	bool result;
 	zoo_io_handle handle = zoo_io_mem_open(buffer, buflen);
 	result = zoo_world_io_load(state, &handle, title_only);
-	handle.close(&handle);
+	handle.func_close(&handle);
 	return result;
 }
 
@@ -494,7 +494,7 @@ bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only) {
 	bool result;
 	zoo_io_handle handle = zoo_io_file_open(file);
 	result = zoo_world_io_load(state, &handle, title_only);
-	handle.close(&handle);
+	handle.func_close(&handle);
 	return result;
 }
 #endif
