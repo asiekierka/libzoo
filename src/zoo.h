@@ -28,8 +28,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "zoo_config_defaults.h"
-#include "zoo_config.h"
+#include <zoo_config.h>
 
 #ifdef ZOO_CONFIG_FILE_IO
 #include <stdio.h>

@@ -55,7 +55,7 @@ static const zoo_sound_drum zoo_sound_drums[10] = {
 	{14, {378,	331,	316,	230,	224,	384,	480,	320,	358,	412,	376,	621,	554,	426,	0}}
 };
 
-static ZOO_INLINE void zoo_nosound(zoo_sound_state *state) {
+static inline void zoo_nosound(zoo_sound_state *state) {
 	if (state->func_play_freqs != NULL) {
 		state->func_play_freqs(state, NULL, 0, false);
 	}

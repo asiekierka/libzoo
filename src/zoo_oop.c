@@ -48,7 +48,7 @@ static void zoo_oop_error(zoo_state *state, int16_t stat_id, const char *message
 	state->board.stats[stat_id].data_pos = -1;
 }
 
-static ZOO_INLINE void zoo_oop_read_char(zoo_state *state, int16_t stat_id, int16_t *position) {
+static inline void zoo_oop_read_char(zoo_state *state, int16_t stat_id, int16_t *position) {
 	zoo_stat *stat = &(state->board.stats[stat_id]);
 
 	if (*position >= 0 && *position < stat->data_len) {
@@ -387,7 +387,7 @@ static bool zoo_oop_parse_tile(zoo_state *state, int16_t stat_id, int16_t *posit
 	return false;
 }
 
-static ZOO_INLINE uint8_t zoo_get_color_for_tile_match(zoo_state *state, zoo_tile tile) {
+static inline uint8_t zoo_get_color_for_tile_match(zoo_state *state, zoo_tile tile) {
 	uint8_t c = zoo_element_defs[tile.element].color;
 	if (c < ZOO_COLOR_SPECIAL_MIN) {
 		return c & 0x07;

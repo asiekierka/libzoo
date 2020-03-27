@@ -20,21 +20,11 @@
  * SOFTWARE.
  */
 
-#ifndef __ZOO_CONFIG_DEFAULTS_H__
-#define __ZOO_CONFIG_DEFAULTS_H__
+/* Define to build with editor constants */
+#undef ZOO_CONFIG_EDITOR_CONSTANTS
 
-// Features
+/* Define to build with filesystem I/O */
+#undef ZOO_CONFIG_FILE_IO
 
-#define ZOO_CONFIG_FILE_IO
-#define ZOO_CONFIG_OPTIMIZATIONS
-// #define ZOO_CONFIG_EDITOR_CONSTANTS
-
-// Compiler options
-
-#if __STDC_VERSION__ >= 199901L
-#define ZOO_INLINE inline
-#else
-#define ZOO_INLINE
-#endif
-
-#endif /* __ZOO_CONFIG_DEFAULTS_H__ */
+/* Define to build with ZZT-level optimizations */
+#undef ZOO_CONFIG_OPTIMIZATIONS
