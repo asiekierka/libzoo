@@ -453,6 +453,7 @@ void zoo_board_enter(zoo_state *state);
 void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y);
 
 void zoo_game_start(zoo_state *state, zoo_game_state game_state);
+void zoo_game_stop(zoo_state *state);
 zoo_tick_retval zoo_tick(zoo_state *state);
 
 // zoo_game_io.c

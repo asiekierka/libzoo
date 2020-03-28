@@ -59,7 +59,6 @@ volatile int keys_down = 0;
 volatile int keys_held = 0;
 volatile bool tick_requested = false;
 volatile uint16_t ticks = 0;
-static bool is_playing = false;
 
 static void vram_write_tile_1bpp(const uint8_t *data, uint32_t *vram_pos, uint8_t invert_mask, uint8_t shift) {
 	for (int iy = 0; iy < 8; iy++, data++) {
@@ -115,7 +114,7 @@ IWRAM_ARM_CODE static void gba_play_freqs(zoo_sound_state *state, const uint16_t
 IWRAM_ARM_CODE static void irq_vblank(void) {
 	int ki = REG_KEYINPUT;
 
-	disp_y_offset = is_playing
+	disp_y_offset = (state.game_state == GS_PLAY)
 		? ((FONT_HEIGHT * MAP_Y_OFFSET) - ((SCREEN_HEIGHT - (FONT_HEIGHT * 26)) / 2))
 		: ((FONT_HEIGHT * MAP_Y_OFFSET) - ((SCREEN_HEIGHT - (FONT_HEIGHT * 25)) / 2));
 	REG_DISPSTAT = DSTAT_VBL_IRQ | DSTAT_VCT_IRQ | DSTAT_VCT(FONT_HEIGHT - disp_y_offset);
@@ -211,21 +210,19 @@ int main(void) {
 		if (tick_requested) {
 			tick_requested = false;
 
-			if (!is_playing) {
+			if (state.game_state == GS_TITLE) {
 				if (keys_down & KEY_START) {
-					zoo_sound_clear_queue(&(state.sound));
+					zoo_game_stop(&state);
 					gba_clear_sound();
 
 					if (!zoo_world_load(&state, &__rom_end__, (1 << 25), false)) {
 						return 0;
 					}
 
-					is_playing = true;
 					zoo_game_start(&state, GS_PLAY);
-					state.game_paused = true;
 					zoo_redraw(&state);
 				}
-			} else {
+			} else if (state.game_state == GS_PLAY) {
 				if (keys_down & KEY_B) {
 					state.input.torch = true;
 				}

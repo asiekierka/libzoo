@@ -52,7 +52,6 @@ static bool playfield_changed;
 static zoo_input_state input;
 static SDL_mutex *input_mutex;
 
-
 #ifdef __BIG_ENDIAN__
 #define SOFT_PIXEL_FORMAT SDL_PIXELFORMAT_ARGB32
 #else
@@ -160,6 +159,62 @@ void sdl_render(void) {
 	SDL_RenderPresent(renderer);
 }
 
+// input logic
+
+typedef enum {
+	IDIR_UP,
+	IDIR_DOWN,
+	IDIR_LEFT,
+	IDIR_RIGHT,
+	IDIR_MAX
+} input_dir;
+
+static int dir_pressed[IDIR_MAX];
+static int dir_pressed_id;
+
+static void input_dir_down(input_dir dir) {
+	if (dir_pressed[dir] == 0) {
+		dir_pressed_id++;
+		dir_pressed[dir] = dir_pressed_id;
+	}
+}
+
+static void input_dir_up(input_dir dir) {
+	dir_pressed[dir] = 0;
+}
+
+static void input_dir_update_delta() {
+	int m = 0;
+	input.delta_x = 0;
+	input.delta_y = 0;
+
+	for (int i = 0; i < IDIR_MAX; i++) {
+		if (dir_pressed[i] > m) {
+			m = dir_pressed[i];
+			switch (i) {
+				case IDIR_UP:
+					input.delta_x = 0;
+					input.delta_y = -1;
+					break;
+				case IDIR_DOWN:
+					input.delta_x = 0;
+					input.delta_y = 1;
+					break;
+				case IDIR_LEFT:
+					input.delta_x = -1;
+					input.delta_y = 0;
+					break;
+				case IDIR_RIGHT:
+					input.delta_x = 1;
+					input.delta_y = 0;
+					break;
+			}
+		}
+	}
+}
+
+// main
+
 int main(int argc, char **argv) {
 	SDL_Event event;
 
@@ -227,7 +282,7 @@ int main(int argc, char **argv) {
 	input_mutex = SDL_CreateMutex();
 
 	zoo_game_start(&state, GS_TITLE);
-	zoo_board_draw(&state);
+	zoo_redraw(&state);
 
 	init_audio();
 
@@ -235,7 +290,6 @@ int main(int argc, char **argv) {
 
 	// run
 	bool cont_loop = true;
-	int directions_pressed = 0;
 
 	while (cont_loop) {
 		SDL_LockMutex(input_mutex);
@@ -245,27 +299,21 @@ int main(int argc, char **argv) {
 					input.shoot = (event.key.keysym.mod & KMOD_SHIFT) ? true : false;
 					switch (event.key.keysym.sym) {
 						case SDLK_LEFT:
-							input.delta_x = -1;
-							input.delta_y = 0;
-							directions_pressed++;
+							input_dir_down(IDIR_LEFT);
 							break;
 						case SDLK_RIGHT:
-							input.delta_x = 1;
-							input.delta_y = 0;
-							directions_pressed++;
+							input_dir_down(IDIR_RIGHT);
 							break;
 						case SDLK_UP:
-							input.delta_x = 0;
-							input.delta_y = -1;
-							directions_pressed++;
+							input_dir_down(IDIR_UP);
 							break;
 						case SDLK_DOWN:
-							input.delta_x = 0;
-							input.delta_y = 1;
-							directions_pressed++;
+							input_dir_down(IDIR_DOWN);
 							break;
 						case SDLK_t:
-							input.torch = true;
+							if (state.game_state == GS_PLAY) {
+								input.torch = true;
+							}
 							break;
 					}
 					break;
@@ -273,16 +321,41 @@ int main(int argc, char **argv) {
 					input.shoot = (event.key.keysym.mod & KMOD_SHIFT) ? true : false;
 					switch (event.key.keysym.sym) {
 						case SDLK_LEFT:
+							input_dir_up(IDIR_LEFT);
+							break;
 						case SDLK_RIGHT:
+							input_dir_up(IDIR_RIGHT);
+							break;
 						case SDLK_UP:
+							input_dir_up(IDIR_UP);
+							break;
 						case SDLK_DOWN:
-							if ((--directions_pressed) <= 0) {
-								input.delta_x = 0;
-								input.delta_y = 0;
-							}
+							input_dir_up(IDIR_DOWN);
 							break;
 						case SDLK_t:
-							input.torch = false;
+							if (state.game_state == GS_PLAY) {
+								input.torch = false;
+							}
+							break;
+						case SDLK_p:
+							if (state.game_state == GS_TITLE) {
+								zoo_game_stop(&state);
+
+								f = fopen(argv[1], "rb");
+								if (!zoo_world_load_file(&state, f, false)) {
+									fclose(f);
+									SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading file!");
+									cont_loop = false;
+									break;
+								}
+								fclose(f);
+
+								zoo_game_start(&state, GS_PLAY);
+								zoo_redraw(&state);
+							}
+							break;
+						case SDLK_b:
+							state.sound.enabled = !state.sound.enabled;
 							break;
 					}
 					break;
@@ -291,6 +364,7 @@ int main(int argc, char **argv) {
 					break;
 			}
 		}
+		input_dir_update_delta();
 		SDL_UnlockMutex(input_mutex);
 
 		sdl_render();

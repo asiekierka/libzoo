@@ -617,7 +617,15 @@ void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 	if (state->game_state == GS_TITLE) {
 		zoo_display_message(state, 0, "");
 		state->game_title_exit_requested = false;
+		state->game_paused = false;
+	} else if (state->game_state == GS_PLAY) {
+		state->game_paused = true;
 	}
+}
+
+void zoo_game_stop(zoo_state *state) {
+	state->game_state = GS_NONE;
+	zoo_sound_clear_queue(&(state->sound));
 }
 
 static ZOO_INLINE zoo_tick_retval zoo_call_stack_tick(zoo_state *state) {

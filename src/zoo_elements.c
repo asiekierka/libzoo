@@ -680,13 +680,13 @@ static void zoo_e_star_tick(zoo_state *state, int16_t stat_id) {
 
 static void zoo_e_energizer_touch(zoo_state *state, int16_t x, int16_t y, int16_t source_stat_id, int16_t *dx, int16_t *dy) {
 	zoo_sound_queue_const(&(state->sound), 9,
-		"\x20\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03"
-		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x20\x03");
+		"\x20\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03"
+		"\x30\x03\x23\x03\x24\x03\x25\x03\x35\x03\x25\x03\x23\x03\x20\x03");
 
 	state->board.tiles[x][y].element = ZOO_E_EMPTY;
 	zoo_board_draw_tile(state, x, y);
@@ -1110,7 +1110,7 @@ static void zoo_e_gem_touch(zoo_state *state, int16_t x, int16_t y, int16_t sour
 
 	state->board.tiles[x][y].element = ZOO_E_EMPTY;
 	state->func_update_sidebar(state);
-	zoo_sound_queue_const(&(state->sound), 2, "\x30\x01\x37\x01\x34\x01\x30\x01");
+	zoo_sound_queue_const(&(state->sound), 2, "\x40\x01\x37\x01\x34\x01\x30\x01");
 
 	if (state->msg_flags.gem) {
 		state->msg_flags.gem = false;
@@ -1212,7 +1212,7 @@ static void zoo_e_torch_touch(zoo_state *state, int16_t x, int16_t y, int16_t so
 	}
 	state->msg_flags.torch = false;
 
-	zoo_sound_queue_const(&(state->sound), 3, "\x30\x01\x3B\x01\x34\x02");
+	zoo_sound_queue_const(&(state->sound), 3, "\x30\x01\x39\x01\x34\x02");
 }
 
 static void zoo_e_invisible_touch(zoo_state *state, int16_t x, int16_t y, int16_t source_stat_id, int16_t *dx, int16_t *dy) {
@@ -1227,7 +1227,7 @@ static void zoo_e_forest_touch(zoo_state *state, int16_t x, int16_t y, int16_t s
 	state->board.tiles[x][y].element = ZOO_E_EMPTY;
 	zoo_board_draw_tile(state, x, y);
 
-	zoo_sound_queue_const(&(state->sound), 3, "\x3B\x01");
+	zoo_sound_queue_const(&(state->sound), 3, "\x39\x01");
 
 	if (state->msg_flags.forest) {
 		zoo_display_message(state, 200, "A path is cleared through the forest.");
