@@ -31,7 +31,7 @@
 #include "zoo_config_defaults.h"
 #include "zoo_config.h"
 
-#ifdef ZOO_CONFIG_FILE_IO
+#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 #include <stdio.h>
 #endif
 
@@ -101,6 +101,44 @@ void zoo_call_pop(zoo_call_stack *stack);
 
 // sound
 
+// zoo_sound_pcm.c
+
+struct s_zoo_sound_state;
+
+#ifdef ZOO_CONFIG_ENABLE_SOUND_PCM
+
+typedef struct {
+	uint32_t tick;
+	uint32_t emitted;
+	const uint16_t *freqs;
+	uint16_t pos, len;
+	bool clear;
+} zoo_pcm_entry;
+
+typedef struct {
+	// user-configurable
+	uint32_t frequency;
+	uint8_t channels;
+	uint8_t volume;
+	bool format_signed;
+	uint8_t latency; // in ticks
+
+	// generated
+	zoo_pcm_entry buffer[ZOO_CONFIG_SOUND_PCM_BUFFER_LEN];
+	uint16_t buf_pos;
+	uint16_t buf_len;
+	int32_t buf_ticks;
+	double sub_ticks;
+	int32_t ticks;
+} zoo_pcm_state;
+
+void zoo_sound_pcm_init(struct s_zoo_sound_state *state, zoo_pcm_state *pcm_state);
+void zoo_sound_pcm_generate(zoo_pcm_state *pcm_state, uint8_t *stream, size_t len);
+void zoo_sound_pcm_tick(zoo_pcm_state *pcm_state);
+#endif
+
+// zoo_sound.c
+
 typedef struct s_zoo_sound_state {
 	bool enabled;
 	bool block_queueing;
@@ -115,6 +153,10 @@ typedef struct s_zoo_sound_state {
 	// optional
 	void (*func_play_freqs)(struct s_zoo_sound_state *state, const uint16_t *freqs, uint16_t len, bool clear);
 	void (*func_play_note)(struct s_zoo_sound_state *state, uint8_t note, uint8_t duration);
+
+#ifdef ZOO_CONFIG_ENABLE_SOUND_PCM
+	zoo_pcm_state *pcm_state;
+#endif
 } zoo_sound_state;
 
 // subtract 1 as those are usually strings and contain a leading \0
@@ -306,6 +348,7 @@ typedef struct s_zoo_state {
 
 	// - high-level engine hooks
 	void (*func_write_message)(struct s_zoo_state *state, uint8_t p2, const char *message);
+	void (*func_draw_sidebar)(struct s_zoo_state *state);
 	void (*func_update_sidebar)(struct s_zoo_state *state);
 
 	// utility methods
@@ -328,12 +371,12 @@ typedef struct {
 	int16_t cycle;
 	zoo_func_element_tick tick_func;
 	zoo_func_element_touch touch_func;
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 	int16_t editor_category;
 	char editor_shortcut;
 #endif
 	char name[21];
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 	char category_name[21];
 	char param1_name[21];
 	char param2_name[21];
@@ -413,7 +456,7 @@ void zoo_board_open(zoo_state *state, int16_t board_id);
 void zoo_world_close(zoo_state *state);
 bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool title_only);
 
-#ifdef ZOO_CONFIG_FILE_IO
+#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only);
 #endif
 
@@ -430,6 +473,12 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 
 void zoo_window_classic_init(zoo_text_window *window);
 void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_t height);
+
+// zoo_sidebar_*
+
+#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
+void zoo_install_sidebar_slim(zoo_state *state);
+#endif
 
 // defines
 

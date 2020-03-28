@@ -39,12 +39,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Empty", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -52,7 +52,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"EMPTY", // stripped name (libzoo)
@@ -70,12 +70,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_board_edge_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -83,7 +83,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -101,12 +101,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_e_message_timer_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -114,7 +114,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -132,12 +132,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_monitor_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Monitor", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -145,7 +145,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"MONITOR", // stripped name (libzoo)
@@ -163,12 +163,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_player_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'Z', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Player", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Items:", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -176,7 +176,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"PLAYER", // stripped name (libzoo)
@@ -194,12 +194,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_ammo_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'A', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Ammo", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -207,7 +207,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"AMMO", // stripped name (libzoo)
@@ -225,12 +225,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_torch_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'T', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Torch", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -238,7 +238,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"TORCH", // stripped name (libzoo)
@@ -256,12 +256,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_gem_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'G', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Gem", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -269,7 +269,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"GEM", // stripped name (libzoo)
@@ -287,12 +287,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_key_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'K', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Key", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -300,7 +300,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"KEY", // stripped name (libzoo)
@@ -318,12 +318,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_door_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'D', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Door", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -331,7 +331,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"DOOR", // stripped name (libzoo)
@@ -349,12 +349,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_scroll_tick, // tick func
 		zoo_e_scroll_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'S', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Scroll", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -362,7 +362,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"Edit text of scroll", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		true, // has text (libzoo)
 		"SCROLL", // stripped name (libzoo)
@@ -380,12 +380,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		0, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_passage_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'P', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Passage", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -393,7 +393,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"Room thru passage?", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"PASSAGE", // stripped name (libzoo)
@@ -411,12 +411,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_duplicator_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'U', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Duplicator", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"Duplication rate?;SF", // param 2 name
@@ -424,7 +424,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"Source direction?", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"DUPLICATOR", // stripped name (libzoo)
@@ -442,12 +442,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		6, // cycle
 		zoo_e_bomb_tick, // tick func
 		zoo_e_bomb_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'B', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Bomb", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -455,7 +455,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"BOMB", // stripped name (libzoo)
@@ -473,12 +473,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_energizer_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'E', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Energizer", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -486,7 +486,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"ENERGIZER", // stripped name (libzoo)
@@ -504,12 +504,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_star_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Star", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -517,7 +517,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"STAR", // stripped name (libzoo)
@@ -535,12 +535,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		3, // cycle
 		zoo_e_conveyor_cw_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'1', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Clockwise", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Conveyors:", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -548,7 +548,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"CLOCKWISE", // stripped name (libzoo)
@@ -566,12 +566,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_conveyor_ccw_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_ITEM, // editor category
 		'2', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Counter", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -579,7 +579,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"COUNTER", // stripped name (libzoo)
@@ -597,12 +597,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_bullet_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Bullet", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -610,7 +610,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"BULLET", // stripped name (libzoo)
@@ -628,12 +628,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_water_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'W', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Water", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Terrains:", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -641,7 +641,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"WATER", // stripped name (libzoo)
@@ -659,12 +659,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_forest_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'F', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Forest", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -672,7 +672,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"FOREST", // stripped name (libzoo)
@@ -690,12 +690,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'S', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Solid", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Walls:", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -703,7 +703,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SOLID", // stripped name (libzoo)
@@ -721,12 +721,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'N', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Normal", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -734,7 +734,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"NORMAL", // stripped name (libzoo)
@@ -752,12 +752,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'B', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Breakable", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -765,7 +765,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"BREAKABLE", // stripped name (libzoo)
@@ -783,12 +783,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_pushable_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'O', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Boulder", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -796,7 +796,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"BOULDER", // stripped name (libzoo)
@@ -814,12 +814,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_pushable_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'1', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Slider (NS)", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -827,7 +827,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SLIDERNS", // stripped name (libzoo)
@@ -845,12 +845,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_pushable_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'2', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Slider (EW)", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -858,7 +858,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SLIDEREW", // stripped name (libzoo)
@@ -876,12 +876,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_fake_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'A', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Fake", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -889,7 +889,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"FAKE", // stripped name (libzoo)
@@ -907,12 +907,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_e_invisible_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'I', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Invisible", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -920,7 +920,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"INVISIBLE", // stripped name (libzoo)
@@ -938,12 +938,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_blink_wall_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'L', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Blink wall", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Starting time", // param 1 name
 		"Period", // param 2 name
@@ -951,7 +951,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"Wall direction", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"BLINKWALL", // stripped name (libzoo)
@@ -969,12 +969,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_transporter_tick, // tick func
 		zoo_e_transporter_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'T', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Transporter", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -982,7 +982,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"Direction?", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"TRANSPORTER", // stripped name (libzoo)
@@ -1000,12 +1000,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Line", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1013,7 +1013,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"LINE", // stripped name (libzoo)
@@ -1031,12 +1031,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_TERRAIN, // editor category
 		'R', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Ricochet", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1044,7 +1044,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"RICOCHET", // stripped name (libzoo)
@@ -1062,12 +1062,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1075,7 +1075,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1093,12 +1093,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		3, // cycle
 		zoo_e_bear_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'B', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Bear", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Creatures:", // category name
 		"Sensitivity?", // param 1 name
 		"", // param 2 name
@@ -1106,7 +1106,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		1, // score value
 		false, // has text (libzoo)
 		"BEAR", // stripped name (libzoo)
@@ -1124,12 +1124,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		1, // cycle
 		zoo_e_ruffian_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'R', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Ruffian", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Intelligence?", // param 1 name
 		"Resting time?", // param 2 name
@@ -1137,7 +1137,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		2, // score value
 		false, // has text (libzoo)
 		"RUFFIAN", // stripped name (libzoo)
@@ -1155,12 +1155,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		3, // cycle
 		zoo_e_object_tick, // tick func
 		zoo_e_object_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'O', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Object", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Character?", // param 1 name
 		"", // param 2 name
@@ -1168,7 +1168,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"Edit Program", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		true, // has text (libzoo)
 		"OBJECT", // stripped name (libzoo)
@@ -1186,12 +1186,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		3, // cycle
 		zoo_e_slime_tick, // tick func
 		zoo_e_slime_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'V', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Slime", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"Movement speed?;FS", // param 2 name
@@ -1199,7 +1199,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SLIME", // stripped name (libzoo)
@@ -1217,12 +1217,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		3, // cycle
 		zoo_e_shark_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'Y', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Shark", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Intelligence?", // param 1 name
 		"", // param 2 name
@@ -1230,7 +1230,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SHARK", // stripped name (libzoo)
@@ -1248,12 +1248,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_spinning_gun_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'G', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Spinning gun", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Intelligence?", // param 1 name
 		"Firing rate?", // param 2 name
@@ -1261,7 +1261,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"SPINNINGGUN", // stripped name (libzoo)
@@ -1279,12 +1279,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		4, // cycle
 		zoo_e_pusher_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'P', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Pusher", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1292,7 +1292,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"Push direction?", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"PUSHER", // stripped name (libzoo)
@@ -1310,12 +1310,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_lion_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'L', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Lion", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Beasts:", // category name
 		"Intelligence?", // param 1 name
 		"", // param 2 name
@@ -1323,7 +1323,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		1, // score value
 		false, // has text (libzoo)
 		"LION", // stripped name (libzoo)
@@ -1341,12 +1341,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_tiger_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'T', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Tiger", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"Intelligence?", // param 1 name
 		"Firing rate?", // param 2 name
@@ -1354,7 +1354,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		2, // score value
 		false, // has text (libzoo)
 		"TIGER", // stripped name (libzoo)
@@ -1372,12 +1372,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1385,7 +1385,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1403,12 +1403,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_centipede_head_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'H', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Head", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"Centipedes", // category name
 		"Intelligence?", // param 1 name
 		"Deviance?", // param 2 name
@@ -1416,7 +1416,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		1, // score value
 		false, // has text (libzoo)
 		"HEAD", // stripped name (libzoo)
@@ -1434,12 +1434,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		2, // cycle
 		zoo_e_centipede_segment_tick, // tick func
 		zoo_e_damaging_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		ZOO_CATEGORY_CREATURE, // editor category
 		'S', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"Segment", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1447,7 +1447,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		3, // score value
 		false, // has text (libzoo)
 		"SEGMENT", // stripped name (libzoo)
@@ -1465,12 +1465,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1478,7 +1478,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1496,12 +1496,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1509,7 +1509,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1527,12 +1527,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1540,7 +1540,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1558,12 +1558,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1571,7 +1571,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1589,12 +1589,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1602,7 +1602,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1620,12 +1620,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1633,7 +1633,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1651,12 +1651,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1664,7 +1664,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)
@@ -1682,12 +1682,12 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		-1, // cycle
 		zoo_default_tick, // tick func
 		zoo_default_touch, // touch func
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		0, // editor category
 		'\0', // editor shortcut
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		"", // name
-#ifdef ZOO_CONFIG_EDITOR_CONSTANTS
+#ifdef ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 		"", // category name
 		"", // param 1 name
 		"", // param 2 name
@@ -1695,7 +1695,7 @@ const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1] = {
 		"", // param board name
 		"", // param dir name
 		"", // param text name
-#endif /* ZOO_CONFIG_EDITOR_CONSTANTS */
+#endif /* ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS */
 		0, // score value
 		false, // has text (libzoo)
 		"", // stripped name (libzoo)

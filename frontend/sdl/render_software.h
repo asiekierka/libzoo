@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 Adrian Siekierka
+ * Copyright (c) 2018, 2019, 2020 Adrian Siekierka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,12 @@
  * SOFTWARE.
  */
 
-#ifndef __ZOO_CONFIG_DEFAULTS_H__
-#define __ZOO_CONFIG_DEFAULTS_H__
+#ifndef __RENDER_SOFTWARE_H__
+#define __RENDER_SOFTWARE_H__
 
-// Features
+#include "types.h"
 
-// Enable POSIX-standard file I/O functions.
-#define ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+void software_draw_char(render_options *opts, void *buffer, int pitch, int x, int y, uint8_t col, uint8_t chr);
+void software_draw_screen(render_options *opts, void *buffer, int pitch, video_buffer *video);
 
-// Enable editor-specific constants in element definitions.
-// #define ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
-
-// Enable PCM sound logic.
-// #define ZOO_CONFIG_ENABLE_SOUND_PCM
-#define ZOO_CONFIG_SOUND_PCM_BUFFER_LEN 32 // ~1.5 seconds of audio
-
-// Various sidebar styles.
-// #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
-
-// Compiler options
-
-#if __STDC_VERSION__ >= 199901L
-#define ZOO_INLINE inline
-#else
-#define ZOO_INLINE
-#endif
-
-#endif /* __ZOO_CONFIG_DEFAULTS_H__ */
+#endif /* __RENDER_SOFTWARE_H__ */

@@ -7,6 +7,8 @@
 
 // Configuration
 
-#undef ZOO_CONFIG_FILE_IO
+#undef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+
+#define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
 
 #endif /* __ZOO_CONFIG_H__ */

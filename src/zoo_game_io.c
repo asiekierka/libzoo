@@ -105,7 +105,7 @@ static zoo_io_handle zoo_io_mem_open(uint8_t *ptr, size_t len) {
 	return h;
 }
 
-#ifdef ZOO_CONFIG_FILE_IO
+#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 
 static uint8_t zoo_io_file_getc(zoo_io_handle *h) {
 	FILE *f = (FILE*) h->p;
@@ -489,7 +489,7 @@ bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool ti
 	return result;
 }
 
-#ifdef ZOO_CONFIG_FILE_IO
+#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only) {
 	bool result;
 	zoo_io_handle handle = zoo_io_file_open(file);

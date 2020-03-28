@@ -138,90 +138,6 @@ IWRAM_ARM_CODE static void irq_timer_pit(void) {
 	zoo_sound_tick(&(state.sound));
 }
 
-// TODO: support negatives
-static void vram_write_number(int16_t x, int16_t y, uint8_t col, int val) {
-	int i = val;
-	int xl = 1;
-	while (i >= 10) {
-		xl++;
-		i /= 10;
-	}
-
-	i = val;
-	while (i >= 10) {
-		xl--;
-		vram_write_char(x + xl, y, col, '0' + (i % 10));
-		i /= 10;
-	}
-	xl--;
-	vram_write_char(x + xl, y, col, '0' + (i % 10));
-}
-
-// TODO: support negatives
-static void vram_write_number_torch(int16_t x, int16_t y, uint8_t col, int val) {
-	int i = val;
-	int xl = 1;
-	uint8_t tcol = (col & 0x0F) | 0x60;
-	int tlimit = (state.world.info.torch_ticks + 39) / 40;
-	while (i >= 10) {
-		xl++;
-		i /= 10;
-	}
-
-	i = val;
-	for (int j = 4; j >= xl; j--)
-		vram_write_char(x + j, y, j < tlimit ? tcol : col, ' ');
-
-	while (i >= 10) {
-		xl--;
-		vram_write_char(x + xl, y, xl < tlimit ? tcol : col, '0' + (i % 10));
-		i /= 10;
-	}
-	xl--;
-	vram_write_char(x + xl, y, xl < tlimit ? tcol : col, '0' + (i % 10));
-}
-
-static void draw_sidebar(zoo_state *sstate) {
-	if (!is_playing) {
-		for (int i = 0; i < 60; i++) {
-			vram_write_char(i, 25, 0x0F, ' ');
-		}
-		return;
-	}
-
-	for (int i = 0; i < 60; i++) {
-		vram_write_char(i, 25, 0x1F, ' ');
-	}
-
-	int x = 1;
-
-	vram_write_char(x, 25, 0x1C, '\x03');
-	vram_write_number(x + 2, 25, 0x1F, sstate->world.info.health);
-	x += 8;
-
-	vram_write_char(x, 25, 0x1B, '\x84');
-	vram_write_number(x + 2, 25, 0x1F, sstate->world.info.ammo);
-	x += 8;
-
-	vram_write_char(x, 25, 0x1E, '\x9D');
-	vram_write_number_torch(x + 2, 25, 0x1F, sstate->world.info.torches);
-	x += 8;
-
-	vram_write_char(x, 25, 0x19, '\x04');
-	vram_write_number(x + 2, 25, 0x1F, sstate->world.info.gems);
-	x += 8;
-
-	vram_write_char(x, 25, 0x17, '\x9E');
-	vram_write_number(x + 2, 25, 0x1F, sstate->world.info.score);
-	x += 8;
-
-	for (int i = 0; i < 7; i++) {
-		if (sstate->world.info.keys[i])
-			vram_write_char(x + i, 25, 0x19 + i, '\x0C');
-	}
-	x += 8;
-}
-
 int main(void) {
 	// set forced blank until display data is loaded
 	REG_DISPCNT = DCNT_BLANK;
@@ -273,7 +189,7 @@ int main(void) {
 	zoo_state_init(&state);
 	state.func_write_char = vram_write_char;
 	state.sound.func_play_freqs = gba_play_freqs;
-	state.func_update_sidebar = draw_sidebar;
+	zoo_install_sidebar_slim(&state);
 
 	// init sound
 	REG_SOUNDCNT_X = SSTAT_ENABLE;

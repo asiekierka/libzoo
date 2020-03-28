@@ -746,10 +746,12 @@ ReadCommand:
 					line_finished = false;
 				} else if (!oop_word_cmp("ZAP")) {
 					zoo_oop_read_word(state, stat_id, position);
+					// state->oop_word is used by zoo_oop_iterate_stat
+					strncpy(buf2, state->oop_word, sizeof(buf2));
 
 					label_stat_id = 0;
 					while (
-						zoo_oop_find_label(state, stat_id, state->oop_word,
+						zoo_oop_find_label(state, stat_id, buf2,
 						&label_stat_id, &label_data_pos, "\r:")
 					) {
 						state->board.stats[label_stat_id].data[label_data_pos + 1] = '\'';
@@ -759,10 +761,12 @@ ReadCommand:
 					strncpy(buf, "\r'", sizeof(buf) - 1);
 					strncat(buf, state->oop_word, sizeof(buf) - 1);
 					strncat(buf, "\r", sizeof(buf) - 1);
+					// state->oop_word is used by zoo_oop_iterate_stat
+					strncpy(buf2, state->oop_word, sizeof(buf2));
 
 					label_stat_id = 0;
 					while (
-						zoo_oop_find_label(state, stat_id, state->oop_word,
+						zoo_oop_find_label(state, stat_id, buf2,
 						&label_stat_id, &label_data_pos, "\r:")
 					) {
 						do {
@@ -777,7 +781,9 @@ ReadCommand:
 					stat->p2 = 0;
 				} else if (!oop_word_cmp("SEND")) {
 					zoo_oop_read_word(state, stat_id, position);
-					if (zoo_oop_send(state, stat_id, state->oop_word, false)) {
+					// state->oop_word is used by zoo_oop_iterate_stat
+					strncpy(buf2, state->oop_word, sizeof(buf2));
+					if (zoo_oop_send(state, stat_id, buf2, false)) {
 						line_finished = false;
 					}
 				} else if (!oop_word_cmp("BECOME")) {

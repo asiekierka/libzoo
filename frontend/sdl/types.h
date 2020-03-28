@@ -20,30 +20,24 @@
  * SOFTWARE.
  */
 
-#ifndef __ZOO_CONFIG_DEFAULTS_H__
-#define __ZOO_CONFIG_DEFAULTS_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
-// Features
+typedef struct {
+	int width, height;
+	uint8_t *buffer;
+} video_buffer;
 
-// Enable POSIX-standard file I/O functions.
-#define ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+typedef struct {
+	const uint8_t *charset;
+	const uint32_t *palette;
+	int char_width, char_height;
+	int flags, bpp;
+} render_options;
 
-// Enable editor-specific constants in element definitions.
-// #define ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
+#define RENDER_BLINK_OFF 1
+#define RENDER_BLINK_PHASE 2
+#define RENDER_BLINK_MASK 3
+#define RENDER_40COL 4
 
-// Enable PCM sound logic.
-// #define ZOO_CONFIG_ENABLE_SOUND_PCM
-#define ZOO_CONFIG_SOUND_PCM_BUFFER_LEN 32 // ~1.5 seconds of audio
-
-// Various sidebar styles.
-// #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
-
-// Compiler options
-
-#if __STDC_VERSION__ >= 199901L
-#define ZOO_INLINE inline
-#else
-#define ZOO_INLINE
-#endif
-
-#endif /* __ZOO_CONFIG_DEFAULTS_H__ */
+#endif /* __TYPES_H__ */
