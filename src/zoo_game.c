@@ -589,35 +589,41 @@ void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y) {
 	zoo_board_enter(state);
 }
 
-void zoo_game_start(zoo_state *state, bool is_title) {
-	state->game_play_exit_requested = false;
-	state->current_tick = state->func_random(100);
-	state->current_stat_tick = state->board.stat_count + 1;
-
-	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].element
-		= is_title ? ZOO_E_MONITOR : ZOO_E_PLAYER;
-	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].color
-		= zoo_element_defs[is_title ? ZOO_E_MONITOR : ZOO_E_PLAYER].color;
-
-	zoo_board_enter(state);
-
-	if (is_title) {
-		zoo_display_message(state, 0, "");
-		state->game_title_exit_requested = false;
-	}
+void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
+	state->game_state = game_state;
 
 	// call stack handling
 	while (state->call_stack.call != NULL) {
 		zoo_call_pop(&state->call_stack);
 	}
+
+	if (game_state == GS_NONE) {
+		return;
+	}
+
+	// GS_TITLE/GS_PLAY
+	state->game_play_exit_requested = false;
+	state->current_tick = state->func_random(100);
+	state->current_stat_tick = state->board.stat_count + 1;
+
+	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].element
+		= (state->game_state == GS_TITLE) ? ZOO_E_MONITOR : ZOO_E_PLAYER;
+	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].color
+		= zoo_element_defs[(state->game_state == GS_TITLE) ? ZOO_E_MONITOR : ZOO_E_PLAYER].color;
+
+
+	zoo_board_enter(state);
+
+	if (state->game_state == GS_TITLE) {
+		zoo_display_message(state, 0, "");
+		state->game_title_exit_requested = false;
+	}
 }
 
-zoo_tick_retval zoo_game_tick(zoo_state *state) {
+static ZOO_INLINE zoo_tick_retval zoo_call_stack_tick(zoo_state *state) {
 	zoo_call call;
 	zoo_text_window *window;
 	zoo_tick_retval ret;
-	int i;
-	uint8_t call_state;
 
 	// call stack handling
 	if (state->call_stack.call != NULL) {
@@ -653,7 +659,14 @@ zoo_tick_retval zoo_game_tick(zoo_state *state) {
 				return RETURN_IMMEDIATE;
 		}
 	}
+
 	state->call_stack.state = 0;
+	return EXIT; // never returned officially, so we repurpose it to mean "continue"
+}
+
+static zoo_tick_retval zoo_game_tick(zoo_state *state) {
+	int i;
+	uint8_t call_state;
 
 	call_state = state->game_tick_state;
 	state->game_tick_state = 0;
@@ -780,4 +793,21 @@ GameTickState2:
 	}
 
 	return RETURN_IMMEDIATE;
+}
+
+zoo_tick_retval zoo_tick(zoo_state *state) {
+	zoo_tick_retval ret;
+
+	ret = zoo_call_stack_tick(state);
+	if (ret != EXIT) {
+		return ret;
+	}
+
+	switch (state->game_state) {
+		case GS_NONE:
+			return RETURN_NEXT_CYCLE;
+		case GS_TITLE:
+		case GS_PLAY:
+			return zoo_game_tick(state);
+	}
 }

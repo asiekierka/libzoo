@@ -126,7 +126,7 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 
 		SDL_LockMutex(playfield_mutex);
 		while (true) {
-			switch (zoo_game_tick(&state)) {
+			switch (zoo_tick(&state)) {
 				case RETURN_IMMEDIATE:
 					break;
 				case RETURN_NEXT_FRAME:
@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 	playfield_mutex = SDL_CreateMutex();
 	input_mutex = SDL_CreateMutex();
 
-	zoo_game_start(&state, true);
+	zoo_game_start(&state, GS_TITLE);
 	zoo_board_draw(&state);
 
 	init_audio();

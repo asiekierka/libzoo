@@ -74,13 +74,12 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 }
 
 static void zoo_draw_sidebar_slim(zoo_state *state) {
-	// TODO: store game state in zoo_state
-/*	if (!is_playing) {
+	if (state->game_state != GS_PLAY) {
 		for (int i = 0; i < 60; i++) {
 			state->func_write_char(i, 25, 0x0F, ' ');
 		}
 		return;
-	} */
+	}
 
 	for (int i = 0; i < 60; i++) {
 		state->func_write_char(i, 25, 0x1F, ' ');

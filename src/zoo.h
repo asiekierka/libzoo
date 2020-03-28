@@ -307,6 +307,12 @@ typedef struct s_zoo_text_window {
 	void (*func_load_file)(struct s_zoo_text_window *window, const char *filename);
 } zoo_text_window;
 
+typedef enum {
+	GS_NONE,
+	GS_TITLE,
+	GS_PLAY
+} zoo_game_state;
+
 typedef struct s_zoo_state {
 	zoo_board board;
 	zoo_world world;
@@ -315,8 +321,9 @@ typedef struct s_zoo_state {
 
 	bool game_title_exit_requested;
 	bool game_play_exit_requested;
-	int16_t game_state_element;
 	int16_t return_board_id;
+
+	zoo_game_state game_state;
 
 	int16_t current_tick;
 	int16_t current_stat_tick;
@@ -445,8 +452,8 @@ void zoo_calc_direction_seek(zoo_state *state, int16_t x, int16_t y, int16_t *dx
 void zoo_board_enter(zoo_state *state);
 void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y);
 
-void zoo_game_start(zoo_state *state, bool is_title);
-zoo_tick_retval zoo_game_tick(zoo_state *state);
+void zoo_game_start(zoo_state *state, zoo_game_state game_state);
+zoo_tick_retval zoo_tick(zoo_state *state);
 
 // zoo_game_io.c
 

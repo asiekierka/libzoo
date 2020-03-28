@@ -200,7 +200,7 @@ int main(void) {
 		return 0;
 	}
 
-	zoo_game_start(&state, true);
+	zoo_game_start(&state, GS_TITLE);
 	zoo_redraw(&state);
 
 	int j = 0;
@@ -221,7 +221,7 @@ int main(void) {
 					}
 
 					is_playing = true;
-					zoo_game_start(&state, false);
+					zoo_game_start(&state, GS_PLAY);
 					state.game_paused = true;
 					zoo_redraw(&state);
 				}
@@ -248,7 +248,7 @@ int main(void) {
 
 			tick_in_progress = true;
 			while (tick_in_progress) {
-				switch (zoo_game_tick(&state)) {
+				switch (zoo_tick(&state)) {
 					case RETURN_IMMEDIATE:
 						break;
 					case RETURN_NEXT_FRAME:
