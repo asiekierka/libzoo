@@ -55,7 +55,7 @@ struct s_zoo_text_window;
 typedef double zoo_time_ms;
 #define ZOO_PIT_TICK_MS 54.92457840312107
 #else
-typedef int zoo_time_ms;
+typedef uint32_t zoo_time_ms;
 #define ZOO_PIT_TICK_MS 55
 #endif /* ZOO_CONFIG_USE_DOUBLE_FOR_MS */
 
@@ -102,7 +102,7 @@ typedef struct s_zoo_call {
 
 typedef struct {
 	zoo_call *call;
-	uint8_t state;
+ 	uint8_t state;
 	zoo_call *curr_call;
 } zoo_call_stack;
 
@@ -346,8 +346,10 @@ typedef struct s_zoo_state {
 
 	int16_t current_tick;
 	int16_t current_stat_tick;
+	int16_t tick_counter;
 	int16_t tick_speed;
 	int16_t tick_duration;
+	zoo_time_ms time_elapsed;
 	bool game_paused;
 	bool game_paused_blink;
 	bool force_darkness_off;
@@ -421,6 +423,7 @@ typedef struct {
 
 // zoo.c
 
+bool zoo_has_hsecs_elapsed(zoo_state *state, int16_t *hsecs_counter, int16_t hsecs_value);
 zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs);
 int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs);
 void zoo_state_init(zoo_state *state);
@@ -477,6 +480,8 @@ void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y);
 
 void zoo_game_start(zoo_state *state, zoo_game_state game_state);
 void zoo_game_stop(zoo_state *state);
+
+void zoo_tick_advance_pit(zoo_state *state);
 zoo_tick_retval zoo_tick(zoo_state *state);
 
 // zoo_game_io.c

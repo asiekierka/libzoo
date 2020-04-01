@@ -116,32 +116,31 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 	ticks++;
 
 	SDL_LockMutex(audio_mutex);
+	zoo_tick_advance_pit(&state);
 	zoo_sound_tick(&(state.sound));
 	zoo_sound_pcm_tick(&pcm_state);
 	SDL_UnlockMutex(audio_mutex);
 
-	int16_t pit_ticks_game = zoo_hsecs_to_pit_ticks(state.tick_duration);
-	if (pit_ticks_game <= 0 || ticks % pit_ticks_game) {
-		SDL_LockMutex(input_mutex);
-		memcpy(&state.input, &input, sizeof(zoo_input_state));
-		SDL_UnlockMutex(input_mutex);
+	SDL_LockMutex(input_mutex);
+	memcpy(&state.input, &input, sizeof(zoo_input_state));
+	SDL_UnlockMutex(input_mutex);
 
-		SDL_LockMutex(playfield_mutex);
-		if (stop_tick_thread) {
-			// cease
-			return 1000;
-		}
-		while (true) {
-			switch (zoo_tick(&state)) {
-				case RETURN_IMMEDIATE:
-					break;
-				case RETURN_NEXT_FRAME:
-					SDL_UnlockMutex(playfield_mutex);
-					return 16; // TODO: more accurate
-				case RETURN_NEXT_CYCLE:
-					SDL_UnlockMutex(playfield_mutex);
-					return ZOO_PIT_TICK_MS; // TODO: more accurate
-			}
+	SDL_LockMutex(playfield_mutex);
+	if (stop_tick_thread) {
+		// cease
+		return 1000;
+	}
+
+	while (true) {
+		switch (zoo_tick(&state)) {
+			case RETURN_IMMEDIATE:
+				break;
+			case RETURN_NEXT_FRAME:
+				SDL_UnlockMutex(playfield_mutex);
+				return 16; // TODO: more accurate
+			case RETURN_NEXT_CYCLE:
+				SDL_UnlockMutex(playfield_mutex);
+				return ZOO_PIT_TICK_MS; // TODO: more accurate
 		}
 	}
 

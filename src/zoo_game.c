@@ -605,6 +605,7 @@ void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 	state->current_tick = state->func_random(100);
 	state->current_stat_tick = state->board.stat_count + 1;
 	state->tick_duration = state->tick_speed * 2;
+	state->time_elapsed = 0;
 
 	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].element
 		= (state->game_state == GS_TITLE) ? ZOO_E_MONITOR : ZOO_E_PLAYER;
@@ -620,6 +621,9 @@ void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 	} else if (state->game_state == GS_PLAY) {
 		state->game_paused = true;
 	}
+
+	zoo_sound_clear_queue(&(state->sound));
+	state->sound.block_queueing = false;
 }
 
 void zoo_game_stop(zoo_state *state) {
@@ -687,7 +691,9 @@ static zoo_tick_retval zoo_game_tick(zoo_state *state) {
 
 	if (state->game_paused) {
 		if (state->func_write_char != NULL) {
-			state->game_paused_blink = !state->game_paused_blink;
+			if (zoo_has_hsecs_elapsed(state, &state->tick_counter, 25)) {
+				state->game_paused_blink = !state->game_paused_blink;
+			}
 
 			if (state->game_paused_blink) {
 				state->func_write_char(
@@ -786,12 +792,28 @@ GameTickState2:
 	}
 
 	if (state->current_stat_tick > state->board.stat_count) {
-		state->current_tick++;
-		if (state->current_tick > 420)
-			state->current_tick = 1;
-		state->current_stat_tick = 0;
+		if (state->tick_duration == 0) {
+			// workaround for fast game speeds to avoid CPU implosion
+			state->current_tick++;
+			if (state->current_tick > 420)
+				state->current_tick = 1;
+			state->current_stat_tick = 0;
 
-		return RETURN_NEXT_CYCLE;
+			return RETURN_NEXT_FRAME;
+		} else {
+			if (zoo_has_hsecs_elapsed(state, &state->tick_counter, state->tick_duration)) {
+				state->current_tick++;
+				if (state->current_tick > 420)
+					state->current_tick = 1;
+				state->current_stat_tick = 0;
+
+				// TODO: input update (have shadow and "copied" input)
+
+				return RETURN_IMMEDIATE;
+			} else {
+				return RETURN_NEXT_CYCLE;
+			}
+		}
 	}
 
 	if (state->game_play_exit_requested) {
@@ -800,6 +822,13 @@ GameTickState2:
 	}
 
 	return RETURN_IMMEDIATE;
+}
+
+void zoo_tick_advance_pit(zoo_state *state) {
+	state->time_elapsed += ZOO_PIT_TICK_MS;
+	while (state->time_elapsed >= 60000) {
+		state->time_elapsed -= 60000;
+	}
 }
 
 zoo_tick_retval zoo_tick(zoo_state *state) {
@@ -811,7 +840,7 @@ zoo_tick_retval zoo_tick(zoo_state *state) {
 	}
 
 	switch (state->game_state) {
-		case GS_NONE:
+		default: /* GS_NONE */
 			return RETURN_NEXT_CYCLE;
 		case GS_TITLE:
 		case GS_PLAY:

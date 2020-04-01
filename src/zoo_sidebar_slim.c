@@ -87,6 +87,8 @@ static void zoo_draw_sidebar_slim(zoo_state *state) {
 
 	int x = 1;
 
+	// left-aligned
+
 	state->func_write_char(x, 25, 0x1C, '\x03');
 	write_number(state, x + 2, 25, 0x1F, state->world.info.health);
 	x += 8;
@@ -110,6 +112,12 @@ static void zoo_draw_sidebar_slim(zoo_state *state) {
 	for (int i = 0; i < 7; i++) {
 		if (state->world.info.keys[i])
 			state->func_write_char(x + i, 25, 0x19 + i, '\x0C');
+	}
+	x += 8;
+
+	if (state->board.info.time_limit_sec > 0) {
+		state->func_write_char(x, 25, 0x1E, 'T');
+		write_number(state, x + 2, 25, 0x1F, state->board.info.time_limit_sec - state->world.info.board_time_sec);
 	}
 	x += 8;
 }

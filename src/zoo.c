@@ -107,6 +107,17 @@ void zoo_state_init(zoo_state *state) {
 	zoo_world_create(state);
 }
 
+bool zoo_has_hsecs_elapsed(zoo_state *state, int16_t *hsecs_counter, int16_t hsecs_value) {
+	int16_t hsecs_total = (int16_t) (state->time_elapsed / 10);
+	int16_t hsecs_diff = (hsecs_total - (*hsecs_counter) + 6000) % 6000;
+	if (hsecs_diff >= hsecs_value) {
+		*hsecs_counter = hsecs_total;
+		return true;
+	} else {
+		return false;
+	}
+}
+
 #ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
 int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs) {
 	zoo_time_ms ms = hsecs * 10;

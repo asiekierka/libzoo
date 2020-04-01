@@ -129,11 +129,10 @@ IWRAM_ARM_CODE static void irq_vblank(void) {
 
 IWRAM_ARM_CODE static void irq_timer_pit(void) {
 	ticks++;
-	if (ticks & 1) {
-		tick_requested = true;
-	}
+	tick_requested = true;
 	REG_IE |= IRQ_VCOUNT; // ensure vcount will still happen
 	REG_IME = 1;
+	zoo_tick_advance_pit(&state);
 	zoo_sound_tick(&(state.sound));
 }
 

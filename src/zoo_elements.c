@@ -1407,7 +1407,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 		}
 
 		state->tick_duration = 0;
-		// TODO: SoundBlockQueueing
+		state->sound.block_queueing = true;
 	}
 
 	if (state->input.delta_x != 0 || state->input.delta_y != 0) {
@@ -1530,7 +1530,18 @@ PlayerTickState1:
 	}
 
 	if ((state->board.info.time_limit_sec > 0) && (state->world.info.health > 0)) {
-		// TODO: time elapsing
+		if (zoo_has_hsecs_elapsed(state, &state->world.info.board_time_hsec, 100)) {
+			state->world.info.board_time_sec++;
+
+			if ((state->board.info.time_limit_sec - 10) == state->world.info.board_time_sec) {
+				zoo_display_message(state, 200, "Running out of time!");
+				zoo_sound_queue_const(&(state->sound), 3, "\x40\x06\x45\x06\x40\x06\x35\x06\x40\x06\x45\x06\x40\x0A");
+			} else if (state->world.info.board_time_sec > state->board.info.time_limit_sec) {
+				zoo_board_damage_stat(state, 0);
+			}
+
+			state->func_update_sidebar(state);
+		}
 	}
 }
 
