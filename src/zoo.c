@@ -102,9 +102,31 @@ void zoo_state_init(zoo_state *state) {
 	state->func_init_text_window = zoo_window_classic_init;
 	state->func_update_sidebar = zoo_default_update_sidebar;
 
+	state->tick_speed = 4;
 	zoo_sound_state_init(&(state->sound));
 	zoo_world_create(state);
 }
+
+#ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
+int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs) {
+	zoo_time_ms ms = hsecs * 10;
+	return (int16_t) ceil((hsecs * 10) / ZOO_PIT_TICK_MS);
+}
+
+zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs) {
+	return zoo_hsecs_to_pit_ticks(hsecs) * ZOO_PIT_TICK_MS;
+}
+#else
+zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs) {
+	zoo_time_ms ms = hsecs * 10 + ZOO_PIT_TICK_MS - 1;
+	return ms - (ms % ZOO_PIT_TICK_MS);
+}
+
+int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs) {
+	zoo_time_ms ms = hsecs * 10 + ZOO_PIT_TICK_MS - 1;
+	return ms / ZOO_PIT_TICK_MS;
+}
+#endif
 
 void zoo_redraw(zoo_state *state) {
 	zoo_board_draw(state);

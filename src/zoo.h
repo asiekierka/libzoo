@@ -35,10 +35,29 @@
 #include <stdio.h>
 #endif
 
+#ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
+#include <math.h>
+#endif
+
 // early defs
 
 struct s_zoo_state;
 struct s_zoo_text_window;
+
+// PIT timing
+
+#ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
+// 3.579545 MHz - NTSC dotclock
+// dotclock * 4 = 14.31818
+// 14.31818 / 12 ~= 1.19318166 - PIT frequency
+// 65535 - maximum PIT cycle count before reload
+// (65535 / 1193181.66) = SYS_TIMER_TIME (seconds)
+typedef double zoo_time_ms;
+#define ZOO_PIT_TICK_MS 54.92457840312107
+#else
+typedef int zoo_time_ms;
+#define ZOO_PIT_TICK_MS 55
+#endif /* ZOO_CONFIG_USE_DOUBLE_FOR_MS */
 
 // call stack
 
@@ -327,6 +346,8 @@ typedef struct s_zoo_state {
 
 	int16_t current_tick;
 	int16_t current_stat_tick;
+	int16_t tick_speed;
+	int16_t tick_duration;
 	bool game_paused;
 	bool game_paused_blink;
 	bool force_darkness_off;
@@ -400,6 +421,8 @@ typedef struct {
 
 // zoo.c
 
+zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs);
+int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs);
 void zoo_state_init(zoo_state *state);
 void zoo_redraw(zoo_state *state);
 

@@ -48,6 +48,8 @@ static void *playfield_buffer;
 static int playfield_pitch;
 static SDL_mutex *playfield_mutex;
 static bool playfield_changed;
+static bool stop_tick_thread = false;
+static SDL_TimerID tick_thread_timer;
 
 static zoo_input_state input;
 static SDL_mutex *input_mutex;
@@ -118,12 +120,17 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 	zoo_sound_pcm_tick(&pcm_state);
 	SDL_UnlockMutex(audio_mutex);
 
-	if (ticks & 1) {
+	int16_t pit_ticks_game = zoo_hsecs_to_pit_ticks(state.tick_duration);
+	if (pit_ticks_game <= 0 || ticks % pit_ticks_game) {
 		SDL_LockMutex(input_mutex);
 		memcpy(&state.input, &input, sizeof(zoo_input_state));
 		SDL_UnlockMutex(input_mutex);
 
 		SDL_LockMutex(playfield_mutex);
+		if (stop_tick_thread) {
+			// cease
+			return 1000;
+		}
 		while (true) {
 			switch (zoo_tick(&state)) {
 				case RETURN_IMMEDIATE:
@@ -133,12 +140,12 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 					return 16; // TODO: more accurate
 				case RETURN_NEXT_CYCLE:
 					SDL_UnlockMutex(playfield_mutex);
-					return 55; // TODO: more accurate
+					return ZOO_PIT_TICK_MS; // TODO: more accurate
 			}
 		}
 	}
 
-	return 55;
+	return ZOO_PIT_TICK_MS;
 }
 
 void sdl_draw_char(int16_t x, int16_t y, uint8_t col, uint8_t chr) {
@@ -286,7 +293,7 @@ int main(int argc, char **argv) {
 
 	init_audio();
 
-	SDL_AddTimer(55, sdl_timer_tick, NULL);
+	tick_thread_timer = SDL_AddTimer(ZOO_PIT_TICK_MS, sdl_timer_tick, NULL);
 
 	// run
 	bool cont_loop = true;
@@ -369,6 +376,11 @@ int main(int argc, char **argv) {
 
 		sdl_render();
 	}
+
+	SDL_LockMutex(playfield_mutex);
+	stop_tick_thread = true;
+	SDL_RemoveTimer(tick_thread_timer);
+	SDL_UnlockMutex(playfield_mutex);
 
 	exit_audio();
 

@@ -1406,7 +1406,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 			zoo_display_message(state, 32000, " Game over  -  Press ESCAPE");
 		}
 
-		// TODO: TickTimeDuration
+		state->tick_duration = 0;
 		// TODO: SoundBlockQueueing
 	}
 

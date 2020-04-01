@@ -384,8 +384,7 @@ void zoo_display_message(zoo_state *state, int16_t duration, char *message) {
 
 	if (strlen(message) > 0) {
 		zoo_stat_add(state, 0, 0, ZOO_E_MESSAGE_TIMER, 0, 1, &zoo_stat_template_default);
-		// TODO TickTimeDuration
-		state->board.stats[state->board.stat_count].p2 = duration / 9;
+		state->board.stats[state->board.stat_count].p2 = duration / (state->tick_duration + 1);
 		strncpy(state->board.info.message, message, sizeof(state->board.info.message) - 1);
 	}
 }
@@ -605,12 +604,12 @@ void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 	state->game_play_exit_requested = false;
 	state->current_tick = state->func_random(100);
 	state->current_stat_tick = state->board.stat_count + 1;
+	state->tick_duration = state->tick_speed * 2;
 
 	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].element
 		= (state->game_state == GS_TITLE) ? ZOO_E_MONITOR : ZOO_E_PLAYER;
 	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].color
 		= zoo_element_defs[(state->game_state == GS_TITLE) ? ZOO_E_MONITOR : ZOO_E_PLAYER].color;
-
 
 	zoo_board_enter(state);
 

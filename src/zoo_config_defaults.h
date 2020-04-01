@@ -38,6 +38,12 @@
 // Various sidebar styles.
 // #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
 
+// Options
+
+// Use doubles instead of ints for passing millisecond values.
+// Provides increased timer accuracy.
+#define ZOO_CONFIG_USE_DOUBLE_FOR_MS
+
 // Compiler options
 
 #if __STDC_VERSION__ >= 199901L

@@ -7,4 +7,6 @@
 
 #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
 
+#undef ZOO_CONFIG_USE_DOUBLE_FOR_MS
+
 #endif /* __ZOO_CONFIG_H__ */
