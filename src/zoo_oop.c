@@ -185,11 +185,11 @@ static void zoo_oop_read_direction(zoo_state *state, int16_t stat_id, int16_t *p
 	}
 }
 
-static int16_t zoo_oop_find_string(zoo_state *state, int16_t stat_id, const char *str) {
+static int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos) {
 	int16_t pos, word_pos, cmp_pos;
 	int16_t data_len = state->board.stats[stat_id].data_len;
 
-	pos = 0;
+	pos = start_pos;
 
 	while (pos < data_len) {
 		word_pos = 0;
@@ -218,6 +218,10 @@ NoMatch:
 	}
 
 	return -1;
+}
+
+static int16_t zoo_oop_find_string(zoo_state *state, int16_t stat_id, const char *str) {
+	return zoo_oop_find_string_from(state, stat_id, str, 0);
 }
 
 static bool zoo_oop_iterate_stat(zoo_state *state, int16_t stat_id, int16_t *i_stat, const char *lookup) {
@@ -767,12 +771,13 @@ ReadCommand:
 					label_stat_id = 0;
 					while (
 						zoo_oop_find_label(state, stat_id, buf2,
-						&label_stat_id, &label_data_pos, "\r:")
+						&label_stat_id, &label_data_pos, "\r'")
 					) {
 						do {
 							state->board.stats[label_stat_id].data[label_data_pos + 1] = ':';
-
-							label_data_pos = zoo_oop_find_string(state, label_stat_id, buf);
+							// FIX: optimization - no need to check already checked parts of the code
+							// label_data_pos = zoo_oop_find_string(state, label_stat_id, buf);
+							label_data_pos = zoo_oop_find_string_from(state, label_stat_id, buf, label_data_pos);
 						} while (label_data_pos > 0);
 					}
 				} else if (!oop_word_cmp("LOCK")) {
