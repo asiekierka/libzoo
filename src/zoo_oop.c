@@ -166,7 +166,7 @@ static bool zoo_oop_parse_direction(zoo_state *state, int16_t stat_id, int16_t *
 		}
 	} else if (!oop_word_cmp("OPP")) {
 		zoo_oop_read_word(state, stat_id, position);
-		result = zoo_oop_parse_direction(state, stat_id, position, dy, dx);
+		result = zoo_oop_parse_direction(state, stat_id, position, dx, dy);
 		*dx = -(*dx);
 		*dy = -(*dy);
 	} else {
