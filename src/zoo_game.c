@@ -633,18 +633,18 @@ void zoo_game_stop(zoo_state *state) {
 
 static ZOO_INLINE zoo_tick_retval zoo_call_stack_tick(zoo_state *state) {
 	zoo_call call;
-	zoo_text_window *window;
 	zoo_tick_retval ret;
 
 	// call stack handling
 	if (state->call_stack.call != NULL) {
 		switch (state->call_stack.call->type) {
-			case TEXT_WINDOW:
+			case CALLBACK:
 				// handle these a bit differently for performance
-				window = state->call_stack.call->args.window.window;
-				ret = window->func_tick(window, state);
+				ret = state->call_stack.call->args.cb.func(
+					state,
+					state->call_stack.call->args.cb.arg
+				);
 				if (ret == EXIT) {
-					window->func_close(window);
 					zoo_call_pop(&state->call_stack);
 					ret = RETURN_IMMEDIATE;
 				}

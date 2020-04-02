@@ -37,6 +37,15 @@ zoo_call *zoo_call_push(zoo_call_stack *stack, zoo_call_type type, uint8_t state
 	return new_call;
 }
 
+zoo_call *zoo_call_push_callback(zoo_call_stack *stack, zoo_func_callback func, void *arg) {
+	zoo_call *c = zoo_call_push(stack, CALLBACK, 0);
+
+	c->args.cb.func = func;
+	c->args.cb.arg = arg;
+
+	return c;
+}
+
 void zoo_call_pop(zoo_call_stack *stack) {
 	zoo_call *old_call;
 

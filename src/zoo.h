@@ -61,14 +61,26 @@ typedef uint32_t zoo_time_ms;
 
 // call stack
 
+typedef enum {
+	// cycle in progress - return immediately
+	RETURN_IMMEDIATE,
+	// cycle in progress, awaiting i/o - return next frame
+	RETURN_NEXT_FRAME,
+	// cycle complete - return next cycle
+	RETURN_NEXT_CYCLE,
+	// exit the current mode
+	EXIT
+} zoo_tick_retval;
+
 typedef void (*zoo_func_element_draw)(struct s_zoo_state *state, int16_t x, int16_t y, uint8_t *ch);
 typedef void (*zoo_func_element_tick)(struct s_zoo_state *state, int16_t stat_id);
 typedef void (*zoo_func_element_touch)(struct s_zoo_state *state, int16_t x, int16_t y, int16_t source_stat_id, int16_t *dx, int16_t *dy);
+typedef zoo_tick_retval (*zoo_func_callback)(struct s_zoo_state *state, void *arg);
 
 typedef enum {
 	TICK_FUNC,
 	TOUCH_FUNC,
-	TEXT_WINDOW
+	CALLBACK
 } zoo_call_type;
 
 typedef struct s_zoo_call {
@@ -95,8 +107,9 @@ typedef struct s_zoo_call {
 			} extra;
 		} touch;
 		struct {
-			struct s_zoo_text_window *window;
-		} window;
+			zoo_func_callback func;
+			void *arg;
+		} cb;
 	} args;
 } zoo_call;
 
@@ -107,6 +120,7 @@ typedef struct {
 } zoo_call_stack;
 
 zoo_call *zoo_call_push(zoo_call_stack *stack, zoo_call_type type, uint8_t state);
+zoo_call *zoo_call_push_callback(zoo_call_stack *stack, zoo_func_callback func, void *arg);
 void zoo_call_pop(zoo_call_stack *stack);
 
 // maths
@@ -228,17 +242,6 @@ typedef struct {
 	zoo_tile tile;
 } zoo_rle_tile;
 
-typedef enum {
-	// cycle in progress - return immediately
-	RETURN_IMMEDIATE,
-	// cycle in progress, awaiting i/o - return next frame
-	RETURN_NEXT_FRAME,
-	// cycle complete - return next cycle
-	RETURN_NEXT_CYCLE,
-	// exit the current mode
-	EXIT
-} zoo_tick_retval;
-
 typedef struct {
 	uint8_t max_shots;
 	bool is_dark;
@@ -320,7 +323,7 @@ typedef struct s_zoo_text_window {
 	// provided by text window init function, required
 	void (*func_append)(struct s_zoo_text_window *window, const char *text);
 	void (*func_close)(struct s_zoo_text_window *window);
-	zoo_tick_retval (*func_tick)(struct s_zoo_text_window *window, struct s_zoo_state *state);
+	zoo_tick_retval (*func_tick)(struct s_zoo_state *state, struct s_zoo_text_window *window);
 
 	// provided by separate routes, optional
 	void (*func_load_file)(struct s_zoo_text_window *window, const char *filename);
@@ -506,6 +509,10 @@ bool zoo_oop_send(zoo_state *state, int16_t stat_id, const char *send_label, boo
 void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const char *default_name);
 
 // zoo_window.c
+
+void zoo_window_open(zoo_state *state, zoo_text_window *window);
+
+// zoo_window_classic.c
 
 void zoo_window_classic_init(zoo_text_window *window);
 void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_t height);

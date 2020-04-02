@@ -922,8 +922,7 @@ static void zoo_e_object_tick(zoo_state *state, int16_t stat_id) {
 		call->args.tick.func = zoo_e_object_tick;
 		call->args.tick.stat_id = stat_id;
 		// push text window
-		call = zoo_call_push(&state->call_stack, TEXT_WINDOW, 0);
-		call->args.window.window = &state->object_window;
+		zoo_window_open(state, &state->object_window);
 		// return
 		state->object_window_request = false;
 		return;
@@ -1049,8 +1048,7 @@ static void zoo_e_scroll_touch(zoo_state *state, int16_t x, int16_t y, int16_t s
 		call->args.touch.func = zoo_e_scroll_touch;
 		CALL_SET_TOUCH_ARGS(call);
 		// push text window
-		call = zoo_call_push(&state->call_stack, TEXT_WINDOW, 0);
-		call->args.window.window = &state->object_window;
+		zoo_window_open(state, &state->object_window);
 		// return
 		state->object_window_request = false;
 		return;
