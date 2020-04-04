@@ -24,8 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tonc.h>
-#include "zoo.h"
+#include "zoo_gba.h"
 
 #include "4x6_bin.h"
 
@@ -53,7 +52,7 @@ static const u16 default_palette[] = {
 };
 extern u32 __rom_end__;
 
-static zoo_state state;
+zoo_state state;
 volatile uint16_t disp_y_offset;
 volatile int keys_down = 0;
 volatile int keys_held = 0;
@@ -94,23 +93,6 @@ IWRAM_ARM_CODE static void irq_vcount(void) {
 	REG_DISPSTAT = DSTAT_VBL_IRQ | DSTAT_VCT_IRQ | DSTAT_VCT(next_vcount);
 }
 
-static inline void gba_clear_sound(void) {
-	REG_SOUND2CNT_L = SSQR_DUTY1_2 | SSQR_IVOL(0);
-	REG_SOUND2CNT_H = SFREQ_RESET;
-}
-
-IWRAM_ARM_CODE static void gba_play_freqs(zoo_sound_state *state, const uint16_t *freqs, uint16_t len, bool clear) {
-	// TODO: support drums
-	if (len != 1 || clear) {
-		gba_clear_sound();
-	} else {
-		uint16_t freq = freqs[0];
-		if (freq < 64) freq = 64;
-		REG_SOUND2CNT_L = SSQR_DUTY1_2 | SSQR_IVOL(12);
-		REG_SOUND2CNT_H = (2048 - (131072 / (int)freq)) | SFREQ_RESET;
-	}
-}
-
 IWRAM_ARM_CODE static void irq_vblank(void) {
 	int ki = REG_KEYINPUT;
 
@@ -128,10 +110,11 @@ IWRAM_ARM_CODE static void irq_vblank(void) {
 }
 
 IWRAM_ARM_CODE static void irq_timer_pit(void) {
-	ticks++;
-	tick_requested = true;
 	REG_IE |= IRQ_VCOUNT; // ensure vcount will still happen
 	REG_IME = 1;
+
+	ticks++;
+	tick_requested = true;
 	zoo_tick_advance_pit(&state);
 	zoo_sound_tick(&(state.sound));
 }
@@ -186,13 +169,9 @@ int main(void) {
 
 	zoo_state_init(&state);
 	state.func_write_char = vram_write_char;
-	state.sound.func_play_freqs = gba_play_freqs;
 	zoo_install_sidebar_slim(&state);
 
-	// init sound
-	REG_SOUNDCNT_X = SSTAT_ENABLE;
-	REG_SOUNDCNT_L = SDMG_LVOL(7) | SDMG_RVOL(7) | SDMG_LSQR2 | SDMG_RSQR2;
-	REG_SOUNDCNT_H = SDS_DMG100;
+	sound_install();
 
 	if (!zoo_world_load(&state, &__rom_end__, (1 << 25), true)) {
 		return 0;
@@ -212,7 +191,7 @@ int main(void) {
 			if (state.game_state == GS_TITLE) {
 				if (keys_down & KEY_START) {
 					zoo_game_stop(&state);
-					gba_clear_sound();
+					sound_clear();
 
 					if (!zoo_world_load(&state, &__rom_end__, (1 << 25), false)) {
 						return 0;
