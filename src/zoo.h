@@ -399,8 +399,7 @@ typedef struct s_zoo_state {
 
 	// - high-level engine hooks
 	void (*func_write_message)(struct s_zoo_state *state, uint8_t p2, const char *message);
-	void (*func_draw_sidebar)(struct s_zoo_state *state);
-	void (*func_update_sidebar)(struct s_zoo_state *state);
+	void (*func_update_sidebar)(struct s_zoo_state *state, uint16_t flags);
 
 	// utility methods
 
@@ -505,17 +504,35 @@ void zoo_game_stop(zoo_state *state);
 void zoo_tick_advance_pit(zoo_state *state);
 zoo_tick_retval zoo_tick(zoo_state *state);
 
+// zoo_io.c
+
+typedef struct s_zoo_io_handle {
+	void *p;
+	int len;
+	int len_orig;
+	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
+	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
+	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
+	size_t (*func_write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
+	size_t (*func_skip)(struct s_zoo_io_handle *h, size_t len);
+	size_t (*func_tell)(struct s_zoo_io_handle *h);
+} zoo_io_handle;
+
+zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable);
+
+// zoo_io_posix.c
+
+#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+zoo_io_handle zoo_io_open_file_posix(FILE *file);
+#endif
+
 // zoo_game_io.c
 
 void zoo_board_close(zoo_state *state);
 void zoo_board_open(zoo_state *state, int16_t board_id);
 
 void zoo_world_close(zoo_state *state);
-bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool title_only);
-
-#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
-bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only);
-#endif
+bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only);
 
 // zoo_input.c
 
@@ -548,6 +565,23 @@ void zoo_window_classic_init(zoo_text_window *window);
 void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_t height);
 
 // zoo_sidebar_*
+
+#define ZOO_SIDEBAR_UPDATE_TIME 0x0001
+#define ZOO_SIDEBAR_UPDATE_HEALTH 0x0002
+#define ZOO_SIDEBAR_UPDATE_AMMO 0x0004
+#define ZOO_SIDEBAR_UPDATE_TORCHES 0x0008 /* + torch ticks */
+#define ZOO_SIDEBAR_UPDATE_GEMS 0x0010
+#define ZOO_SIDEBAR_UPDATE_SCORE 0x0020
+#define ZOO_SIDEBAR_UPDATE_KEYS 0x0040
+
+#define ZOO_SIDEBAR_UPDATE_OTHER 0x4000
+#define ZOO_SIDEBAR_UPDATE_ALL 0x7FFF
+#define ZOO_SIDEBAR_UPDATE_REDRAW 0x8000
+#define ZOO_SIDEBAR_UPDATE_ALL_REDRAW 0xFFFF
+
+#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC
+void zoo_install_sidebar_classic(zoo_state *state);
+#endif
 
 #ifdef ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
 void zoo_install_sidebar_slim(zoo_state *state);

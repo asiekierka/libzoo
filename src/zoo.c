@@ -97,7 +97,7 @@ static void zoo_default_restore_display(zoo_state *state, void *data) {
 	}
 }
 
-static void zoo_default_update_sidebar(zoo_state *state) {
+static void zoo_default_update_sidebar(zoo_state *state, uint16_t flags) {
 
 }
 
@@ -150,5 +150,5 @@ int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs) {
 
 void zoo_redraw(zoo_state *state) {
 	zoo_board_draw(state);
-	state->func_update_sidebar(state);
+	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL_REDRAW);
 }

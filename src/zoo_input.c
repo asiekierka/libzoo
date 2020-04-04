@@ -64,10 +64,6 @@ static void zoo_input_movement_update(zoo_input_state *state) {
 	}
 
 	switch (move_action) {
-		case ZOO_ACTION_MAX:
-			state->delta_x = 0;
-			state->delta_y = 0;
-			break;
 		case ZOO_ACTION_UP:
 			state->delta_x = 0;
 			state->delta_y = -1;
@@ -82,6 +78,10 @@ static void zoo_input_movement_update(zoo_input_state *state) {
 			break;
 		case ZOO_ACTION_RIGHT:
 			state->delta_x = 1;
+			state->delta_y = 0;
+			break;
+		default:
+			state->delta_x = 0;
 			state->delta_y = 0;
 			break;
 	}

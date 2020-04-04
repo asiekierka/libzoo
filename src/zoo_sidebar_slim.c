@@ -73,10 +73,12 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 	}
 }
 
-static void zoo_draw_sidebar_slim(zoo_state *state) {
+static void zoo_draw_sidebar_slim(zoo_state *state, uint16_t flags) {
 	if (state->game_state != GS_PLAY) {
-		for (int i = 0; i < 60; i++) {
-			state->func_write_char(i, 25, 0x0F, ' ');
+		if (flags & ZOO_SIDEBAR_UPDATE_REDRAW) {
+			for (int i = 0; i < 60; i++) {
+				state->func_write_char(i, 25, 0x0F, ' ');
+			}
 		}
 		return;
 	}
@@ -123,7 +125,6 @@ static void zoo_draw_sidebar_slim(zoo_state *state) {
 }
 
 void zoo_install_sidebar_slim(zoo_state *state) {
-	state->func_draw_sidebar = zoo_draw_sidebar_slim;
 	state->func_update_sidebar = zoo_draw_sidebar_slim;
 }
 

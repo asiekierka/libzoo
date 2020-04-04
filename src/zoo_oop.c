@@ -737,7 +737,7 @@ ReadCommand:
 						}
 					}
 
-					state->func_update_sidebar(state);
+					state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
 				} else if (!oop_word_cmp("END")) {
 					*position = -1;
 					state->oop_char = '\0';

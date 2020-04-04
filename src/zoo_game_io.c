@@ -27,84 +27,6 @@
 #include <string.h>
 #include "zoo.h"
 
-typedef struct s_zoo_io_handle {
-	void *p;
-	int len;
-	int len_orig;
-	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
-	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
-	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
-	size_t (*func_write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
-	size_t (*func_skip)(struct s_zoo_io_handle *h, size_t len);
-	size_t (*func_tell)(struct s_zoo_io_handle *h);
-	void (*func_close)(struct s_zoo_io_handle *h);
-} zoo_io_handle;
-
-static uint8_t zoo_io_mem_getc(zoo_io_handle *h) {
-	uint8_t **ptr = (uint8_t **) &h->p;
-	if (h->len <= 0) return 0;
-	h->len--;
-	return *((*ptr)++);
-}
-
-static size_t zoo_io_mem_putc(zoo_io_handle *h, uint8_t v) {
-	uint8_t **ptr = (uint8_t **) &h->p;
-	if (h->len <= 0) return 0;
-	h->len--;
-	*((*ptr)++) = v;
-	return 1;
-}
-
-static size_t zoo_io_mem_read(zoo_io_handle *h, uint8_t *d_ptr, size_t len) {
-	uint8_t **ptr = (uint8_t **) &h->p;
-	if (len > h->len) len = h->len;
-	if (len <= 0) return 0;
-	h->len -= len;
-	memcpy(d_ptr, *ptr, len);
-	*ptr += len;
-	return len;
-}
-
-static size_t zoo_io_mem_write(zoo_io_handle *h, const uint8_t *d_ptr, size_t len) {
-	uint8_t **ptr = (uint8_t **) &h->p;
-	if (len > h->len) len = h->len;
-	if (len <= 0) return 0;
-	h->len -= len;
-	memcpy(*ptr, d_ptr, len);
-	*ptr += len;
-	return len;
-}
-
-static size_t zoo_io_mem_skip(zoo_io_handle *h, size_t len) {
-	uint8_t **ptr = (uint8_t **) &h->p;
-	if (len > h->len) len = h->len;
-	h->len -= len;
-	*ptr += len;
-	return len;
-}
-
-static size_t zoo_io_mem_tell(zoo_io_handle *h) {
-	return h->len_orig - h->len;
-}
-
-static void zoo_io_mem_close(zoo_io_handle *h) {
-}
-
-static zoo_io_handle zoo_io_mem_open(uint8_t *ptr, size_t len) {
-	zoo_io_handle h;
-	h.p = ptr;
-	h.len = len;
-	h.len_orig = len;
-	h.func_getc = zoo_io_mem_getc;
-	h.func_putc = zoo_io_mem_putc;
-	h.func_read = zoo_io_mem_read;
-	h.func_write = zoo_io_mem_write;
-	h.func_skip = zoo_io_mem_skip;
-	h.func_tell = zoo_io_mem_tell;
-	h.func_close = zoo_io_mem_close;
-	return h;
-}
-
 #ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 
 static uint8_t zoo_io_file_getc(zoo_io_handle *h) {
@@ -142,9 +64,6 @@ static size_t zoo_io_file_tell(zoo_io_handle *h) {
 	return ftell(f);
 }
 
-static void zoo_io_file_close(zoo_io_handle *h) {
-}
-
 static zoo_io_handle zoo_io_file_open(FILE *file) {
 	zoo_io_handle h;
 	h.p = file;
@@ -154,7 +73,6 @@ static zoo_io_handle zoo_io_file_open(FILE *file) {
 	h.func_write = zoo_io_file_write;
 	h.func_skip = zoo_io_file_skip;
 	h.func_tell = zoo_io_file_tell;
-	h.func_close = zoo_io_file_close;
 	return h;
 }
 
@@ -392,7 +310,7 @@ void zoo_board_close(zoo_state *state) {
 	// TODO: malloc check
 	state->world.board_data[board_id] = malloc(buf_len);
 
-	handle = zoo_io_mem_open(state->world.board_data[board_id], buf_len);
+	handle = zoo_io_open_file_mem(state->world.board_data[board_id], buf_len, true);
 
 	zoo_board_io_close(state, &handle);
 	if (handle.func_tell(&handle) != buf_len) {
@@ -401,8 +319,6 @@ void zoo_board_close(zoo_state *state) {
 		state->world.board_data[board_id] =
 			realloc(state->world.board_data[board_id], state->world.board_len[board_id]);
 	}
-
-	handle.func_close(&handle);
 }
 
 void zoo_board_open(zoo_state *state, int16_t board_id) {
@@ -411,15 +327,14 @@ void zoo_board_open(zoo_state *state, int16_t board_id) {
 		board_id = state->world.info.current_board;
 	}
 
-	handle = zoo_io_mem_open(
+	handle = zoo_io_open_file_mem(
 		state->world.board_data[board_id],
-		state->world.board_len[board_id]
+		state->world.board_len[board_id],
+		false
 	);
 
 	zoo_board_io_open(state, &handle);
 	state->world.info.current_board = board_id;
-
-	handle.func_close(&handle);
 }
 
 //
@@ -432,7 +347,7 @@ void zoo_world_close(zoo_state *state) {
 	}
 }
 
-static bool zoo_world_io_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
+bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
 	int i;
 	zoo_world_close(state);
 
@@ -480,21 +395,3 @@ static bool zoo_world_io_load(zoo_state *state, zoo_io_handle *h, bool title_onl
 
 	return true;
 }
-
-bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool title_only) {
-	bool result;
-	zoo_io_handle handle = zoo_io_mem_open(buffer, buflen);
-	result = zoo_world_io_load(state, &handle, title_only);
-	handle.func_close(&handle);
-	return result;
-}
-
-#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
-bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only) {
-	bool result;
-	zoo_io_handle handle = zoo_io_file_open(file);
-	result = zoo_world_io_load(state, &handle, title_only);
-	handle.func_close(&handle);
-	return result;
-}
-#endif

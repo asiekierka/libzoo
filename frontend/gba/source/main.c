@@ -120,6 +120,8 @@ IWRAM_ARM_CODE static void irq_timer_pit(void) {
 }
 
 int main(void) {
+	zoo_io_handle io_h;
+
 	// set forced blank until display data is loaded
 	REG_DISPCNT = DCNT_BLANK;
 
@@ -173,7 +175,8 @@ int main(void) {
 
 	sound_install();
 
-	if (!zoo_world_load(&state, &__rom_end__, (1 << 25), true)) {
+	io_h = zoo_io_open_file_mem((uint8_t *) &__rom_end__, (1 << 25), false);
+	if (!zoo_world_load(&state, &io_h, true)) {
 		return 0;
 	}
 
@@ -193,7 +196,8 @@ int main(void) {
 					zoo_game_stop(&state);
 					sound_clear();
 
-					if (!zoo_world_load(&state, &__rom_end__, (1 << 25), false)) {
+					io_h = zoo_io_open_file_mem((uint8_t *) &__rom_end__, (1 << 25), false);
+					if (!zoo_world_load(&state, &io_h, false)) {
 						return 0;
 					}
 

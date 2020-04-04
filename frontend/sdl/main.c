@@ -163,6 +163,7 @@ void sdl_render(void) {
 // main
 
 int main(int argc, char **argv) {
+	bool use_slim_sidebar = false;
 	SDL_Event event;
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
@@ -172,7 +173,16 @@ int main(int argc, char **argv) {
 
 	zoo_state_init(&state);
 	state.func_write_char = sdl_draw_char;
-	zoo_install_sidebar_slim(&state);
+
+	if (use_slim_sidebar) {
+		zoo_install_sidebar_slim(&state);
+		video.width = 60;
+		video.height = 26;
+	} else {
+		zoo_install_sidebar_classic(&state);
+		video.width = 80;
+		video.height = 25;
+	}
 
 	if (argc < 2) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No file provided!");
@@ -180,15 +190,14 @@ int main(int argc, char **argv) {
 	}
 
 	FILE *f = fopen(argv[1], "rb");
-	if (!zoo_world_load_file(&state, f, true)) {
+	zoo_io_handle io_h = zoo_io_open_file_posix(f);
+	if (!zoo_world_load(&state, &io_h, true)) {
 		fclose(f);
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading file!");
 		return 1;
 	}
 	fclose(f);
 
-	video.width = 60;
-	video.height = 26;
 	video.buffer = malloc(video.width * video.height * 2);
 
 	render_opts.charset = res_8x14_bin;
@@ -296,7 +305,8 @@ int main(int argc, char **argv) {
 								zoo_game_stop(&state);
 
 								f = fopen(argv[1], "rb");
-								if (!zoo_world_load_file(&state, f, false)) {
+								io_h = zoo_io_open_file_posix(f);
+								if (!zoo_world_load(&state, &io_h, false)) {
 									fclose(f);
 									SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading file!");
 									cont_loop = false;

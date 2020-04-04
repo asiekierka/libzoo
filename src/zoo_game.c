@@ -400,8 +400,11 @@ void zoo_board_damage_stat(zoo_state *state, int16_t stat_id) {
 	if (stat_id == 0) {
 		if (state->world.info.health > 0) {
 			state->world.info.health -= 10;
+			if (state->world.info.health < 0) {
+				state->world.info.health = 0;
+			}
 
-			state->func_update_sidebar(state);
+			state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_HEALTH);
 			zoo_display_message(state, 100, "Ouch!");
 
 			state->board.tiles[stat->x][stat->y].color = 0x70 | (zoo_element_defs[ZOO_E_PLAYER].color & 0x0F);
@@ -456,7 +459,7 @@ void zoo_board_damage_tile(zoo_state *state, int16_t x, int16_t y) {
 void zoo_board_attack_tile(zoo_state *state, int16_t attacker_stat_id, int16_t x, int16_t y) {
 	if ((attacker_stat_id == 0) && (state->world.info.energizer_ticks > 0)) {
 		state->world.info.score += zoo_element_defs[state->board.tiles[x][y].element].score_value;
-		state->func_update_sidebar(state);
+		state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_SCORE);
 	} else {
 		zoo_board_damage_stat(state, attacker_stat_id);
 	}
@@ -470,7 +473,7 @@ void zoo_board_attack_tile(zoo_state *state, int16_t attacker_stat_id, int16_t x
 			[state->board.stats[attacker_stat_id].x]
 			[state->board.stats[attacker_stat_id].y]
 		.element].score_value;
-		state->func_update_sidebar(state);
+		state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_SCORE);
 	} else {
 		zoo_board_damage_tile(state, x, y);
 		zoo_sound_queue_const(&(state->sound), 2, "\x10\x01");
@@ -537,7 +540,7 @@ void zoo_board_enter(zoo_state *state) {
 	}
 
 	state->world.info.board_time_sec = 0;
-	state->func_update_sidebar(state);
+	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
 }
 
 void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y) {

@@ -36,6 +36,9 @@
 #define ZOO_CONFIG_SOUND_PCM_BUFFER_LEN 32 // ~1.5 seconds of audio
 
 // Various sidebar styles.
+// - classic (80x25 ZZT-like)
+// #define ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC
+// - slim (60x26 bottom bar)
 // #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
 
 // Options
