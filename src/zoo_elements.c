@@ -1482,7 +1482,7 @@ PlayerTickState1:
 		}
 	}
 
-	if (zoo_input_action_pressed(&state->input, ZOO_ACTION_TORCH)) {
+	if (zoo_input_action_pressed_once(&state->input, ZOO_ACTION_TORCH)) {
 		if (state->world.info.torch_ticks <= 0) {
 			if (state->world.info.torches > 0) {
 				if (state->board.info.is_dark) {

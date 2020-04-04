@@ -247,8 +247,8 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			zoo_window_draw_text(window, state, false);
 		}
 
-		act_ok = zoo_input_action_pressed(&state->input, ZOO_ACTION_OK);
-		act_cancel = zoo_input_action_pressed(&state->input, ZOO_ACTION_CANCEL);
+		act_ok = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_OK);
+		act_cancel = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_CANCEL);
 		if (act_ok || act_cancel) {
 			if (act_ok) {
 				if (window->lines[window->line_pos][0] == '!') {

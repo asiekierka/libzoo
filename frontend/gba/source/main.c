@@ -223,15 +223,6 @@ int main(void) {
 				}
 			}
 
-			if (keys_down & KEY_A) {
-				zoo_input_action_once(&state.input, ZOO_ACTION_OK);
-			}
-
-			if (keys_down & KEY_B) {
-				zoo_input_action_once(&state.input, ZOO_ACTION_TORCH);
-				zoo_input_action_once(&state.input, ZOO_ACTION_CANCEL);
-			}
-
 			keys_held |= keys_down;
 
 			zoo_input_action_set(&state.input, ZOO_ACTION_UP, keys_held & KEY_UP);
@@ -239,6 +230,9 @@ int main(void) {
 			zoo_input_action_set(&state.input, ZOO_ACTION_RIGHT, keys_held & KEY_RIGHT);
 			zoo_input_action_set(&state.input, ZOO_ACTION_DOWN, keys_held & KEY_DOWN);
 			zoo_input_action_set(&state.input, ZOO_ACTION_SHOOT, keys_held & KEY_A);
+			zoo_input_action_set(&state.input, ZOO_ACTION_TORCH, keys_held & KEY_B);
+			zoo_input_action_set(&state.input, ZOO_ACTION_OK, keys_held & KEY_A);
+			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & KEY_B);
 
 			keys_down = 0;
 

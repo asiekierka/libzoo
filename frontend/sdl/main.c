@@ -257,13 +257,13 @@ int main(int argc, char **argv) {
 							zoo_input_action_down(&(state.input), ZOO_ACTION_DOWN);
 							break;
 						case SDLK_t:
-							zoo_input_action_once(&(state.input), ZOO_ACTION_TORCH);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_TORCH);
 							break;
 						case SDLK_RETURN:
-							zoo_input_action_once(&(state.input), ZOO_ACTION_OK);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_OK);
 							break;
 						case SDLK_ESCAPE:
-							zoo_input_action_once(&(state.input), ZOO_ACTION_CANCEL);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_CANCEL);
 							break;
 					}
 					break;

@@ -520,6 +520,7 @@ bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only);
 // zoo_input.c
 
 bool zoo_input_action_pressed(zoo_input_state *state, zoo_input_action action);
+bool zoo_input_action_pressed_once(zoo_input_state *state, zoo_input_action action);
 void zoo_input_update(zoo_input_state *state);
 void zoo_input_clear_post_tick(zoo_input_state *state);
 

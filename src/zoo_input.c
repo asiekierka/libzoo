@@ -110,6 +110,15 @@ bool zoo_input_action_pressed(zoo_input_state *state, zoo_input_action action) {
 	}
 }
 
+bool zoo_input_action_pressed_once(zoo_input_state *state, zoo_input_action action) {
+	if (state->actions_down[action]) {
+		state->actions_down[action] = false;
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void zoo_input_action_down(zoo_input_state *state, zoo_input_action action) {
 	state->actions_down[action] = true;
 	state->actions_held[action] = true;
