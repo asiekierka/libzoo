@@ -40,28 +40,6 @@ void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_
 	window_height = height;
 }
 
-static void zoo_window_classic_append(zoo_text_window *window, const char *text) {
-	char *buffer;
-	int16_t buflen = strlen(text);
-	if (buflen > 50) buflen = 50;
-
-	buffer = malloc(sizeof(char) * (buflen + 1));
-	memcpy(buffer, text, buflen);
-	buffer[buflen] = '\0';
-
-	window->lines = realloc(window->lines, sizeof(char*) * (window->line_count + 1));
-	window->lines[(window->line_count)++] = buffer;
-}
-
-static void zoo_window_classic_close(zoo_text_window *window) {
-	int16_t i;
-
-	for (i = 0; i < window->line_count; i++) {
-		free(window->lines[i]);
-	}
-	free(window->lines);
-}
-
 static void zoo_window_draw_title(zoo_text_window *window, zoo_state *state, uint8_t color, const char *title) {
 	int16_t i;
 	int16_t il = strlen(title);
@@ -251,12 +229,17 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 		act_cancel = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_CANCEL);
 		if (act_ok || act_cancel) {
 			if (act_ok) {
+				window->accepted = true;
 				if (window->lines[window->line_pos][0] == '!') {
 					zoo_window_hyperlink(window, state);
 				}
+			} else {
+				window->accepted = false;
 			}
 			zoo_window_draw_close(window, state);
-			zoo_window_classic_close(window);
+			if (!window->manual_close) {
+				zoo_window_close(window);
+			}
 
 			zoo_input_clear_post_tick(&state->input);
 			return EXIT;
@@ -266,10 +249,10 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 	return RETURN_NEXT_CYCLE;
 }
 
-void zoo_window_classic_init(zoo_text_window *window) {
-	memset(window, 0, sizeof(zoo_text_window));
+static void zoo_window_classic_open(zoo_state *state, zoo_text_window *window) {
+	zoo_call_push_callback(&(state->call_stack), (zoo_func_callback) zoo_window_classic_tick, window);
+}
 
-	window->func_append = zoo_window_classic_append;
-	window->func_close = zoo_window_classic_close;
-	window->func_tick = zoo_window_classic_tick;
+void zoo_install_window_classic(zoo_state *state) {
+	state->func_ui_open_window = zoo_window_classic_open;
 }

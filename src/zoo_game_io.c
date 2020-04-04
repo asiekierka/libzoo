@@ -391,7 +391,8 @@ bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
 		h->func_read(h, state->world.board_data[i], state->world.board_len[i]);
 	}
 
-	zoo_board_open(state, state->world.info.current_board);
+	state->return_board_id = state->world.info.current_board;
+	zoo_board_open(state, state->return_board_id);
 
 	return true;
 }

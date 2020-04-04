@@ -24,7 +24,7 @@
 #include <string.h>
 #include "zoo.h"
 
-#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
+#ifdef ZOO_CONFIG_ENABLE_UI_SLIM
 
 static void write_number(zoo_state *state, int16_t x, int16_t y, uint8_t col, int val) {
 	char s[8];
@@ -124,8 +124,8 @@ static void zoo_draw_sidebar_slim(zoo_state *state, uint16_t flags) {
 	x += 8;
 }
 
-void zoo_install_sidebar_slim(zoo_state *state) {
-	state->func_update_sidebar = zoo_draw_sidebar_slim;
+void zoo_install_ui_slim(zoo_state *state) {
+	state->func_ui_draw_sidebar = zoo_draw_sidebar_slim;
 }
 
-#endif /* ZOO_CONFIG_ENABLE_SIDEBAR_SLIM */
+#endif /* ZOO_CONFIG_ENABLE_UI_SLIM */

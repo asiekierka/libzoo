@@ -342,7 +342,7 @@ TryMove:
 	if (i_elem == ZOO_E_BREAKABLE || (zoo_element_defs[i_elem].destructible && (i_elem == ZOO_E_PLAYER || stat->p1 == 0))) {
 		if (zoo_element_defs[i_elem].score_value != 0) {
 			state->world.info.score += zoo_element_defs[i_elem].score_value;
-			state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_SCORE);
+			state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_SCORE);
 		}
 		zoo_board_attack_tile(state, stat_id, ix, iy);
 		return;
@@ -692,7 +692,7 @@ static void zoo_e_energizer_touch(zoo_state *state, int16_t x, int16_t y, int16_
 	zoo_board_draw_tile(state, x, y);
 
 	state->world.info.energizer_ticks = 75;
-	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
+	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
 
 	if (state->msg_flags.energizer) {
 		zoo_display_message(state, 200, "Energizer - You are invincible");
@@ -922,7 +922,7 @@ static void zoo_e_object_tick(zoo_state *state, int16_t stat_id) {
 		call->args.tick.func = zoo_e_object_tick;
 		call->args.tick.stat_id = stat_id;
 		// push text window
-		zoo_window_open(state, &state->object_window);
+		state->func_ui_open_window(state, &state->object_window);
 		// return
 		state->object_window_request = false;
 		return;
@@ -1048,7 +1048,7 @@ static void zoo_e_scroll_touch(zoo_state *state, int16_t x, int16_t y, int16_t s
 		call->args.touch.func = zoo_e_scroll_touch;
 		CALL_SET_TOUCH_ARGS(call);
 		// push text window
-		zoo_window_open(state, &state->object_window);
+		state->func_ui_open_window(state, &state->object_window);
 		// return
 		state->object_window_request = false;
 		return;
@@ -1079,7 +1079,7 @@ static void zoo_e_key_touch(zoo_state *state, int16_t x, int16_t y, int16_t sour
 	} else {
 		ZOO_SET_KEY(key);
 		state->board.tiles[x][y].element = ZOO_E_EMPTY;
-		state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_KEYS);
+		state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_KEYS);
 		strncpy(msg, "You now have the ", ZOO_LEN_MESSAGE);
 		strncat(msg, zoo_color_names[key], ZOO_LEN_MESSAGE);
 		strncat(msg, " key.", ZOO_LEN_MESSAGE);
@@ -1092,7 +1092,7 @@ static void zoo_e_ammo_touch(zoo_state *state, int16_t x, int16_t y, int16_t sou
 	state->world.info.ammo += 5;
 
 	state->board.tiles[x][y].element = ZOO_E_EMPTY;
-	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_AMMO);
+	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_AMMO);
 	zoo_sound_queue_const(&(state->sound), 2, "\x30\x01\x31\x01\x32\x01");
 
 	if (state->msg_flags.ammo) {
@@ -1110,7 +1110,7 @@ static void zoo_e_gem_touch(zoo_state *state, int16_t x, int16_t y, int16_t sour
 	if (state->world.info.health < 0) {
 		state->world.info.health = 0;
 	}
-	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_GEMS | ZOO_SIDEBAR_UPDATE_HEALTH | ZOO_SIDEBAR_UPDATE_SCORE);
+	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_GEMS | ZOO_SIDEBAR_UPDATE_HEALTH | ZOO_SIDEBAR_UPDATE_SCORE);
 	zoo_sound_queue_const(&(state->sound), 2, "\x40\x01\x37\x01\x34\x01\x30\x01");
 
 	if (state->msg_flags.gem) {
@@ -1134,7 +1134,7 @@ static void zoo_e_door_touch(zoo_state *state, int16_t x, int16_t y, int16_t sou
 		zoo_board_draw_tile(state, x, y);
 
 		ZOO_CLEAR_KEY(key);
-		state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_KEYS);
+		state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_KEYS);
 
 		strncpy(msg, "The ", ZOO_LEN_MESSAGE);
 		strncat(msg, zoo_color_names[key], ZOO_LEN_MESSAGE);
@@ -1206,7 +1206,7 @@ static void zoo_e_torch_touch(zoo_state *state, int16_t x, int16_t y, int16_t so
 	state->board.tiles[x][y].element = ZOO_E_EMPTY;
 
 	zoo_board_draw_tile(state, x, y);
-	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
+	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
 
 	if (state->msg_flags.torch) {
 		zoo_display_message(state, 200, "Torch - used for lighting in the underground.");
@@ -1440,7 +1440,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 						state->input.delta_x, state->input.delta_y, 0)
 					) {
 						state->world.info.ammo--;
-						state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_AMMO);
+						state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_AMMO);
 
 						zoo_sound_queue_const(&(state->sound), 2, "\x40\x01\x30\x01\x20\x01");
 
@@ -1493,7 +1493,7 @@ PlayerTickState1:
 					state->world.info.torch_ticks = ZOO_TORCH_DURATION;
 
 					zoo_draw_player_surroundings(state, stat->x, stat->y, 0);
-					state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
+					state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
 				} else {
 					if (state->msg_flags.room_not_dark) {
 						zoo_display_message(state, 200, "Don't need torch - room is not dark!");
@@ -1517,7 +1517,7 @@ PlayerTickState1:
 		}
 
 		// TODO: ZZT normally does this every 40 ticks; maybe another function to check?
-		state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
+		state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_TORCHES);
 	}
 
 	if (state->world.info.energizer_ticks > 0) {
@@ -1541,7 +1541,7 @@ PlayerTickState1:
 				zoo_board_damage_stat(state, 0);
 			}
 
-			state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_TIME);
+			state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_TIME);
 		}
 	}
 }

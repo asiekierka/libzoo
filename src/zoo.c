@@ -97,7 +97,7 @@ static void zoo_default_restore_display(zoo_state *state, void *data) {
 	}
 }
 
-static void zoo_default_update_sidebar(zoo_state *state, uint16_t flags) {
+static void zoo_default_ui_draw_sidebar(zoo_state *state, uint16_t flags) {
 
 }
 
@@ -108,8 +108,8 @@ void zoo_state_init(zoo_state *state) {
 	state->func_store_display = zoo_default_store_display;
 	state->func_restore_display = zoo_default_restore_display;
 
-	state->func_init_text_window = zoo_window_classic_init;
-	state->func_update_sidebar = zoo_default_update_sidebar;
+	state->func_ui_draw_sidebar = zoo_default_ui_draw_sidebar;
+	zoo_install_window_classic(state);
 
 	state->tick_speed = 4;
 	zoo_sound_state_init(&(state->sound));
@@ -150,5 +150,14 @@ int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs) {
 
 void zoo_redraw(zoo_state *state) {
 	zoo_board_draw(state);
-	state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL_REDRAW);
+	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL_REDRAW);
+}
+
+void zoo_path_cat(char *dest, const char *src, size_t n) {
+	size_t len = strlen(dest);
+	if (len < n && dest[len - 1] != ZOO_PATH_SEPARATOR) {
+		dest[len] = ZOO_PATH_SEPARATOR;
+		dest[len + 1] = '\0';
+	}
+	strncpy(dest, src, ZOO_PATH_MAX);
 }

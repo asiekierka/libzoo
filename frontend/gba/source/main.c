@@ -171,7 +171,7 @@ int main(void) {
 
 	zoo_state_init(&state);
 	state.func_write_char = vram_write_char;
-	zoo_install_sidebar_slim(&state);
+	zoo_install_ui_slim(&state);
 
 	sound_install();
 
@@ -201,8 +201,7 @@ int main(void) {
 						return 0;
 					}
 
-					zoo_game_start(&state, GS_PLAY);
-					zoo_redraw(&state);
+					zoo_ui_play(&state);
 				}
 			}
 

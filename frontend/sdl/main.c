@@ -163,7 +163,7 @@ void sdl_render(void) {
 // main
 
 int main(int argc, char **argv) {
-	bool use_slim_sidebar = false;
+	bool use_slim_ui = true;
 	SDL_Event event;
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
@@ -174,17 +174,17 @@ int main(int argc, char **argv) {
 	zoo_state_init(&state);
 	state.func_write_char = sdl_draw_char;
 
-	if (use_slim_sidebar) {
-		zoo_install_sidebar_slim(&state);
+	if (use_slim_ui) {
+		zoo_install_ui_slim(&state);
 		video.width = 60;
 		video.height = 26;
 	} else {
-		zoo_install_sidebar_classic(&state);
+		zoo_install_ui_classic(&state);
 		video.width = 80;
 		video.height = 25;
 	}
 
-	if (argc < 2) {
+/*	if (argc < 2) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No file provided!");
 		return 1;
 	}
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading file!");
 		return 1;
 	}
-	fclose(f);
+	fclose(f); */
 
 	video.buffer = malloc(video.width * video.height * 2);
 
@@ -236,8 +236,8 @@ int main(int argc, char **argv) {
 
 	playfield_mutex = SDL_CreateMutex();
 
-	zoo_game_start(&state, GS_TITLE);
 	zoo_redraw(&state);
+	zoo_ui_load_world(&state, false);
 
 	init_audio();
 
@@ -300,22 +300,20 @@ int main(int argc, char **argv) {
 						case SDLK_ESCAPE:
 							zoo_input_action_up(&(state.input), ZOO_ACTION_CANCEL);
 							break;
+						case SDLK_l:
+							if (state.game_state != GS_PLAY) {
+								zoo_ui_load_world(&state, false);
+							}
+							break;
+						case SDLK_r:
+							if (state.game_state != GS_PLAY) {
+								zoo_ui_load_world(&state, true);
+							}
+							break;
 						case SDLK_p:
-							if (state.game_state == GS_TITLE) {
+							if (state.game_state != GS_PLAY) {
 								zoo_game_stop(&state);
-
-								f = fopen(argv[1], "rb");
-								io_h = zoo_io_open_file_posix(f);
-								if (!zoo_world_load(&state, &io_h, false)) {
-									fclose(f);
-									SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading file!");
-									cont_loop = false;
-									break;
-								}
-								fclose(f);
-
-								zoo_game_start(&state, GS_PLAY);
-								zoo_redraw(&state);
+								zoo_ui_play(&state);
 							}
 							break;
 						case SDLK_b:

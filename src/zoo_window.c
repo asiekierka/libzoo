@@ -24,6 +24,24 @@
 #include <string.h>
 #include "zoo.h"
 
-void zoo_window_open(zoo_state *state, zoo_text_window *window) {
-	zoo_call_push_callback(&(state->call_stack), (zoo_func_callback) window->func_tick, window);
+void zoo_window_append(zoo_text_window *window, const char *text) {
+	char *buffer;
+	int16_t buflen = strlen(text);
+	if (buflen > 50) buflen = 50;
+
+	buffer = malloc(sizeof(char) * (buflen + 1));
+	memcpy(buffer, text, buflen);
+	buffer[buflen] = '\0';
+
+	window->lines = realloc(window->lines, sizeof(char*) * (window->line_count + 1));
+	window->lines[(window->line_count)++] = buffer;
+}
+
+void zoo_window_close(zoo_text_window *window) {
+	int16_t i;
+
+	for (i = 0; i < window->line_count; i++) {
+		free(window->lines[i]);
+	}
+	free(window->lines);
 }

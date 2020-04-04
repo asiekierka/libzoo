@@ -300,16 +300,19 @@ typedef struct {
 } zoo_state_message;
 
 typedef enum {
+	// universal - movement
 	ZOO_ACTION_UP,
 	ZOO_ACTION_LEFT,
 	ZOO_ACTION_RIGHT,
 	ZOO_ACTION_DOWN,
 
-	ZOO_ACTION_SHOOT,
-	ZOO_ACTION_TORCH,
-
+	// universal - windows/popups
 	ZOO_ACTION_OK,
 	ZOO_ACTION_CANCEL,
+
+	// gameplay
+	ZOO_ACTION_SHOOT,
+	ZOO_ACTION_TORCH,
 
 	ZOO_ACTION_MAX
 } zoo_input_action;
@@ -331,20 +334,14 @@ typedef struct s_zoo_text_window {
 	char title[51];
 	void *screen_copy;
 
+	bool accepted;
 	bool hyperlink_as_select;
 	bool viewing_file;
+	bool manual_close;
 
 	// temporary fields for zoo_window_classic
 	// TODO: refactor text window into a dynamically allocated thing
 	uint16_t state;
-
-	// provided by text window init function, required
-	void (*func_append)(struct s_zoo_text_window *window, const char *text);
-	void (*func_close)(struct s_zoo_text_window *window);
-	zoo_tick_retval (*func_tick)(struct s_zoo_state *state, struct s_zoo_text_window *window);
-
-	// provided by separate routes, optional
-	void (*func_load_file)(struct s_zoo_text_window *window, const char *filename);
 } zoo_text_window;
 
 typedef enum {
@@ -387,8 +384,9 @@ typedef struct s_zoo_state {
 	zoo_call_stack call_stack;
 	uint8_t game_tick_state; // not in call_stack to save performance
 
-	// defaults provided by libzoo, required
-	void (*func_init_text_window)(zoo_text_window *window);
+	// - ui methods
+	void (*func_ui_draw_sidebar)(struct s_zoo_state *state, uint16_t flags);
+	void (*func_ui_open_window)(struct s_zoo_state *state, zoo_text_window *window);
 
 	// - utility methods
 	int16_t (*func_random)(int16_t max);
@@ -399,7 +397,6 @@ typedef struct s_zoo_state {
 
 	// - high-level engine hooks
 	void (*func_write_message)(struct s_zoo_state *state, uint8_t p2, const char *message);
-	void (*func_update_sidebar)(struct s_zoo_state *state, uint16_t flags);
 
 	// utility methods
 
@@ -448,6 +445,7 @@ zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs);
 int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs);
 void zoo_state_init(zoo_state *state);
 void zoo_redraw(zoo_state *state);
+void zoo_path_cat(char *dest, const char *src, size_t n);
 
 // zoo_element.c
 
@@ -557,14 +555,15 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 
 // zoo_window.c
 
-void zoo_window_open(zoo_state *state, zoo_text_window *window);
+void zoo_window_append(zoo_text_window *window, const char *text);
+void zoo_window_close(zoo_text_window *window);
 
 // zoo_window_classic.c
 
-void zoo_window_classic_init(zoo_text_window *window);
+void zoo_install_window_classic(zoo_state *state);
 void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_t height);
 
-// zoo_sidebar_*
+// zoo_ui_*
 
 #define ZOO_SIDEBAR_UPDATE_TIME 0x0001
 #define ZOO_SIDEBAR_UPDATE_HEALTH 0x0002
@@ -579,12 +578,15 @@ void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_
 #define ZOO_SIDEBAR_UPDATE_REDRAW 0x8000
 #define ZOO_SIDEBAR_UPDATE_ALL_REDRAW 0xFFFF
 
-#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC
-void zoo_install_sidebar_classic(zoo_state *state);
+void zoo_ui_load_world(zoo_state *state, bool as_save);
+void zoo_ui_play(zoo_state *state);
+
+#ifdef ZOO_CONFIG_ENABLE_UI_CLASSIC
+void zoo_install_ui_classic(zoo_state *state);
 #endif
 
-#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
-void zoo_install_sidebar_slim(zoo_state *state);
+#ifdef ZOO_CONFIG_ENABLE_UI_SLIM
+void zoo_install_ui_slim(zoo_state *state);
 #endif
 
 // defines

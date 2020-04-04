@@ -28,6 +28,9 @@
 // Enable POSIX-standard file I/O functions.
 #define ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 
+// Enable POSIX-standard dir I/O functions (opendir, readdir, closedir)
+#define ZOO_CONFIG_ENABLE_POSIX_DIR_IO
+
 // Enable editor-specific constants in element definitions.
 // #define ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS
 
@@ -37,9 +40,9 @@
 
 // Various sidebar styles.
 // - classic (80x25 ZZT-like)
-// #define ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC
+#define ZOO_CONFIG_ENABLE_UI_CLASSIC
 // - slim (60x26 bottom bar)
-// #define ZOO_CONFIG_ENABLE_SIDEBAR_SLIM
+#define ZOO_CONFIG_ENABLE_UI_SLIM
 
 // Options
 
@@ -48,6 +51,25 @@
 #define ZOO_CONFIG_USE_DOUBLE_FOR_MS
 
 // Compiler options
+
+#ifndef ZOO_PATH_SEPARATOR
+#ifdef _WIN32
+#define ZOO_PATH_SEPARATOR '\\'
+#define ZOO_PATH_SEPARATOR_STR "\\"
+#else
+#define ZOO_PATH_SEPARATOR '/'
+#define ZOO_PATH_SEPARATOR_STR "/"
+#endif
+#endif
+
+#ifndef ZOO_PATH_MAX
+#ifdef _WIN32
+#define ZOO_PATH_MAX 260
+#else
+// TODO: Linux uses 4096 by default
+#define ZOO_PATH_MAX 512
+#endif
+#endif
 
 #if __STDC_VERSION__ >= 199901L
 #define ZOO_INLINE inline

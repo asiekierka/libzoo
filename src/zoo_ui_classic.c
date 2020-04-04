@@ -27,7 +27,7 @@
 #include <string.h>
 #include "zoo.h"
 
-#ifdef ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC
+#ifdef ZOO_CONFIG_ENABLE_UI_CLASSIC
 
 static void zoo_sidebar_draw_string(zoo_state *state, uint8_t x, uint8_t y, uint8_t col, const char *text) {
 	uint8_t i;
@@ -159,8 +159,8 @@ static void zoo_draw_sidebar_classic(zoo_state *state, uint16_t flags) {
 	}
 }
 
-void zoo_install_sidebar_classic(zoo_state *state) {
-	state->func_update_sidebar = zoo_draw_sidebar_classic;
+void zoo_install_ui_classic(zoo_state *state) {
+	state->func_ui_draw_sidebar = zoo_draw_sidebar_classic;
 }
 
-#endif /* ZOO_CONFIG_ENABLE_SIDEBAR_CLASSIC */
+#endif /* ZOO_CONFIG_ENABLE_UI_CLASSIC */

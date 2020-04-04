@@ -584,8 +584,8 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	}
 
 StartParsing:
-	if (state->func_init_text_window != NULL) {
-		state->func_init_text_window(&text_window);
+	if (state->func_ui_open_window != NULL) {
+		memset(&text_window, 0, sizeof(text_window));
 		has_text_window = true;
 	}
 	stop_running = false;
@@ -737,7 +737,7 @@ ReadCommand:
 						}
 					}
 
-					state->func_update_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
+					state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
 				} else if (!oop_word_cmp("END")) {
 					*position = -1;
 					state->oop_char = '\0';
@@ -887,7 +887,7 @@ ReadCommand:
 		} break;
 		case '\r': {	// newline
 			if (has_text_window && text_window.line_count > 0) {
-				text_window.func_append(&text_window, "");
+				zoo_window_append(&text_window, "");
 			}
 		} break;
 		case '\0': {	// end
@@ -897,7 +897,7 @@ ReadCommand:
 			buf[0] = state->oop_char;
 			zoo_oop_read_line_to_end(state, stat_id, position, buf + 1, sizeof(buf) - 2);
 			if (has_text_window) {
-				text_window.func_append(&text_window, buf);
+				zoo_window_append(&text_window, buf);
 			}
 		} break;
 		}
@@ -938,7 +938,7 @@ ReadCommand:
 			state->object_window_request = true;
 		} else if (text_window.line_count == 1) {
 			zoo_display_message(state, 200, text_window.lines[0]);
-			text_window.func_close(&text_window);
+			zoo_window_close(&text_window);
 		}
 	}
 }
