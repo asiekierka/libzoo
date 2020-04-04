@@ -221,24 +221,24 @@ int main(void) {
 					zoo_game_start(&state, GS_PLAY);
 					zoo_redraw(&state);
 				}
-			} else if (state.game_state == GS_PLAY) {
-				if (keys_down & KEY_B) {
-					state.input.torch = true;
-				}
+			}
+
+			if (keys_down & KEY_A) {
+				zoo_input_action_once(&state.input, ZOO_ACTION_OK);
+			}
+
+			if (keys_down & KEY_B) {
+				zoo_input_action_once(&state.input, ZOO_ACTION_TORCH);
+				zoo_input_action_once(&state.input, ZOO_ACTION_CANCEL);
 			}
 
 			keys_held |= keys_down;
 
-			if (keys_held & KEY_UP) {
-				state.input.delta_y = -1;
-			} else if (keys_held & KEY_DOWN) {
-				state.input.delta_y = 1;
-			} else if (keys_held & KEY_LEFT) {
-				state.input.delta_x = -1;
-			} else if (keys_held & KEY_RIGHT) {
-				state.input.delta_x = 1;
-			}
-			state.input.shoot = (keys_held & KEY_A);
+			zoo_input_action_set(&state.input, ZOO_ACTION_UP, keys_held & KEY_UP);
+			zoo_input_action_set(&state.input, ZOO_ACTION_LEFT, keys_held & KEY_LEFT);
+			zoo_input_action_set(&state.input, ZOO_ACTION_RIGHT, keys_held & KEY_RIGHT);
+			zoo_input_action_set(&state.input, ZOO_ACTION_DOWN, keys_held & KEY_DOWN);
+			zoo_input_action_set(&state.input, ZOO_ACTION_SHOOT, keys_held & KEY_A);
 
 			keys_down = 0;
 
@@ -256,9 +256,6 @@ int main(void) {
 						break;
 				}
 			}
-
-			state.input.delta_x = 0;
-			state.input.delta_y = 0;
 		}
 
 		if (tick_next_frame) {

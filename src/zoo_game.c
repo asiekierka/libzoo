@@ -715,6 +715,8 @@ static zoo_tick_retval zoo_game_tick(zoo_state *state) {
 			}
 		}
 
+		zoo_input_update(&state->input);
+
 		if (state->input.delta_x != 0 || state->input.delta_y != 0) {
 			// push self
 			state->game_tick_state = 1;
@@ -765,6 +767,8 @@ GameTickState1:
 			state->current_tick = state->func_random(100);
 			state->current_stat_tick = state->board.stat_count + 1;
 			state->world.info.is_save = true;
+
+			return RETURN_NEXT_CYCLE;
 		} else {
 			return RETURN_NEXT_CYCLE;
 		}
@@ -793,12 +797,13 @@ GameTickState2:
 
 	if (state->current_stat_tick > state->board.stat_count) {
 		if (state->tick_duration == 0) {
-			// workaround for fast game speeds to avoid CPU implosion
+			// workaround for fast game speeds to avoid high CPU usage
 			state->current_tick++;
 			if (state->current_tick > 420)
 				state->current_tick = 1;
 			state->current_stat_tick = 0;
 
+			zoo_input_update(&state->input);
 			return RETURN_NEXT_FRAME;
 		} else {
 			if (zoo_has_hsecs_elapsed(state, &state->tick_counter, state->tick_duration)) {
@@ -807,8 +812,7 @@ GameTickState2:
 					state->current_tick = 1;
 				state->current_stat_tick = 0;
 
-				// TODO: input update (have shadow and "copied" input)
-
+				zoo_input_update(&state->input);
 				return RETURN_IMMEDIATE;
 			} else {
 				return RETURN_NEXT_CYCLE;
@@ -831,7 +835,7 @@ void zoo_tick_advance_pit(zoo_state *state) {
 	}
 }
 
-zoo_tick_retval zoo_tick(zoo_state *state) {
+static ZOO_INLINE zoo_tick_retval zoo_tick_inner(zoo_state *state) {
 	zoo_tick_retval ret;
 
 	ret = zoo_call_stack_tick(state);
@@ -846,4 +850,12 @@ zoo_tick_retval zoo_tick(zoo_state *state) {
 		case GS_PLAY:
 			return zoo_game_tick(state);
 	}
+}
+
+zoo_tick_retval zoo_tick(zoo_state *state) {
+	zoo_tick_retval ret = zoo_tick_inner(state);
+	if (ret != RETURN_IMMEDIATE) {
+		zoo_input_clear_post_tick(&state->input);
+	}
+	return ret;
 }

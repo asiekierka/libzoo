@@ -229,12 +229,15 @@ static void zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
 
 static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window *window) {
 	int16_t old_line_pos = window->line_pos;
+	bool act_ok, act_cancel;
 
 	if (window->state == 0) {
 		zoo_window_draw_open(window, state);
 		zoo_window_draw_text(window, state, false);
 		window->state = 1;
 	} else if (window->state == 1) {
+		zoo_input_update(&state->input);
+
 		window->line_pos += state->input.delta_y;
 		window->line_pos += state->input.delta_x * 4;
 		if (window->line_pos < 0) window->line_pos = 0;
@@ -244,12 +247,18 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			zoo_window_draw_text(window, state, false);
 		}
 
-		if (state->input.shoot) {
-			if (window->lines[window->line_pos][0] == '!') {
-				zoo_window_hyperlink(window, state);
+		act_ok = zoo_input_action_pressed(&state->input, ZOO_ACTION_OK);
+		act_cancel = zoo_input_action_pressed(&state->input, ZOO_ACTION_CANCEL);
+		if (act_ok || act_cancel) {
+			if (act_ok) {
+				if (window->lines[window->line_pos][0] == '!') {
+					zoo_window_hyperlink(window, state);
+				}
 			}
 			zoo_window_draw_close(window, state);
 			zoo_window_classic_close(window);
+
+			zoo_input_clear_post_tick(&state->input);
 			return EXIT;
 		}
 	}

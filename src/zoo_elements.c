@@ -1398,7 +1398,8 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 	if (state->world.info.health <= 0) {
 		state->input.delta_x = 0;
 		state->input.delta_y = 0;
-		state->input.shoot = false;
+		// TODO input refactor
+		// state->input.shoot = false;
 
 		if (zoo_stat_get_id(state, 0, 0) == -1) {
 			zoo_display_message(state, 32000, " Game over  -  Press ESCAPE");
@@ -1409,7 +1410,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 	}
 
 	if (state->input.delta_x != 0 || state->input.delta_y != 0) {
-		if (state->input.shoot) {
+		if (zoo_input_action_pressed(&state->input, ZOO_ACTION_SHOOT)) {
 			if (state->board.info.max_shots == 0) {
 				if (state->msg_flags.no_shooting) {
 					zoo_display_message(state, 200, "Can't shoot in this place!");
@@ -1481,8 +1482,7 @@ PlayerTickState1:
 		}
 	}
 
-	if (state->input.torch) {
-		state->input.torch = false;
+	if (zoo_input_action_pressed(&state->input, ZOO_ACTION_TORCH)) {
 		if (state->world.info.torch_ticks <= 0) {
 			if (state->world.info.torches > 0) {
 				if (state->board.info.is_dark) {

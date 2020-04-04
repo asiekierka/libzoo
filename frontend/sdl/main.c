@@ -52,7 +52,6 @@ static bool stop_tick_thread = false;
 static SDL_TimerID tick_thread_timer;
 
 static zoo_input_state input;
-static SDL_mutex *input_mutex;
 
 #ifdef __BIG_ENDIAN__
 #define SOFT_PIXEL_FORMAT SDL_PIXELFORMAT_ARGB32
@@ -121,10 +120,6 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 	zoo_sound_pcm_tick(&pcm_state);
 	SDL_UnlockMutex(audio_mutex);
 
-	SDL_LockMutex(input_mutex);
-	memcpy(&state.input, &input, sizeof(zoo_input_state));
-	SDL_UnlockMutex(input_mutex);
-
 	SDL_LockMutex(playfield_mutex);
 	if (stop_tick_thread) {
 		// cease
@@ -163,60 +158,6 @@ void sdl_render(void) {
 	SDL_UnlockMutex(playfield_mutex);
 
 	SDL_RenderPresent(renderer);
-}
-
-// input logic
-
-typedef enum {
-	IDIR_UP,
-	IDIR_DOWN,
-	IDIR_LEFT,
-	IDIR_RIGHT,
-	IDIR_MAX
-} input_dir;
-
-static int dir_pressed[IDIR_MAX];
-static int dir_pressed_id;
-
-static void input_dir_down(input_dir dir) {
-	if (dir_pressed[dir] == 0) {
-		dir_pressed_id++;
-		dir_pressed[dir] = dir_pressed_id;
-	}
-}
-
-static void input_dir_up(input_dir dir) {
-	dir_pressed[dir] = 0;
-}
-
-static void input_dir_update_delta() {
-	int m = 0;
-	input.delta_x = 0;
-	input.delta_y = 0;
-
-	for (int i = 0; i < IDIR_MAX; i++) {
-		if (dir_pressed[i] > m) {
-			m = dir_pressed[i];
-			switch (i) {
-				case IDIR_UP:
-					input.delta_x = 0;
-					input.delta_y = -1;
-					break;
-				case IDIR_DOWN:
-					input.delta_x = 0;
-					input.delta_y = 1;
-					break;
-				case IDIR_LEFT:
-					input.delta_x = -1;
-					input.delta_y = 0;
-					break;
-				case IDIR_RIGHT:
-					input.delta_x = 1;
-					input.delta_y = 0;
-					break;
-			}
-		}
-	}
 }
 
 // main
@@ -285,7 +226,6 @@ int main(int argc, char **argv) {
 	SDL_LockTexture(playfield, NULL, &playfield_buffer, &playfield_pitch);
 
 	playfield_mutex = SDL_CreateMutex();
-	input_mutex = SDL_CreateMutex();
 
 	zoo_game_start(&state, GS_TITLE);
 	zoo_redraw(&state);
@@ -298,50 +238,58 @@ int main(int argc, char **argv) {
 	bool cont_loop = true;
 
 	while (cont_loop) {
-		SDL_LockMutex(input_mutex);
+		SDL_LockMutex(playfield_mutex);
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_KEYDOWN:
-					input.shoot = (event.key.keysym.mod & KMOD_SHIFT) ? true : false;
+					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
 					switch (event.key.keysym.sym) {
 						case SDLK_LEFT:
-							input_dir_down(IDIR_LEFT);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_LEFT);
 							break;
 						case SDLK_RIGHT:
-							input_dir_down(IDIR_RIGHT);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_RIGHT);
 							break;
 						case SDLK_UP:
-							input_dir_down(IDIR_UP);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_UP);
 							break;
 						case SDLK_DOWN:
-							input_dir_down(IDIR_DOWN);
+							zoo_input_action_down(&(state.input), ZOO_ACTION_DOWN);
 							break;
 						case SDLK_t:
-							if (state.game_state == GS_PLAY) {
-								input.torch = true;
-							}
+							zoo_input_action_once(&(state.input), ZOO_ACTION_TORCH);
+							break;
+						case SDLK_RETURN:
+							zoo_input_action_once(&(state.input), ZOO_ACTION_OK);
+							break;
+						case SDLK_ESCAPE:
+							zoo_input_action_once(&(state.input), ZOO_ACTION_CANCEL);
 							break;
 					}
 					break;
 				case SDL_KEYUP:
-					input.shoot = (event.key.keysym.mod & KMOD_SHIFT) ? true : false;
+					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
 					switch (event.key.keysym.sym) {
 						case SDLK_LEFT:
-							input_dir_up(IDIR_LEFT);
+							zoo_input_action_up(&(state.input), ZOO_ACTION_LEFT);
 							break;
 						case SDLK_RIGHT:
-							input_dir_up(IDIR_RIGHT);
+							zoo_input_action_up(&(state.input), ZOO_ACTION_RIGHT);
 							break;
 						case SDLK_UP:
-							input_dir_up(IDIR_UP);
+							zoo_input_action_up(&(state.input), ZOO_ACTION_UP);
 							break;
 						case SDLK_DOWN:
-							input_dir_up(IDIR_DOWN);
+							zoo_input_action_up(&(state.input), ZOO_ACTION_DOWN);
 							break;
 						case SDLK_t:
-							if (state.game_state == GS_PLAY) {
-								input.torch = false;
-							}
+							zoo_input_action_up(&(state.input), ZOO_ACTION_TORCH);
+							break;
+						case SDLK_RETURN:
+							zoo_input_action_up(&(state.input), ZOO_ACTION_OK);
+							break;
+						case SDLK_ESCAPE:
+							zoo_input_action_up(&(state.input), ZOO_ACTION_CANCEL);
 							break;
 						case SDLK_p:
 							if (state.game_state == GS_TITLE) {
@@ -370,8 +318,7 @@ int main(int argc, char **argv) {
 					break;
 			}
 		}
-		input_dir_update_delta();
-		SDL_UnlockMutex(input_mutex);
+		SDL_UnlockMutex(playfield_mutex);
 
 		sdl_render();
 	}

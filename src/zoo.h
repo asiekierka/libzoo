@@ -41,6 +41,7 @@
 
 // early defs
 
+struct s_zoo_input_state;
 struct s_zoo_state;
 struct s_zoo_text_window;
 
@@ -298,11 +299,28 @@ typedef struct {
 	bool energizer;
 } zoo_state_message;
 
-typedef struct {
+typedef enum {
+	ZOO_ACTION_UP,
+	ZOO_ACTION_LEFT,
+	ZOO_ACTION_RIGHT,
+	ZOO_ACTION_DOWN,
+
+	ZOO_ACTION_SHOOT,
+	ZOO_ACTION_TORCH,
+
+	ZOO_ACTION_OK,
+	ZOO_ACTION_CANCEL,
+
+	ZOO_ACTION_MAX
+} zoo_input_action;
+
+typedef struct s_zoo_input_state {
 	int16_t delta_x;
 	int16_t delta_y;
-	bool shoot;
-	bool torch;
+	bool updated;
+
+	bool actions_down[ZOO_ACTION_MAX];
+	bool actions_held[ZOO_ACTION_MAX];
 } zoo_input_state;
 
 typedef struct s_zoo_text_window {
@@ -498,6 +516,17 @@ bool zoo_world_load(zoo_state *state, const void *buffer, size_t buflen, bool ti
 #ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 bool zoo_world_load_file(zoo_state *state, FILE *file, bool title_only);
 #endif
+
+// zoo_input.c
+
+bool zoo_input_action_pressed(zoo_input_state *state, zoo_input_action action);
+void zoo_input_update(zoo_input_state *state);
+void zoo_input_clear_post_tick(zoo_input_state *state);
+
+void zoo_input_action_down(zoo_input_state *state, zoo_input_action action);
+void zoo_input_action_once(zoo_input_state *state, zoo_input_action action);
+void zoo_input_action_up(zoo_input_state *state, zoo_input_action action);
+void zoo_input_action_set(zoo_input_state *state, zoo_input_action action, bool value);
 
 // zoo_oop.c
 
