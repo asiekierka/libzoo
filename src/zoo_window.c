@@ -24,10 +24,12 @@
 #include <string.h>
 #include "zoo.h"
 
+#define ZOO_WINDOW_LINE_MAX 50
+
 void zoo_window_append(zoo_text_window *window, const char *text) {
 	char *buffer;
 	int16_t buflen = strlen(text);
-	if (buflen > 50) buflen = 50;
+	if (buflen > ZOO_WINDOW_LINE_MAX) buflen = ZOO_WINDOW_LINE_MAX;
 
 	buffer = malloc(sizeof(char) * (buflen + 1));
 	memcpy(buffer, text, buflen);
@@ -44,4 +46,41 @@ void zoo_window_close(zoo_text_window *window) {
 		free(window->lines[i]);
 	}
 	free(window->lines);
+
+	window->line_pos = 0;
+	window->line_count = 0;
 }
+
+void zoo_window_append_file(zoo_text_window *window, zoo_io_handle *h) {
+	char str[ZOO_WINDOW_LINE_MAX + 1];
+	char c;
+	int16_t i;
+
+	while (h->func_read(h, &c, 1) > 0) {
+		if (c == '\x0D') {
+			str[i++] = '\0';
+			zoo_window_append(window, str);
+			i = 0;
+		} else if (c != '\x0A' && i < ZOO_WINDOW_LINE_MAX) {
+			str[i++] = c;
+		}
+	}
+
+	str[i++] = '\0';
+	zoo_window_append(window, str);
+}
+
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+bool zoo_window_open_file(zoo_io_state *io, zoo_text_window *window, const char *filename) {
+	char path[ZOO_PATH_MAX + 1];
+	zoo_io_handle h;
+
+	zoo_io_translate(io, filename, (strchr(filename, '.') == NULL) ? ".HLP" : NULL, path, ZOO_PATH_MAX);
+
+	h = io->func_io_open_file(path, MODE_READ);
+	zoo_window_append_file(window, &h);
+	h.func_close(&h);
+
+	return true;
+}
+#endif

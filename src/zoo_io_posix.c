@@ -105,7 +105,9 @@ static bool zoo_io_scan_dir_posix(const char *name, zoo_func_io_scan_dir_callbac
 	while ((dent = readdir(dir)) != NULL) {
 		strncpy(ent.name, dent->d_name, ZOO_PATH_MAX);
 		ent.type = dent->d_type == DT_DIR ? TYPE_DIR : TYPE_FILE;
-		cb(&ent, cb_arg);
+		if (!cb(&ent, cb_arg)) {
+			break;
+		}
 	}
 
 	closedir(dir);

@@ -152,12 +152,3 @@ void zoo_redraw(zoo_state *state) {
 	zoo_board_draw(state);
 	state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL_REDRAW);
 }
-
-void zoo_path_cat(char *dest, const char *src, size_t n) {
-	size_t len = strlen(dest);
-	if (len < n && dest[len - 1] != ZOO_PATH_SEPARATOR) {
-		dest[len] = ZOO_PATH_SEPARATOR;
-		dest[len + 1] = '\0';
-	}
-	strncpy(dest, src, ZOO_PATH_MAX);
-}

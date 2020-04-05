@@ -100,3 +100,47 @@ zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable) {
 	h.func_close = zoo_io_mem_close;
 	return h;
 }
+
+void zoo_path_cat(char *dest, const char *src, size_t n) {
+	size_t len = strlen(dest);
+	if (len < n && dest[len - 1] != ZOO_PATH_SEPARATOR) {
+		dest[len] = ZOO_PATH_SEPARATOR;
+		dest[len + 1] = '\0';
+	}
+	strncpy(dest, src, ZOO_PATH_MAX);
+}
+
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+typedef struct {
+	char fn_cmp[ZOO_PATH_MAX + 1];
+	char fn_found[ZOO_PATH_MAX + 1];
+} zoo_io_translate_state;
+
+static bool zoo_io_translate_compare(zoo_io_dirent *e, void *cb_arg) {
+	zoo_io_translate_state *ts = (zoo_io_translate_state *) cb_arg;
+
+	if (e->type == TYPE_FILE && !strcasecmp(e->name, ts->fn_cmp)) {
+		strncpy(ts->fn_found, e->name, ZOO_PATH_MAX);
+		return false;
+	} else {
+		return true;
+	}
+}
+
+void zoo_io_translate(zoo_io_state *state, const char *filename, const char *extension, char *buffer, size_t buflen) {
+	zoo_io_translate_state ts;
+
+	// fn_cmp - searched name, fn_found - found actual name
+	strncpy(ts.fn_cmp, filename, ZOO_PATH_MAX);
+	if (extension != NULL) {
+		strncat(ts.fn_cmp, extension, ZOO_PATH_MAX);
+	}
+	ts.fn_found[0] = '\0';
+
+	state->func_io_scan_dir(state->path, zoo_io_translate_compare, &ts);
+
+	strncpy(buffer, state->path, buflen);
+	zoo_path_cat(buffer, strlen(ts.fn_found) > 0 ? ts.fn_found : ts.fn_cmp, buflen);
+}
+
+#endif

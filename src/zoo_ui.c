@@ -27,6 +27,10 @@
 #include <string.h>
 #include "zoo.h"
 
+static void zoo_ui_io_error(void) {
+	// TODO
+}
+
 #ifdef ZOO_CONFIG_ENABLE_FILE_IO
 typedef struct {
 	zoo_text_window window;
@@ -35,24 +39,25 @@ typedef struct {
 
 static zoo_ui_file_select_state filesel_state;
 
-static void zoo_ui_populate_file(zoo_io_dirent *e, void *cb_arg) {
+static bool zoo_ui_populate_file(zoo_io_dirent *e, void *cb_arg) {
 	zoo_ui_file_select_state *state = (zoo_ui_file_select_state *) cb_arg;
 	const char *dirext;
 	const char *dirext_cmp = state->as_save ? ".SAV" : ".ZZT";
 
 	if (e->type == TYPE_DIR) {
 		// TODO: add directory support
-		return;
+		return true;
 	}
 
 	if (dirext_cmp != NULL) {
 		dirext = strrchr(e->name, '.');
 		if (dirext == NULL || strcasecmp(dirext_cmp, dirext)) {
-			return;
+			return true;
 		}
 	}
 
 	zoo_window_append(&(state->window), e->name);
+	return true;
 }
 
 static zoo_tick_retval zoo_ui_load_world_cb(zoo_state *state, zoo_ui_file_select_state *cb_state) {
@@ -74,6 +79,8 @@ static zoo_tick_retval zoo_ui_load_world_cb(zoo_state *state, zoo_ui_file_select
 				zoo_game_start(state, GS_TITLE);
 			}
 			zoo_redraw(state);
+		} else {
+			zoo_ui_io_error();
 		}
 		h.func_close(&h);
 	}
@@ -96,10 +103,21 @@ void zoo_ui_load_world(zoo_state *state, bool as_save) {
 #endif
 
 void zoo_ui_play(zoo_state *state) {
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+	char path[ZOO_PATH_MAX + 1];
+	zoo_io_handle h;
+#endif
 	bool ret = true;
+
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
 	if (state->world.info.is_save) {
-		// TODO
+		zoo_io_translate(&state->io, state->world.info.name, ".ZZT", path, ZOO_PATH_MAX);
+		h = state->io.func_io_open_file(path, MODE_READ);
+		ret = zoo_world_load(state, &h, false);
+		state->return_board_id = state->world.info.current_board;
 	}
+#endif
+
 	if (ret) {
 		zoo_game_start(state, GS_PLAY);
 
@@ -107,5 +125,7 @@ void zoo_ui_play(zoo_state *state) {
 		zoo_board_enter(state);
 
 		zoo_redraw(state);
+	} else {
+		zoo_ui_io_error();
 	}
 }

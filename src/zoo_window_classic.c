@@ -177,7 +177,8 @@ static void zoo_window_draw_close(zoo_text_window *window, zoo_state *state) {
 	state->func_restore_display(state, window->screen_copy);
 }
 
-static void zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
+// returns: whether or not to close
+static bool zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
 	char *str;
 	char pointer_str[21];
 	char pointer_label[21];
@@ -193,7 +194,15 @@ static void zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
 	}
 
 	if (pointer_str[0] == '-') {
-		// TODO: files
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+		zoo_window_close(window);
+		if (zoo_window_open_file(&state->io, window, pointer_str + 1)) {
+			window->viewing_file = true;
+			zoo_window_draw_text(window, state, false);
+			zoo_input_clear_post_tick(&state->input);
+			return false;
+		}
+#endif
 	} else {
 		if (window->hyperlink_as_select) {
 			strncpy(window->hyperlink, pointer_str, sizeof(window->hyperlink));
@@ -203,11 +212,12 @@ static void zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
 			// TODO: in-document label jumps
 		}
 	}
+	return true;
 }
 
 static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window *window) {
 	int16_t old_line_pos = window->line_pos;
-	bool act_ok, act_cancel;
+	bool act_ok, act_cancel, should_close;
 
 	if (window->state == 0) {
 		zoo_window_draw_open(window, state);
@@ -228,21 +238,24 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 		act_ok = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_OK);
 		act_cancel = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_CANCEL);
 		if (act_ok || act_cancel) {
+			should_close = true;
 			if (act_ok) {
 				window->accepted = true;
 				if (window->lines[window->line_pos][0] == '!') {
-					zoo_window_hyperlink(window, state);
+					should_close = zoo_window_hyperlink(window, state);
 				}
 			} else {
 				window->accepted = false;
 			}
-			zoo_window_draw_close(window, state);
-			if (!window->manual_close) {
-				zoo_window_close(window);
-			}
+			if (should_close) {
+				zoo_window_draw_close(window, state);
+				if (!window->manual_close) {
+					zoo_window_close(window);
+				}
 
-			zoo_input_clear_post_tick(&state->input);
-			return EXIT;
+				zoo_input_clear_post_tick(&state->input);
+				return EXIT;
+			}
 		}
 	}
 

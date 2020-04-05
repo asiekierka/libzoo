@@ -232,7 +232,7 @@ typedef struct {
 	char name[ZOO_PATH_MAX + 1];
 } zoo_io_dirent;
 
-typedef void (*zoo_func_io_scan_dir_callback)(zoo_io_dirent *e, void *arg);
+typedef bool (*zoo_func_io_scan_dir_callback)(zoo_io_dirent *e, void *arg);
 
 typedef struct {
 	char path[ZOO_PATH_MAX + 1];
@@ -242,6 +242,11 @@ typedef struct {
 } zoo_io_state;
 
 zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable);
+void zoo_path_cat(char *dest, const char *src, size_t n);
+
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+void zoo_io_translate(zoo_io_state *state, const char *filename, const char *extension, char *buffer, size_t buflen);
+#endif
 
 #ifdef ZOO_CONFIG_ENABLE_FILE_IO_POSIX
 void zoo_io_install_posix(zoo_io_state *state);
@@ -493,7 +498,6 @@ zoo_time_ms zoo_hsecs_to_pit_ms(int16_t hsecs);
 int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs);
 void zoo_state_init(zoo_state *state);
 void zoo_redraw(zoo_state *state);
-void zoo_path_cat(char *dest, const char *src, size_t n);
 
 // zoo_element.c
 
@@ -583,6 +587,11 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 
 void zoo_window_append(zoo_text_window *window, const char *text);
 void zoo_window_close(zoo_text_window *window);
+
+void zoo_window_append_file(zoo_text_window *window, zoo_io_handle *h);
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+bool zoo_window_open_file(zoo_io_state *io, zoo_text_window *window, const char *filename);
+#endif
 
 // zoo_window_classic.c
 
