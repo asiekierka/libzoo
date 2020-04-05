@@ -27,7 +27,10 @@
 #include <string.h>
 #include "zoo.h"
 
-#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO_POSIX
+#include <stdio.h>
+#include <dirent.h>
+#include <unistd.h>
 
 static uint8_t zoo_io_file_getc(zoo_io_handle *h) {
 	FILE *f = (FILE*) h->p;
@@ -64,8 +67,20 @@ static size_t zoo_io_file_tell(zoo_io_handle *h) {
 	return ftell(f);
 }
 
-zoo_io_handle zoo_io_open_file_posix(FILE *file) {
+static void zoo_io_file_close(zoo_io_handle *h) {
+	FILE *f = (FILE*) h->p;
+	fclose(f);
+}
+
+static zoo_io_handle zoo_io_open_file_posix(const char *name, zoo_io_mode mode) {
+	FILE *file;
 	zoo_io_handle h;
+
+	file = fopen(name, mode == MODE_WRITE ? "wb" : "rb");
+	if (file == NULL) {
+		return zoo_io_open_file_mem(NULL, 0, false);
+	}
+
 	h.p = file;
 	h.func_getc = zoo_io_file_getc;
 	h.func_putc = zoo_io_file_putc;
@@ -73,7 +88,36 @@ zoo_io_handle zoo_io_open_file_posix(FILE *file) {
 	h.func_write = zoo_io_file_write;
 	h.func_skip = zoo_io_file_skip;
 	h.func_tell = zoo_io_file_tell;
+	h.func_close = zoo_io_file_close;
 	return h;
 }
 
+static bool zoo_io_scan_dir_posix(const char *name, zoo_func_io_scan_dir_callback cb, void *cb_arg) {
+	DIR *dir;
+	struct dirent *dent;
+	zoo_io_dirent ent;
+
+	dir = opendir(name);
+	if (dir == NULL) {
+		return false;
+	}
+
+	while ((dent = readdir(dir)) != NULL) {
+		strncpy(ent.name, dent->d_name, ZOO_PATH_MAX);
+		ent.type = dent->d_type == DT_DIR ? TYPE_DIR : TYPE_FILE;
+		cb(&ent, cb_arg);
+	}
+
+	closedir(dir);
+	return true;
+}
+
+void zoo_io_install_posix(zoo_io_state *state) {
+	if (getcwd(state->path, ZOO_PATH_MAX) == NULL) {
+		strncpy(state->path, "/", ZOO_PATH_MAX);
+	}
+
+	state->func_io_open_file = zoo_io_open_file_posix;
+	state->func_io_scan_dir = zoo_io_scan_dir_posix;
+}
 #endif

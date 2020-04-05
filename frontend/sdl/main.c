@@ -172,6 +172,7 @@ int main(int argc, char **argv) {
 	}
 
 	zoo_state_init(&state);
+	zoo_io_install_posix(&state.io);
 	state.func_write_char = sdl_draw_char;
 
 	if (use_slim_ui) {

@@ -25,11 +25,11 @@
 
 // Features
 
-// Enable POSIX-standard file I/O functions.
-#define ZOO_CONFIG_ENABLE_POSIX_FILE_IO
+// Enable file I/O, state tracking, related UI methods, etc.
+#define ZOO_CONFIG_ENABLE_FILE_IO
 
-// Enable POSIX-standard dir I/O functions (opendir, readdir, closedir)
-#define ZOO_CONFIG_ENABLE_POSIX_DIR_IO
+// Enable POSIX implementation of file/dir I/O.
+#define ZOO_CONFIG_ENABLE_FILE_IO_POSIX
 
 // Enable editor-specific constants in element definitions.
 // #define ZOO_CONFIG_ENABLE_EDITOR_CONSTANTS

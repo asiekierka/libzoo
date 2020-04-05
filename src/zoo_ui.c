@@ -27,73 +27,57 @@
 #include <string.h>
 #include "zoo.h"
 
-#ifdef ZOO_CONFIG_ENABLE_POSIX_DIR_IO
-#include <dirent.h>
-#endif
-
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
 typedef struct {
 	zoo_text_window window;
 	bool as_save;
 } zoo_ui_file_select_state;
 
 static zoo_ui_file_select_state filesel_state;
-static char* filesel_path = ".";
 
-static void zoo_ui_populate_files(const char *name, zoo_text_window *window, const char *extension) {
-#ifdef ZOO_CONFIG_ENABLE_POSIX_DIR_IO
-	DIR *dir;
-	struct dirent *ent;
+static void zoo_ui_populate_file(zoo_io_dirent *e, void *cb_arg) {
+	zoo_ui_file_select_state *state = (zoo_ui_file_select_state *) cb_arg;
 	const char *dirext;
+	const char *dirext_cmp = state->as_save ? ".SAV" : ".ZZT";
 
-	dir = opendir(name);
-	if (dir != NULL) {
-		while ((ent = readdir(dir)) != NULL) {
-			if (extension != NULL) {
-				dirext = strrchr(ent->d_name, '.');
-				if (dirext == NULL || strcasecmp(extension, dirext)) {
-					// no match
-					continue;
-				}
-			}
-			// TODO: filter out directories
-			zoo_window_append(window, ent->d_name);
-		}
-		closedir(dir);
+	if (e->type == TYPE_DIR) {
+		// TODO: add directory support
+		return;
 	}
-#else
-	// no implementation
-#endif
+
+	if (dirext_cmp != NULL) {
+		dirext = strrchr(e->name, '.');
+		if (dirext == NULL || strcasecmp(dirext_cmp, dirext)) {
+			return;
+		}
+	}
+
+	zoo_window_append(&(state->window), e->name);
 }
 
 static zoo_tick_retval zoo_ui_load_world_cb(zoo_state *state, zoo_ui_file_select_state *cb_state) {
-// TODO: decouple from POSIX file I/O
-#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
 	char path[ZOO_PATH_MAX + 1];
 	char *name;
-	FILE *f;
 	zoo_io_handle h;
 
 	if (cb_state->window.accepted && cb_state->window.line_pos < cb_state->window.line_count) {
 		// TODO: warn for long filenames (> 20 chars, minus extension);
-		strncpy(path, filesel_path, ZOO_PATH_MAX);
+		strncpy(path, state->io.path, ZOO_PATH_MAX);
 		name = cb_state->window.lines[cb_state->window.line_pos];
 		zoo_path_cat(path, name, ZOO_PATH_MAX);
-		f = fopen(path, "rb");
-		if (f != NULL) {
-			h = zoo_io_open_file_posix(f);
-			if (zoo_world_load(state, &h, false)) {
-				if (filesel_state.as_save) {
-					zoo_game_start(state, GS_PLAY);
-				} else {
-					zoo_board_change(state, 0);
-					zoo_game_start(state, GS_TITLE);
-				}
-				zoo_redraw(state);
+		h = state->io.func_io_open_file(path, MODE_READ);
+		if (zoo_world_load(state, &h, false)) {
+			if (filesel_state.as_save) {
+				zoo_game_start(state, GS_PLAY);
+			} else {
+				zoo_board_change(state, 0);
+				zoo_game_start(state, GS_TITLE);
 			}
-			fclose(f);
+			zoo_redraw(state);
 		}
+		h.func_close(&h);
 	}
-#endif
+
 	zoo_window_close(&cb_state->window);
 	return EXIT;
 }
@@ -105,10 +89,11 @@ void zoo_ui_load_world(zoo_state *state, bool as_save) {
 	filesel_state.window.manual_close = true;
 	filesel_state.window.hyperlink_as_select = true;
 	filesel_state.as_save = as_save;
-	zoo_ui_populate_files(filesel_path, &filesel_state.window, as_save ? ".SAV" : ".ZZT");
+	state->io.func_io_scan_dir(state->io.path, zoo_ui_populate_file, &filesel_state);
 	zoo_call_push_callback(&(state->call_stack), (zoo_func_callback) zoo_ui_load_world_cb, &filesel_state);
 	state->func_ui_open_window(state, &filesel_state.window);
 }
+#endif
 
 void zoo_ui_play(zoo_state *state) {
 	bool ret = true;

@@ -202,6 +202,51 @@ void zoo_sound_tick(zoo_sound_state *state);
 int16_t zoo_sound_parse(const char *input, uint8_t *output, int16_t out_max);
 void zoo_sound_state_init(zoo_sound_state *state);
 
+// zoo_io.c
+
+typedef struct s_zoo_io_handle {
+	void *p;
+	int len;
+	int len_orig;
+	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
+	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
+	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
+	size_t (*func_write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
+	size_t (*func_skip)(struct s_zoo_io_handle *h, size_t len);
+	size_t (*func_tell)(struct s_zoo_io_handle *h);
+	void (*func_close)(struct s_zoo_io_handle *h);
+} zoo_io_handle;
+
+typedef enum {
+	MODE_READ,
+	MODE_WRITE
+} zoo_io_mode;
+
+typedef enum {
+	TYPE_DIR,
+	TYPE_FILE
+} zoo_io_type;
+
+typedef struct {
+	zoo_io_type type;
+	char name[ZOO_PATH_MAX + 1];
+} zoo_io_dirent;
+
+typedef void (*zoo_func_io_scan_dir_callback)(zoo_io_dirent *e, void *arg);
+
+typedef struct {
+	char path[ZOO_PATH_MAX + 1];
+
+	zoo_io_handle (*func_io_open_file)(const char *name, zoo_io_mode mode);
+	bool (*func_io_scan_dir)(const char *dir, zoo_func_io_scan_dir_callback cb, void *cb_arg);
+} zoo_io_state;
+
+zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable);
+
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO_POSIX
+void zoo_io_install_posix(zoo_io_state *state);
+#endif
+
 // game
 
 #define ZOO_MAX_BOARD_LEN 20000
@@ -376,6 +421,9 @@ typedef struct s_zoo_state {
 	char oop_word[21];
 	int16_t oop_value;
 
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
+	zoo_io_state io;
+#endif
 	zoo_input_state input;
 	zoo_sound_state sound;
 
@@ -502,28 +550,6 @@ void zoo_game_stop(zoo_state *state);
 void zoo_tick_advance_pit(zoo_state *state);
 zoo_tick_retval zoo_tick(zoo_state *state);
 
-// zoo_io.c
-
-typedef struct s_zoo_io_handle {
-	void *p;
-	int len;
-	int len_orig;
-	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
-	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
-	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
-	size_t (*func_write)(struct s_zoo_io_handle *h, const uint8_t *ptr, size_t len);
-	size_t (*func_skip)(struct s_zoo_io_handle *h, size_t len);
-	size_t (*func_tell)(struct s_zoo_io_handle *h);
-} zoo_io_handle;
-
-zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable);
-
-// zoo_io_posix.c
-
-#ifdef ZOO_CONFIG_ENABLE_POSIX_FILE_IO
-zoo_io_handle zoo_io_open_file_posix(FILE *file);
-#endif
-
 // zoo_game_io.c
 
 void zoo_board_close(zoo_state *state);
@@ -578,7 +604,9 @@ void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_
 #define ZOO_SIDEBAR_UPDATE_REDRAW 0x8000
 #define ZOO_SIDEBAR_UPDATE_ALL_REDRAW 0xFFFF
 
+#ifdef ZOO_CONFIG_ENABLE_FILE_IO
 void zoo_ui_load_world(zoo_state *state, bool as_save);
+#endif
 void zoo_ui_play(zoo_state *state);
 
 #ifdef ZOO_CONFIG_ENABLE_UI_CLASSIC

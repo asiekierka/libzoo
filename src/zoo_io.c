@@ -82,6 +82,10 @@ static size_t zoo_io_mem_tell(zoo_io_handle *h) {
 	return h->len_orig - h->len;
 }
 
+static void zoo_io_mem_close(zoo_io_handle *h) {
+
+}
+
 zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable) {
 	zoo_io_handle h;
 	h.p = ptr;
@@ -93,5 +97,6 @@ zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable) {
 	h.func_write = writeable ? zoo_io_mem_write : zoo_io_mem_write_ro;
 	h.func_skip = zoo_io_mem_skip;
 	h.func_tell = zoo_io_mem_tell;
+	h.func_close = zoo_io_mem_close;
 	return h;
 }
