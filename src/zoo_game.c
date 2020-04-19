@@ -550,14 +550,9 @@ void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y) {
 	int16_t ix, iy, new_x, new_y;
 
 	stat = zoo_stat_get(state, x, y, NULL);
-	// FIX: bounds check
-	if (stat == NULL) {
-		return;
-	}
-
 	color = state->board.tiles[x][y].color;
 	old_board = state->world.info.current_board;
-	zoo_board_change(state, stat->p3);
+	zoo_board_change(state, stat != NULL ? stat->p3 : 0);
 
 	new_x = 0;
 	for (ix = 1; ix <= ZOO_BOARD_WIDTH; ix++) {
