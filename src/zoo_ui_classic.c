@@ -130,6 +130,14 @@ static void zoo_draw_sidebar_classic(zoo_state *state, uint16_t flags) {
 	}
 
 	if (state->game_state == GS_PLAY) {
+		if (flags & ZOO_SIDEBAR_UPDATE_PAUSED) {
+			if (state->game_paused) {
+				zoo_sidebar_draw_string(state, 64, 5, 0x1F, "Pausing...");
+			} else {
+				zoo_sidebar_clear_line(state, 5);
+			}
+		}
+
 		if (state->board.info.time_limit_sec > 0) {
 			zoo_sidebar_draw_string(state, 64, 6, 0x1E, "   Time:");
 			zoo_sidebar_draw_value(state, 72, 6, 0x1E, state->board.info.time_limit_sec - state->world.info.board_time_sec, " ");

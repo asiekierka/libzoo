@@ -608,6 +608,8 @@ void zoo_window_classic_set_position(int16_t x, int16_t y, int16_t width, int16_
 #define ZOO_SIDEBAR_UPDATE_SCORE 0x0020
 #define ZOO_SIDEBAR_UPDATE_KEYS 0x0040
 
+#define ZOO_SIDEBAR_UPDATE_PAUSED 0x0080
+
 #define ZOO_SIDEBAR_UPDATE_OTHER 0x4000
 #define ZOO_SIDEBAR_UPDATE_ALL 0x7FFF
 #define ZOO_SIDEBAR_UPDATE_REDRAW 0x8000
