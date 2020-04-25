@@ -104,10 +104,10 @@ zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, bool writeable) {
 void zoo_path_cat(char *dest, const char *src, size_t n) {
 	size_t len = strlen(dest);
 	if (len < n && dest[len - 1] != ZOO_PATH_SEPARATOR) {
-		dest[len] = ZOO_PATH_SEPARATOR;
-		dest[len + 1] = '\0';
+		dest[len++] = ZOO_PATH_SEPARATOR;
+		dest[len] = '\0';
 	}
-	strncpy(dest, src, ZOO_PATH_MAX);
+	strncpy(dest + len, src, n - len);
 }
 
 #ifdef ZOO_CONFIG_ENABLE_FILE_IO
