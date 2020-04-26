@@ -561,6 +561,7 @@ void zoo_board_open(zoo_state *state, int16_t board_id);
 
 void zoo_world_close(zoo_state *state);
 bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only);
+bool zoo_world_save(zoo_state *state, zoo_io_handle *h);
 
 // zoo_input.c
 

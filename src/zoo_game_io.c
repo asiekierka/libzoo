@@ -396,3 +396,38 @@ bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
 
 	return true;
 }
+
+bool zoo_world_save(zoo_state *state, zoo_io_handle *h) {
+	int i;
+	zoo_board_close(state);
+
+	zoo_io_write_short(h, -1);
+	zoo_io_write_short(h, state->world.board_count);
+
+	zoo_io_write_short(h, state->world.info.ammo);
+	zoo_io_write_short(h, state->world.info.gems);
+	for (i = 0; i < 7; i++)
+		zoo_io_write_byte(h, state->world.info.keys[i] ? 1 : 0);
+	zoo_io_write_short(h, state->world.info.health);
+	zoo_io_write_short(h, state->world.info.current_board);
+	zoo_io_write_short(h, state->world.info.torches);
+	zoo_io_write_short(h, state->world.info.torch_ticks);
+	zoo_io_write_short(h, state->world.info.energizer_ticks);
+	zoo_io_write_short(h, 0);
+	zoo_io_write_short(h, state->world.info.score);
+	zoo_io_write_pstring(h, 20, state->world.info.name, sizeof(state->world.info.name) - 1);
+	for (i = 0; i < 10; i++)
+		zoo_io_write_pstring(h, 20, state->world.info.flags[i], sizeof(state->world.info.flags[i]) - 1);
+	zoo_io_write_short(h, state->world.info.board_time_sec);
+	zoo_io_write_short(h, state->world.info.board_time_hsec);
+	zoo_io_write_byte(h, state->world.info.is_save ? 1 : 0);
+	h->func_skip(h, 247);
+
+	for (i = 0; i <= state->world.board_count; i++) {
+		zoo_io_write_short(h, state->world.board_len[i]);
+		h->func_write(h, state->world.board_data[i], state->world.board_len[i]);
+	}
+
+	zoo_board_open(state, state->world.info.current_board);
+	return true;
+}
