@@ -182,7 +182,7 @@ Movement:
 	if (zoo_element_defs[*d_elem].walkable) {
 		zoo_stat_move(state, stat_id, stat->x + dx, stat->y + dy);
 	} else if (*d_elem == ZOO_E_PLAYER || *d_elem == ZOO_E_BREAKABLE) {
-		zoo_board_attack_tile(state, stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
+		zoo_board_attack_tile(state, stat_id, stat->x + dx, stat->y + dy);
 	}
 }
 
@@ -438,10 +438,10 @@ static void zoo_conveyor_tick(zoo_state *state, int16_t x, int16_t y, int16_t di
 	zoo_tile tmp_tile;
 
 	i_min = (dir == 1) ? 0 : 7;
-	i_max = (dir == 1) ? 7 : 0;
+	i_max = (dir == 1) ? 8 : -1;
 
 	can_move = true;
-	for (i = i_min; i <= i_max; i += dir) {
+	for (i = i_min; i != i_max; i += dir) {
 		tiles[i] = state->board.tiles[x + zoo_diagonal_delta_x[i]][y + zoo_diagonal_delta_y[i]];
 		if (tiles[i].element == ZOO_E_EMPTY) {
 			can_move = true;
@@ -450,7 +450,7 @@ static void zoo_conveyor_tick(zoo_state *state, int16_t x, int16_t y, int16_t di
 		}
 	}
 
-	for (i = i_min; i <= i_max; i += dir) {
+	for (i = i_min; i != i_max; i += dir) {
 		if (can_move) {
 			if (zoo_element_defs[tiles[i].element].pushable) {
 				ix = x + zoo_diagonal_delta_x[(i - dir) & 7];
@@ -461,7 +461,7 @@ static void zoo_conveyor_tick(zoo_state *state, int16_t x, int16_t y, int16_t di
 					state->board.tiles[x + zoo_diagonal_delta_x[i]][y + zoo_diagonal_delta_y[i]] = tiles[i];
 					state->board.tiles[ix][iy].element = ZOO_E_EMPTY;
 					zoo_stat_move(state, i_stat, ix, iy);
-					state->board.tiles[ix][iy] = tmp_tile;
+					state->board.tiles[x + zoo_diagonal_delta_x[i]][y + zoo_diagonal_delta_y[i]] = tmp_tile;
 				} else {
 					state->board.tiles[ix][iy] = tiles[i];
 					zoo_board_draw_tile(state, ix, iy);
