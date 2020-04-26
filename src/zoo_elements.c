@@ -1217,7 +1217,7 @@ static void zoo_e_torch_touch(zoo_state *state, int16_t x, int16_t y, int16_t so
 }
 
 static void zoo_e_invisible_touch(zoo_state *state, int16_t x, int16_t y, int16_t source_stat_id, int16_t *dx, int16_t *dy) {
-	state->board.tiles[x][y].element = ZOO_E_EMPTY;
+	state->board.tiles[x][y].element = ZOO_E_NORMAL;
 	zoo_board_draw_tile(state, x, y);
 
 	zoo_sound_queue_const(&(state->sound), 3, "\x12\x01\x10\x01");
