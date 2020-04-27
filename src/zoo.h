@@ -441,8 +441,11 @@ typedef struct s_zoo_state {
 	void (*func_ui_draw_sidebar)(struct s_zoo_state *state, uint16_t flags);
 	void (*func_ui_open_window)(struct s_zoo_state *state, zoo_text_window *window);
 
+	// - rng methods
+	uint32_t random_seed;
+	int16_t (*func_random)(struct s_zoo_state *state, int16_t max);
+
 	// - utility methods
-	int16_t (*func_random)(int16_t max);
 	void *(*func_store_display)(struct s_zoo_state *state);
 	void (*func_restore_display)(struct s_zoo_state *state, void *data);
 

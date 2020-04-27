@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 
 #include "zoo.h"
@@ -171,9 +172,12 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+	srand(time(NULL));
+
 	zoo_state_init(&state);
 	zoo_io_install_posix(&state.io);
 	state.func_write_char = sdl_draw_char;
+	state.random_seed = rand();
 
 	if (use_slim_ui) {
 		zoo_install_ui_slim(&state);

@@ -85,7 +85,7 @@ static void zoo_e_lion_tick(zoo_state *state, int16_t stat_id) {
 	int16_t dx, dy;
 	TICK_GET_SELF;
 
-	if (stat->p1 < state->func_random(10)) {
+	if (stat->p1 < state->func_random(state, 10)) {
 		zoo_calc_direction_rnd(state, &dx, &dy);
 	} else {
 		zoo_calc_direction_seek(state, stat->x, stat->y, &dx, &dy);
@@ -104,7 +104,7 @@ static void zoo_e_tiger_tick(zoo_state *state, int16_t stat_id) {
 	TICK_GET_SELF;
 
 	element = (stat->p2 & 0x80) ? ZOO_E_STAR : ZOO_E_BULLET;
-	if ((state->func_random(10) * 3) <= (stat->p2 & 0x7F)) {
+	if ((state->func_random(state, 10) * 3) <= (stat->p2 & 0x7F)) {
 		if (zoo_difference(stat->x, state->board.stats[0].x) <= 2) {
 			shot = zoo_board_shoot(state, element, stat->x, stat->y, 0, zoo_signum(state->board.stats[0].y - stat->y), 1);
 		} else {
@@ -126,15 +126,15 @@ static void zoo_e_ruffian_tick(zoo_state *state, int16_t stat_id) {
 	TICK_GET_SELF;
 
 	if ((stat->step_x == 0) && (stat->step_y == 0)) {
-		if ((stat->p2 + 8) <= state->func_random(17)) {
-			if (stat->p1 >= state->func_random(9)) {
+		if ((stat->p2 + 8) <= state->func_random(state, 17)) {
+			if (stat->p1 >= state->func_random(state, 9)) {
 				zoo_calc_direction_seek(state, stat->x, stat->y, &stat->step_x, &stat->step_y);
 			} else {
 				zoo_calc_direction_rnd(state, &stat->step_x, &stat->step_y);
 			}
 		}
 	} else {
-		if (((stat->y == state->board.stats[0].y) || (stat->x == state->board.stats[0].x)) && (state->func_random(9) <= stat->p1)) {
+		if (((stat->y == state->board.stats[0].y) || (stat->x == state->board.stats[0].x)) && (state->func_random(state, 9) <= stat->p1)) {
 			zoo_calc_direction_seek(state, stat->x, stat->y, &stat->step_x, &stat->step_y);
 		}
 
@@ -144,7 +144,7 @@ static void zoo_e_ruffian_tick(zoo_state *state, int16_t stat_id) {
 		} else if (zoo_element_defs[*d_elem].walkable) {
 			zoo_stat_move(state, stat_id, stat->x + stat->step_x, stat->y + stat->step_y);
 
-			if ((stat->p2 + 8) <= state->func_random(17)) {
+			if ((stat->p2 + 8) <= state->func_random(state, 17)) {
 				stat->step_x = 0;
 				stat->step_y = 0;
 			}
@@ -193,13 +193,13 @@ static void zoo_e_centipede_head_tick(zoo_state *state, int16_t stat_id) {
 	zoo_stat *stat2;
 	TICK_GET_SELF;
 
-	if ((stat->x == state->board.stats[0].x) && (state->func_random(10) < stat->p1)) {
+	if ((stat->x == state->board.stats[0].x) && (state->func_random(state, 10) < stat->p1)) {
 		stat->step_y = zoo_signum(state->board.stats[0].y - stat->y);
 		stat->step_x = 0;
-	} else if ((stat->y == state->board.stats[0].y) && (state->func_random(10) < stat->p1)) {
+	} else if ((stat->y == state->board.stats[0].y) && (state->func_random(state, 10) < stat->p1)) {
 		stat->step_x = zoo_signum(state->board.stats[0].x - stat->x);
 		stat->step_y = 0;
-	} else if (((state->func_random(10) * 4) < stat->p2) || ((stat->step_x == 0) && (stat->step_y == 0))) {
+	} else if (((state->func_random(state, 10) * 4) < stat->p2) || ((stat->step_x == 0) && (stat->step_y == 0))) {
 		zoo_calc_direction_rnd(state, &stat->step_x, &stat->step_y);
 	}
 
@@ -209,8 +209,8 @@ static void zoo_e_centipede_head_tick(zoo_state *state, int16_t stat_id) {
 		ix = stat->step_x;
 		iy = stat->step_y;
 
-		tmp = ((state->func_random(2) * 2) - 1) * stat->step_y;
-		stat->step_y = ((state->func_random(2) * 2) - 1) * stat->step_x;
+		tmp = ((state->func_random(state, 2) * 2) - 1) * stat->step_y;
+		stat->step_y = ((state->func_random(state, 2) * 2) - 1) * stat->step_x;
 		stat->step_x = tmp;
 
 		if (!zoo_element_defs[state->board.tiles[stat->x + stat->step_x][stat->y + stat->step_y].element].walkable
@@ -407,8 +407,8 @@ static void zoo_e_spinning_gun_tick(zoo_state *state, int16_t stat_id) {
 	zoo_board_draw_tile(state, stat->x, stat->y);
 	element = (stat->p2 & 0x80) ? ZOO_E_STAR : ZOO_E_BULLET;
 
-	if (state->func_random(9) < (stat->p2 & 0x7F)) {
-		if (state->func_random(9) <= stat->p1) {
+	if (state->func_random(state, 9) < (stat->p2 & 0x7F)) {
+		if (state->func_random(state, 9) <= stat->p1) {
 			if (zoo_difference(stat->x, state->board.stats[0].x) <= 2) {
 				shot = zoo_board_shoot(state, element, stat->x, stat->y,
 					0, zoo_signum(state->board.stats[0].y - stat->y), 1);
@@ -757,7 +757,7 @@ static void zoo_e_shark_tick(zoo_state *state, int16_t stat_id) {
 	int16_t dx, dy;
 	TICK_GET_SELF;
 
-	if (stat->p1 < state->func_random(10)) {
+	if (stat->p1 < state->func_random(state, 10)) {
 		zoo_calc_direction_rnd(state, &dx, &dy);
 	} else {
 		zoo_calc_direction_seek(state, stat->x, stat->y, &dx, &dy);
@@ -1349,7 +1349,7 @@ void zoo_draw_player_surroundings(zoo_state *state, int16_t x, int16_t y, int16_
 
 					if (tile->element == ZOO_E_EMPTY || tile->element == ZOO_E_BREAKABLE) {
 						tile->element = ZOO_E_BREAKABLE;
-						tile->color = 9 + state->func_random(7);
+						tile->color = 9 + state->func_random(state, 7);
 						zoo_board_draw_tile(state, ix, iy);
 					}
 				} else /* usually bomb_phase == 2 */ {

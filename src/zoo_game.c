@@ -506,15 +506,15 @@ bool zoo_board_shoot(zoo_state *state, uint8_t element, int16_t x, int16_t y, in
 }
 
 void zoo_calc_direction_rnd(zoo_state *state, int16_t *dx, int16_t *dy) {
-	*dx = state->func_random(3) - 1;
-	*dy = (*dx == 0) ? (state->func_random(2) * 2 - 1) : 0;
+	*dx = state->func_random(state, 3) - 1;
+	*dy = (*dx == 0) ? (state->func_random(state, 2) * 2 - 1) : 0;
 }
 
 void zoo_calc_direction_seek(zoo_state *state, int16_t x, int16_t y, int16_t *dx, int16_t *dy) {
 	*dx = 0;
 	*dy = 0;
 
-	if ((state->func_random(2) < 1) || (state->board.stats[0].y == y)) {
+	if ((state->func_random(state, 2) < 1) || (state->board.stats[0].y == y)) {
 		*dx = zoo_signum(state->board.stats[0].x - x);
 	}
 
@@ -600,7 +600,7 @@ void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 
 	// GS_TITLE/GS_PLAY
 	state->game_play_exit_requested = false;
-	state->current_tick = state->func_random(100);
+	state->current_tick = state->func_random(state, 100);
 	state->current_stat_tick = state->board.stat_count + 1;
 	state->tick_duration = state->tick_speed * 2;
 	state->time_elapsed = 0;
@@ -768,7 +768,7 @@ GameTickState1:
 			// unpause
 			state->game_paused = false;
 			state->func_ui_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_PAUSED);
-			state->current_tick = state->func_random(100);
+			state->current_tick = state->func_random(state, 100);
 			state->current_stat_tick = state->board.stat_count + 1;
 			state->world.info.is_save = true;
 

@@ -54,8 +54,9 @@ void zoo_call_pop(zoo_call_stack *stack) {
 	free(old_call);
 }
 
-static int16_t zoo_default_random(int16_t max) {
-	return rand() % max;
+static int16_t zoo_default_random(zoo_state *state, int16_t max) {
+	state->random_seed = (state->random_seed * 134775813) + 1;
+	return state->random_seed % max;
 }
 
 static void* zoo_default_store_display(zoo_state *state) {

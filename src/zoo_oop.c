@@ -144,9 +144,9 @@ static bool zoo_oop_parse_direction(zoo_state *state, int16_t stat_id, int16_t *
 		zoo_calc_direction_rnd(state, dx, dy);
 	} else if (!oop_word_cmp("RNDNS")) {
 		*dx = 0;
-		*dy = state->func_random(2) * 2 - 1;
+		*dy = state->func_random(state, 2) * 2 - 1;
 	} else if (!oop_word_cmp("RNDNE")) {
-		*dx = state->func_random(2);
+		*dx = state->func_random(state, 2);
 		*dy = (*dx == 0) ? -1 : 0;
 	} else if (!oop_word_cmp("CW")) {
 		zoo_oop_read_word(state, stat_id, position);
@@ -159,7 +159,7 @@ static bool zoo_oop_parse_direction(zoo_state *state, int16_t stat_id, int16_t *
 	} else if (!oop_word_cmp("RNDP")) {
 		zoo_oop_read_word(state, stat_id, position);
 		result = zoo_oop_parse_direction(state, stat_id, position, dy, dx);
-		if (state->func_random(2) == 0) {
+		if (state->func_random(state, 2) == 0) {
 			*dx = -(*dx);
 		} else {
 			*dy = -(*dy);
