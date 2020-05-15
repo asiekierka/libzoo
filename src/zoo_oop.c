@@ -561,7 +561,6 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	zoo_tile arg_tile, arg_tile2;
 	//
 	zoo_text_window text_window;
-	bool has_text_window = false;
 
 	strncpy(name, default_name, sizeof(name) - 1);
 	stat = &state->board.stats[stat_id];
@@ -575,7 +574,10 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 			}
 		}
 
-		return;
+		// go back to where we left off
+		replace_stat = state->object_replace_stat;
+		replace_tile = state->object_replace_tile;
+		goto AfterTextWindow;
 	}
 
 	if (*position < 0) {
@@ -583,10 +585,7 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	}
 
 StartParsing:
-	if (state->func_ui_open_window != NULL) {
-		memset(&text_window, 0, sizeof(text_window));
-		has_text_window = true;
-	}
+	memset(&text_window, 0, sizeof(text_window));
 	stop_running = false;
 	repeat_ins_next_tick = false;
 	replace_stat = false;
@@ -603,6 +602,7 @@ ReadInstruction:
 			do {
 				zoo_oop_read_char(state, stat_id, position);
 			} while (state->oop_char != '\0' && state->oop_char != '\r');
+			zoo_oop_read_char(state, stat_id, position);
 		}
 
 		switch (state->oop_char) {
@@ -885,7 +885,7 @@ ReadCommand:
 			}
 		} break;
 		case '\r': {	// newline
-			if (has_text_window && text_window.line_count > 0) {
+			if (text_window.line_count > 0) {
 				zoo_window_append(&text_window, "");
 			}
 		} break;
@@ -895,9 +895,7 @@ ReadCommand:
 		default: {	// text
 			buf[0] = state->oop_char;
 			zoo_oop_read_line_to_end(state, stat_id, position, buf + 1, sizeof(buf) - 2);
-			if (has_text_window) {
-				zoo_window_append(&text_window, buf);
-			}
+			zoo_window_append(&text_window, buf);
 		} break;
 		}
 	} while (!end_of_program && !stop_running && !repeat_ins_next_tick && !replace_stat && ins_count <= 32);
@@ -910,34 +908,35 @@ ReadCommand:
 		*position = -1;
 	}
 
-	// order swapped here, as text window will end logic
+	if (text_window.line_count > 1) {
+		name_position = 0;
+		zoo_oop_read_char(state, stat_id, &name_position);
+		if (state->oop_char == '@') {
+			zoo_oop_read_line_to_end(state, stat_id, &name_position, name, sizeof(name) - 1);
+		}
+		if (strnlen(name, sizeof(name) - 1) == 0) {
+			strncpy(name, "Interaction", sizeof(name) - 1);
+		}
+
+		strncpy(text_window.title, name, sizeof(text_window.title) - 1);
+		text_window.hyperlink_as_select = true;
+		text_window.viewing_file = false;
+
+		state->object_replace_stat = replace_stat;
+		state->object_replace_tile = replace_tile;
+		memcpy(&(state->object_window), &text_window, sizeof(zoo_text_window));
+		state->object_window_request = true;
+		return;
+	} else if (text_window.line_count == 1) {
+		zoo_display_message(state, 200, text_window.lines[0]);
+		zoo_window_close(&text_window);
+	}
+
+	AfterTextWindow:
 	if (replace_stat) {
 		ix = stat->x;
 		iy = stat->y;
 		zoo_board_damage_stat(state, stat_id);
 		zoo_oop_place_tile(state, ix, iy, replace_tile);
-	}
-
-	if (has_text_window) {
-		if (text_window.line_count > 1) {
-			name_position = 0;
-			zoo_oop_read_char(state, stat_id, &name_position);
-			if (state->oop_char == '@') {
-				zoo_oop_read_line_to_end(state, stat_id, &name_position, name, sizeof(name) - 1);
-			}
-			if (strnlen(name, sizeof(name) - 1) == 0) {
-				strncpy(name, "Interaction", sizeof(name) - 1);
-			}
-
-			strncpy(text_window.title, name, sizeof(text_window.title) - 1);
-			text_window.hyperlink_as_select = true;
-			text_window.viewing_file = false;
-
-			memcpy(&(state->object_window), &text_window, sizeof(zoo_text_window));
-			state->object_window_request = true;
-		} else if (text_window.line_count == 1) {
-			zoo_display_message(state, 200, text_window.lines[0]);
-			zoo_window_close(&text_window);
-		}
 	}
 }

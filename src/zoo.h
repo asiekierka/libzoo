@@ -432,8 +432,11 @@ typedef struct s_zoo_state {
 	zoo_input_state input;
 	zoo_sound_state sound;
 
+	bool object_replace_stat;
+	zoo_tile object_replace_tile;
 	zoo_text_window object_window;
 	bool object_window_request;
+
 	zoo_call_stack call_stack;
 	uint8_t game_tick_state; // not in call_stack to save performance
 
