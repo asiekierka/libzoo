@@ -62,13 +62,12 @@ static bool zoo_ui_populate_file(zoo_io_dirent *e, void *cb_arg) {
 
 static zoo_tick_retval zoo_ui_load_world_cb(zoo_state *state, zoo_ui_file_select_state *cb_state) {
 	char path[ZOO_PATH_MAX + 1];
-	char *name;
+	char *name = zoo_window_line_selected(&(cb_state->window));
 	zoo_io_handle h;
 
-	if (cb_state->window.accepted && cb_state->window.line_pos < cb_state->window.line_count) {
+	if (cb_state->window.accepted && name != NULL) {
 		// TODO: warn for long filenames (> 20 chars, minus extension);
 		strncpy(path, state->io.path, ZOO_PATH_MAX);
-		name = cb_state->window.lines[cb_state->window.line_pos];
 		zoo_path_cat(path, name, ZOO_PATH_MAX);
 		h = state->io.func_io_open_file(path, MODE_READ);
 		if (zoo_world_load(state, &h, false)) {

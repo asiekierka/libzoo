@@ -26,6 +26,18 @@
 
 #define ZOO_WINDOW_LINE_MAX 50
 
+char *zoo_window_line_at(zoo_text_window *window, int pos) {
+	if (pos >= 0 && pos < window->line_count) {
+		return window->lines[pos];
+	} else {
+		return NULL;
+	}
+}
+
+char *zoo_window_line_selected(zoo_text_window *window) {
+	return zoo_window_line_at(window, window->line_pos);
+}
+
 void zoo_window_append(zoo_text_window *window, const char *text) {
 	char *buffer;
 	int16_t buflen = strlen(text);

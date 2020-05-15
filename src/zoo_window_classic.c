@@ -119,9 +119,8 @@ static void zoo_window_draw_line(zoo_text_window *window, zoo_state *state, int1
 	text_x = 0;
 	text_width = (window_width - 7);
 
-	if (line_pos >= 0 && line_pos < window->line_count) {
-		str = window->lines[line_pos];
-
+	str = zoo_window_line_at(window, line_pos);
+	if (str != NULL) {
 		switch (str[0]) {
 			case '!':
 				tmp = strchr(str, ';');
@@ -177,14 +176,12 @@ static void zoo_window_draw_close(zoo_text_window *window, zoo_state *state) {
 	state->func_restore_display(state, window->screen_copy);
 }
 
-// returns: whether or not to close
-static bool zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
-	char *str;
+// if TRUE, close the window
+static bool zoo_window_hyperlink(zoo_text_window *window, zoo_state *state, char *str) {
 	char pointer_str[21];
 	char pointer_label[21];
 	int16_t i;
 
-	str = window->lines[window->line_pos];
 	for (i = 0; i < sizeof(pointer_str); i++) {
 		pointer_str[i] = str[i + 1];
 		if (pointer_str[i] == '\0' || pointer_str[i] == ';' || i == (sizeof(pointer_str) - 1)) {
@@ -218,6 +215,7 @@ static bool zoo_window_hyperlink(zoo_text_window *window, zoo_state *state) {
 static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window *window) {
 	int16_t old_line_pos = window->line_pos;
 	bool act_ok, act_cancel, should_close;
+	char *curr_str;
 
 	if (window->state == 0) {
 		zoo_window_draw_open(window, state);
@@ -241,8 +239,9 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			should_close = true;
 			if (act_ok) {
 				window->accepted = true;
-				if (window->lines[window->line_pos][0] == '!') {
-					should_close = zoo_window_hyperlink(window, state);
+				curr_str = zoo_window_line_selected(window);
+				if (curr_str != NULL && curr_str[0] == '!') {
+					should_close = zoo_window_hyperlink(window, state, curr_str);
 				}
 			} else {
 				window->accepted = false;

@@ -589,6 +589,8 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 
 // zoo_window.c
 
+char *zoo_window_line_at(zoo_text_window *window, int pos);
+char *zoo_window_line_selected(zoo_text_window *window);
 void zoo_window_append(zoo_text_window *window, const char *text);
 void zoo_window_close(zoo_text_window *window);
 
