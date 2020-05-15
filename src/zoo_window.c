@@ -56,7 +56,7 @@ void zoo_window_append_file(zoo_text_window *window, zoo_io_handle *h) {
 	char c;
 	int16_t i;
 
-	while (h->func_read(h, &c, 1) > 0) {
+	while (h->func_read(h, (uint8_t*) &c, 1) > 0) {
 		if (c == '\x0D') {
 			str[i++] = '\0';
 			zoo_window_append(window, str);

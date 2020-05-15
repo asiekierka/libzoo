@@ -552,7 +552,6 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	int16_t last_position;
 	bool repeat_ins_next_tick;
 	bool line_finished;
-	char *label_ptr;
 	int16_t label_data_pos;
 	int16_t label_stat_id;
 	int16_t *counter_ptr;
@@ -838,9 +837,9 @@ ReadCommand:
 					}
 				} else if (!oop_word_cmp("PLAY")) {
 					zoo_oop_read_line_to_end(state, stat_id, position, buf, sizeof(buf) - 1);
-					buf2_len = zoo_sound_parse(buf, buf2, sizeof(buf2));
+					buf2_len = zoo_sound_parse(buf, (uint8_t*) buf2, sizeof(buf2));
 					if (buf2_len > 0) {
-						zoo_sound_queue(&(state->sound), -1, (uint8_t*)buf2, buf2_len);
+						zoo_sound_queue(&(state->sound), -1, (uint8_t*) buf2, buf2_len);
 					}
 					line_finished = false;
 				} else if (!oop_word_cmp("CYCLE")) {

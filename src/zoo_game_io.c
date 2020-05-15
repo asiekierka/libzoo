@@ -114,8 +114,6 @@ static void zoo_io_write_tile(zoo_io_handle *h, zoo_tile tile) {
 }
 
 static void zoo_io_write_pstring(zoo_io_handle *h, int p_len, const char *str, int str_len) {
-	int i;
-
 	str_len = strnlen(str, str_len);
 	if (str_len > p_len) str_len = p_len;
 

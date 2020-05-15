@@ -30,6 +30,7 @@ static void write_number(zoo_state *state, int16_t x, int16_t y, uint8_t col, in
 	char s[8];
 	int16_t pos = sizeof(s);
 	int16_t i = val < 0 ? -val : val;
+
 	while (i >= 10) {
 		s[--pos] = '0' + (i % 10);
 		i /= 10;
@@ -48,6 +49,9 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 	char s[8];
 	int16_t pos = sizeof(s);
 	int16_t i = val < 0 ? -val : val;
+	uint8_t torch_col;
+	int16_t torch_pos;
+
 	while (i >= 10) {
 		s[--pos] = '0' + (i % 10);
 		i /= 10;
@@ -57,8 +61,8 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 		s[--pos] = '-';
 	}
 
-	uint8_t torch_col = (col & 0x0F) | 0x60;
-	int16_t torch_pos = state->world.info.torch_ticks > 0
+	torch_col = (col & 0x0F) | 0x60;
+	torch_pos = state->world.info.torch_ticks > 0
 		? x + (state->world.info.torch_ticks + 39) / 40
 		: x;
 	if (torch_pos > (x + 5)) torch_pos = (x + 5);
@@ -74,20 +78,21 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 }
 
 static void zoo_draw_sidebar_slim(zoo_state *state, uint16_t flags) {
+	int i;
+	int x = 1;
+
 	if (state->game_state != GS_PLAY) {
 		if (flags & ZOO_SIDEBAR_UPDATE_REDRAW) {
-			for (int i = 0; i < 60; i++) {
+			for (i = 0; i < 60; i++) {
 				state->func_write_char(i, 25, 0x0F, ' ');
 			}
 		}
 		return;
 	}
 
-	for (int i = 0; i < 60; i++) {
+	for (i = 0; i < 60; i++) {
 		state->func_write_char(i, 25, 0x1F, ' ');
 	}
-
-	int x = 1;
 
 	// left-aligned
 
@@ -111,7 +116,7 @@ static void zoo_draw_sidebar_slim(zoo_state *state, uint16_t flags) {
 	write_number(state, x + 2, 25, 0x1F, state->world.info.score);
 	x += 8;
 
-	for (int i = 0; i < 7; i++) {
+	for (i = 0; i < 7; i++) {
 		if (state->world.info.keys[i])
 			state->func_write_char(x + i, 25, 0x19 + i, '\x0C');
 	}
