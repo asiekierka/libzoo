@@ -1,0 +1,3 @@
+**/build
+**/*.elf
+src/frontend/gba/*.gba
