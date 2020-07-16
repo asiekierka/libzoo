@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "zoo_io_posix.h"
 
+#include <sys/stat.h>
+
 static uint8_t zoo_io_file_getc(zoo_io_handle *h) {
 	FILE *f = (FILE*) h->p;
 	int result = fgetc(f);
@@ -62,6 +64,16 @@ static zoo_io_handle zoo_io_open_file_posix(zoo_io_path_driver *drv, const char 
 	return h;
 }
 
+static inline int64_t zoo_io_get_mtime(const char *basename, const char *name) {
+	struct stat statinfo;
+	char path[ZOO_PATH_MAX + 1];
+
+	strncpy(path, basename, ZOO_PATH_MAX);
+	zoo_path_cat(path, basename, ZOO_PATH_MAX);
+	stat(path, &statinfo);
+	return statinfo.st_mtime;
+}
+
 static bool zoo_io_scan_dir_posix(zoo_io_path_driver *drv, const char *name, zoo_func_io_scan_dir_callback cb, void *cb_arg) {
 	DIR *dir;
 	struct dirent *dent;
@@ -80,6 +92,10 @@ static bool zoo_io_scan_dir_posix(zoo_io_path_driver *drv, const char *name, zoo
 #else
 		ent.type = dent->d_type == DT_DIR ? TYPE_DIR : TYPE_FILE;
 #endif
+		if (ent.type == TYPE_FILE) {
+			ent.mtime = zoo_io_get_mtime(name, ent.name);
+		}
+
 		if (!cb(drv, &ent, cb_arg)) {
 			break;
 		}

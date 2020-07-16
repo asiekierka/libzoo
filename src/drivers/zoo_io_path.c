@@ -1,7 +1,7 @@
 #include <string.h>
 #include "zoo_io_path.h"
 
-static void zoo_path_cat(char *dest, const char *src, size_t n) {
+void zoo_path_cat(char *dest, const char *src, size_t n) {
 	size_t len = strlen(dest);
 	if (len < n && dest[len - 1] != ZOO_PATH_SEPARATOR) {
 		dest[len++] = ZOO_PATH_SEPARATOR;

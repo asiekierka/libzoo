@@ -33,6 +33,7 @@ typedef enum {
 typedef struct {
 	zoo_io_type type;
 	char name[ZOO_PATH_MAX + 1];
+	int64_t mtime;
 } zoo_io_dirent;
 
 typedef bool (*zoo_func_io_scan_dir_callback)(struct s_zoo_io_path_driver *drv, zoo_io_dirent *e, void *arg);
@@ -48,6 +49,7 @@ typedef struct s_zoo_io_path_driver {
     bool (*func_dir_advance)(struct s_zoo_io_path_driver *drv, char *dest, const char *curr, const char *next, size_t len);
 } zoo_io_path_driver;
 
+void zoo_path_cat(char *dest, const char *src, size_t n);
 void zoo_io_internal_init_path_driver(zoo_io_path_driver *drv);
 
 #endif /* __ZOO_IO_H__ */

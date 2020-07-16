@@ -178,6 +178,12 @@ void zoo_state_init(zoo_state *state) {
 	zoo_game_start(state, GS_TITLE);
 }
 
+bool zoo_check_hsecs_elapsed(zoo_state *state, int16_t *hsecs_counter, int16_t hsecs_value) {
+	int16_t hsecs_total = (int16_t) (state->time_elapsed / 10);
+	int16_t hsecs_diff = (hsecs_total - (*hsecs_counter) + 6000) % 6000;
+	return hsecs_diff >= hsecs_value;
+}
+
 bool zoo_has_hsecs_elapsed(zoo_state *state, int16_t *hsecs_counter, int16_t hsecs_value) {
 	int16_t hsecs_total = (int16_t) (state->time_elapsed / 10);
 	int16_t hsecs_diff = (hsecs_total - (*hsecs_counter) + 6000) % 6000;
