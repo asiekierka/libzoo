@@ -25,9 +25,9 @@
 #include "zoo_sound_pcm.h"
 
 void zoo_sound_pcm_generate(zoo_sound_pcm_driver *pcm, uint8_t *stream, size_t len) {
-	uint8_t n_min = pcm->format_signed ? (-(pcm->volume >> 1)) : 0;
+	uint8_t n_min = pcm->format_signed ? (-(pcm->volume >> 1)) : (0x80 - (pcm->volume >> 1));
 	uint8_t n_ctr = pcm->format_signed ? 0 : 0x80;
-	uint8_t n_max = pcm->format_signed ? (pcm->volume >> 1) : pcm->volume;
+	uint8_t n_max = pcm->format_signed ? (pcm->volume >> 1) : (0x80 + (pcm->volume >> 1));
 	size_t pos = 0;
 	double samples_per_tick = pcm->frequency * 55 / 1000.0;
 	double samples_per_drum = pcm->frequency * 1 / 1000.0;
