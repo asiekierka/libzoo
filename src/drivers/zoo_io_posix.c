@@ -54,6 +54,7 @@ static zoo_io_handle zoo_io_open_file_posix(zoo_io_path_driver *drv, const char 
 	}
 
 	h.p = file;
+	h.func_getptr = NULL;
 	h.func_getc = zoo_io_file_getc;
 	h.func_putc = zoo_io_file_putc;
 	h.func_read = zoo_io_file_read;

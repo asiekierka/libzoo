@@ -1,9 +1,14 @@
 BASEDIR := $(abspath ../../..)
 BUILDDIR := $(abspath ./build)
+
 ZOO_TYPE := frontend
+ZOO_DEBUG_MENU := 1
 ZOO_USE_DRIVER_IO_ROMFS := 1
+ZOO_USE_LABEL_CACHE := 1
+ZOO_USE_ROM_POINTERS := 1
 ZOO_USE_UI := 1
 ZOO_USE_UI_SIDEBAR_SLIM := 1
+
 SOURCES := \
 	src/main.c \
 	src/sound_gba.c \
@@ -19,7 +24,7 @@ all: $(OUTPUT).gba
 include $(DEVKITARM)/gba_rules
 
 ARCH :=	-mcpu=arm7tdmi -mtune=arm7tdmi -mthumb -mthumb-interwork
-ARCH_CFLAGS := -fomit-frame-pointer $(ARCH)
+ARCH_CFLAGS := -fomit-frame-pointer $(ARCH) -DZOO_GBA_HACKS
 ARCH_LDFLAGS := -specs=gba.specs $(ARCH)
 
 INCLUDE_DIRS := $(DEVKITPRO)/libtonc/include

@@ -41,13 +41,34 @@ static zoo_state state;
 static zoo_ui_state ui_state;
 static zoo_io_romfs_driver d_io;
 
-extern uint16_t keys_down;
-extern uint16_t keys_held;
+extern volatile uint16_t keys_down;
+extern volatile uint16_t keys_held;
 volatile bool tick_requested = false;
 volatile uint16_t ticks = 0;
 
+#ifdef ZOO_DEBUG_MENU
+
+#include <malloc.h>
+#include <unistd.h>
+
+/* https://devkitpro.org/viewtopic.php?f=6&t=3057 */
+
+extern uint8_t *fake_heap_end;
+extern uint8_t *fake_heap_start;
+
+int platform_debug_free_memory(void) {
+	struct mallinfo info = mallinfo();
+	return info.fordblks + (fake_heap_end - (uint8_t*)sbrk(0));
+}
+
+#endif
+
+bool platform_is_rom_ptr(void *ptr) {
+	return (((u32) ptr) & 0x08000000) != 0;
+}
+
 IWRAM_ARM_CODE static void irq_timer_pit(void) {
-	REG_IE |= IRQ_VCOUNT; // ensure vcount will still happen
+	REG_IE |= (IRQ_VBLANK | IRQ_VCOUNT);
 	REG_IME = 1;
 
 	ticks++;
@@ -56,15 +77,31 @@ IWRAM_ARM_CODE static void irq_timer_pit(void) {
 	zoo_sound_tick(&(state.sound));
 }
 
+#define dbg_ticks() (REG_TM2CNT_L | (REG_TM3CNT_L << 16))
+
+#ifdef DEBUG_CONSOLE
+#define DBG_TICK_TIME_LEN 16
+static u32 dbg_tick_times[DBG_TICK_TIME_LEN];
+static u16 dbg_tick_time_pos = 0;
+#endif
+
 int main(void) {
 	zoo_io_handle io_h;
 
 	zoo_video_gba_hide();
-	irq_init(NULL);
+	irq_init(isr_master_nest);
 
 	// init game speed timer
 	REG_TM0CNT_L = 65536 - 14398;
 	REG_TM0CNT_H = TM_FREQ_64 | TM_IRQ | TM_ENABLE;
+
+#ifdef DEBUG_CONSOLE
+	// init ticktime counter
+	REG_TM2CNT_L = 0;
+	REG_TM2CNT_H = TM_FREQ_1 | TM_ENABLE;
+	REG_TM3CNT_L = 0;
+	REG_TM3CNT_H = TM_FREQ_1 | TM_CASCADE | TM_ENABLE;
+#endif
 
 	zoo_state_init(&state);
 	zoo_video_gba_install(&state, _4x6_bin);
@@ -87,12 +124,16 @@ int main(void) {
 	while(true) {
 		if (tick_requested) {
 			tick_requested = false;
+#ifdef DEBUG_CONSOLE
+			u32 tick_time = dbg_ticks();
+#endif
 
 			if ((keys_down & KEY_START) && zoo_call_empty(&state.call_stack)) {
 				zoo_ui_main_menu(&ui_state);
 			}
 
-			keys_held |= keys_down;
+			keys_held = keys_down;
+			keys_down = 0;
 
 			zoo_input_action_set(&state.input, ZOO_ACTION_UP, keys_held & KEY_UP);
 			zoo_input_action_set(&state.input, ZOO_ACTION_LEFT, keys_held & KEY_LEFT);
@@ -102,8 +143,6 @@ int main(void) {
 			zoo_input_action_set(&state.input, ZOO_ACTION_TORCH, keys_held & KEY_B);
 			zoo_input_action_set(&state.input, ZOO_ACTION_OK, keys_held & KEY_A);
 			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & KEY_B);
-
-			keys_down = 0;
 
 			tick_in_progress = true;
 			while (tick_in_progress) {
@@ -121,12 +160,33 @@ int main(void) {
 						break;
 				}
 			}
+
+#ifdef DEBUG_CONSOLE
+			if (!tick_next_frame) {
+				dbg_tick_times[(dbg_tick_time_pos++) % DBG_TICK_TIME_LEN] = dbg_ticks() - tick_time;
+
+				u32 avg_tick_time = 0;
+				u32 max_tick_time = 0;
+				for (int i = 0; i < DBG_TICK_TIME_LEN; i++) {
+					avg_tick_time += dbg_tick_times[i];
+					if (dbg_tick_times[i] > max_tick_time) {
+						max_tick_time = dbg_tick_times[i];
+					}
+				}
+				avg_tick_time = (avg_tick_time + (DBG_TICK_TIME_LEN >> 1)) / DBG_TICK_TIME_LEN;
+
+				zoo_ui_debug_printf(true, "tick time: avg %d cy, max %d cy\n", avg_tick_time, max_tick_time);
+				fflush(stdout);
+			}
+#endif
 		}
 
 		if (tick_next_frame) {
 			VBlankIntrWait();
 			tick_requested = true;
 			tick_next_frame = false;
+		} else if (!tick_requested) {
+			Halt();
 		}
 	}
 	return 0;

@@ -47,7 +47,7 @@ IWRAM_ARM_CODE static inline void gba_play_sound(uint16_t freq) {
 }
 
 IWRAM_ARM_CODE static void irq_timer_sound(void) {
-	REG_IE |= IRQ_VCOUNT; // ensure vcount will still happen
+	REG_IE |= (IRQ_VBLANK | IRQ_VCOUNT);
 	REG_IME = 1;
 
 	if (d_sound_gba.sound_len == 0) {

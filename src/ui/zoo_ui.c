@@ -29,7 +29,7 @@
 
 // utility methods
 
-static ZOO_INLINE void zoo_ui_init_select_window(zoo_ui_state *state, const char *title) {
+void zoo_ui_init_select_window(zoo_ui_state *state, const char *title) {
 	memset(&state->window, 0, sizeof(zoo_text_window));
 	strcpy(state->window.title, title);
 	state->window.manual_close = true;
@@ -102,9 +102,14 @@ void zoo_ui_load_world(zoo_ui_state *state, bool as_save) {
 	zoo_ui_filesel_call(state, as_save ? "Saved Games" : "ZZT Worlds", as_save ? ".SAV" : ".ZZT", (zoo_func_callback) zoo_ui_load_world_cb);
 }
 
-static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_state) {
-	char *hyperlink = cb_state->window.hyperlink;
+#ifdef ZOO_DEBUG_MENU
+#endif
 
+static zoo_tick_retval zoo_ui_debug_menu_cb(zoo_state *zoo, zoo_ui_state *cb_state) {
+	char hyperlink[21];
+	strncpy(hyperlink, cb_state->window.hyperlink, sizeof(hyperlink));
+
+	zoo_window_close(&cb_state->window);
 	zoo_call_pop(&zoo->call_stack);
 
 	if (!strcmp(hyperlink, "play")) {
@@ -119,6 +124,10 @@ static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_stat
 		if (cb_state->zoo->game_state == GS_PLAY)  {
 			zoo_world_return_title(zoo);
 		}
+#ifdef ZOO_DEBUG_MENU
+	} else if (!strcmp(hyperlink, "zoo_debug")) {
+		zoo_ui_debug_menu(cb_state);
+#endif
 	}
 
 	return RETURN_IMMEDIATE;
@@ -127,6 +136,10 @@ static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_stat
 void zoo_ui_main_menu(struct s_zoo_ui_state *state) {
 	zoo_ui_init_select_window(state, "Main Menu");
 	
+#ifdef ZOO_DEBUG_MENU
+	zoo_window_append(&state->window, "!zoo_debug;Debug options");
+#endif
+
 	if (state->zoo->game_state != GS_PLAY) {
 		zoo_window_append(&state->window, "!play;Play world");
 	}
@@ -142,7 +155,7 @@ void zoo_ui_main_menu(struct s_zoo_ui_state *state) {
 		zoo_window_append(&state->window, "!quit;Quit world");
 	}
 
-	zoo_call_push_callback(&(state->zoo->call_stack), (zoo_func_callback) zoo_ui_main_menu_cb, state);
+	zoo_call_push_callback(&(state->zoo->call_stack), (zoo_func_callback) zoo_ui_debug_menu_cb, state);
 	zoo_window_open(state->zoo, &state->window);
 }
 

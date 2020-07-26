@@ -123,6 +123,10 @@ static uint32_t ticks = 0;
 
 static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 	ticks++;
+	int tick_start = SDL_GetTicks();
+	int tick_delay = ZOO_PIT_TICK_MS;
+	bool ticking = true;
+	int tick_time;
 
 	SDL_LockMutex(audio_mutex);
 	zoo_tick_advance_pit(&state);
@@ -136,20 +140,22 @@ static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
 		return 1000;
 	}
 
-	while (true) {
+	while (ticking) {
 		switch (zoo_tick(&state)) {
 			case RETURN_IMMEDIATE:
 				break;
 			case RETURN_NEXT_FRAME:
 				SDL_UnlockMutex(playfield_mutex);
-				return 16; // TODO: more accurate
+				tick_delay = 16;
+				ticking = false;
 			case RETURN_NEXT_CYCLE:
 				SDL_UnlockMutex(playfield_mutex);
-				return ZOO_PIT_TICK_MS; // TODO: more accurate
+				ticking = false;
 		}
 	}
 
-	return ZOO_PIT_TICK_MS;
+	tick_time = SDL_GetTicks() - tick_start;
+	return (tick_time >= tick_delay) ? 1 : (tick_delay - tick_time);
 }
 
 void sdl_draw_char(zoo_video_driver *drv, int16_t x, int16_t y, uint8_t col, uint8_t chr) {

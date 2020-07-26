@@ -111,13 +111,21 @@ IWRAM_ARM_CODE static void irq_vblank(void) {
 		? ((FONT_HEIGHT * MAP_Y_OFFSET) - ((SCREEN_HEIGHT - (FONT_HEIGHT * 26)) / 2))
 		: ((FONT_HEIGHT * MAP_Y_OFFSET) - ((SCREEN_HEIGHT - (FONT_HEIGHT * 25)) / 2));
 	REG_DISPSTAT = DSTAT_VBL_IRQ | DSTAT_VCT_IRQ | DSTAT_VCT(FONT_HEIGHT - disp_y_offset);
+
+#ifdef DEBUG_CONSOLE
+	if ((~ki) & KEY_R) {
+		disp_y_offset = (8 * 31) - (8 * 26) + 2;
+		REG_DISPSTAT = DSTAT_VBL_IRQ | DSTAT_VCT_IRQ | DSTAT_VCT(4);
+	}
+#endif
+
 	REG_BG0VOFS = disp_y_offset;
 	REG_BG1VOFS = disp_y_offset;
 	REG_BG2VOFS = disp_y_offset;
 	REG_BG3VOFS = disp_y_offset;
 
-	keys_held &= ~ki;
-	keys_down |= (~ki) & (~keys_held);
+
+	keys_down |= ~ki;
 }
 
 static zoo_video_driver d_video_gba = {
@@ -135,6 +143,65 @@ void zoo_video_gba_show(void) {
 	VBlankIntrWait();
 	REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_BG3;
 }
+
+#ifdef DEBUG_CONSOLE
+static u16 console_x = 0;
+static u16 console_y = 0;
+
+#define CONSOLE_WIDTH 60
+#define CONSOLE_HEIGHT 3
+#define CONSOLE_YOFFSET 27
+
+void platform_debug_puts(const char *text, bool status) {
+	if (status) {
+		// clear line
+		int x = 0;
+		int y = CONSOLE_YOFFSET + CONSOLE_HEIGHT;
+		GET_VRAM_PTRS;
+		
+		memset32(tile_fg_ptr, 0, 16);
+		memset32(tile_fg_ptr + (1 << 10), 0, 16);
+
+		while (*text != '\0') {
+			char c = *(text++);
+			if (c == '\n') continue;
+			vram_write_char(NULL, x++, CONSOLE_YOFFSET + CONSOLE_HEIGHT, 0x0A, c);
+		}
+	} else {
+		while (*text != '\0') {
+			char c = *(text++);
+
+			if (c == '\n') {
+				console_x = 0;
+				console_y += 1;
+				continue;
+			}
+
+			while (console_y >= CONSOLE_HEIGHT) {
+				// scroll one up
+				int x = 0;
+				int y = CONSOLE_YOFFSET;
+				GET_VRAM_PTRS;
+
+				memcpy32(tile_fg_ptr, tile_fg_ptr + 32, 16 * (CONSOLE_HEIGHT - 1));
+				memcpy32(tile_fg_ptr + (1 << 10), tile_fg_ptr + 32 + (1 << 10), 16 * (CONSOLE_HEIGHT - 1));
+
+				memset32(tile_fg_ptr + (32*(CONSOLE_HEIGHT-1)), 0, 16);
+				memset32(tile_fg_ptr + (32*(CONSOLE_HEIGHT-1)) + (1 << 10), 0, 16);
+
+				console_y--;
+			}
+
+			vram_write_char(NULL, console_x, console_y + CONSOLE_YOFFSET, 0x0F, c);
+			console_x += 1;
+			if (console_x >= CONSOLE_WIDTH) {
+				console_x = 0;
+				console_y += 1;
+			}
+		}
+	}
+}
+#endif
 
 void zoo_video_gba_install(zoo_state *state, const uint8_t *charset_bin) {
 	// initialize state
@@ -171,5 +238,5 @@ void zoo_video_gba_install(zoo_state *state, const uint8_t *charset_bin) {
 	REG_BG3VOFS = 0;
 
 	// clear display
-	memset32((void*) (MEM_VRAM + MAP_ADDR_OFFSET), 0x00000000, 0x4000 >> 2);
+	memset32((void*) (MEM_VRAM + MAP_ADDR_OFFSET), 0x00000000, 64 * 32 * 2);
 }

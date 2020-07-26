@@ -15,6 +15,15 @@ void zoo_ui_filesel_call(struct s_zoo_ui_state *state, const char *title, const 
 void zoo_ui_load_world(struct s_zoo_ui_state *state, bool as_save);
 void zoo_ui_main_menu(struct s_zoo_ui_state *state);
 
+// internal
+
+void zoo_ui_init_select_window(struct s_zoo_ui_state *state, const char *title);
+
+#ifdef ZOO_DEBUG_MENU
+void zoo_ui_debug_printf(bool status, const char *format, ...);
+void zoo_ui_debug_menu(struct s_zoo_ui_state *state);
+#endif
+
 // state definitions
 
 typedef struct s_zoo_ui_state {

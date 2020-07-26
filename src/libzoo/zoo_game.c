@@ -139,6 +139,7 @@ void zoo_world_create(zoo_state *state) {
 	state->world.info.name[0] = 0;
 }
 
+GBA_FAST_CODE
 void zoo_board_draw_tile(zoo_state *state, int16_t x, int16_t y) {
 	uint8_t ch;
 	zoo_tile *tile;
@@ -184,6 +185,7 @@ void zoo_board_draw_tile(zoo_state *state, int16_t x, int16_t y) {
 	}
 }
 
+GBA_FAST_CODE
 void zoo_board_draw_border(zoo_state *state) {
 	int i;
 
@@ -198,6 +200,7 @@ void zoo_board_draw_border(zoo_state *state) {
 	}
 }
 
+GBA_FAST_CODE
 void zoo_board_draw(zoo_state *state) {
 	int ix, iy;
 
@@ -254,7 +257,7 @@ void zoo_stat_remove(zoo_state *state, int16_t stat_id) {
 			if (state->board.stats[i].data == stat->data) goto StatDataInUse;
 		}
 	}
-	free(stat->data);
+	zoo_stat_free(stat);
 
 StatDataInUse:
 	if (stat_id < state->current_stat_tick) {
@@ -290,6 +293,7 @@ StatDataInUse:
 	state->board.stat_count--;
 }
 
+GBA_FAST_CODE
 int16_t zoo_stat_get_id(zoo_state *state, int16_t x, int16_t y) {
 	int16_t i;
 	zoo_stat *stat = state->board.stats;
@@ -302,6 +306,7 @@ int16_t zoo_stat_get_id(zoo_state *state, int16_t x, int16_t y) {
 	return -1;
 }
 
+GBA_FAST_CODE
 zoo_stat *zoo_stat_get(zoo_state *state, int16_t x, int16_t y, int16_t *stat_id) {
 	int16_t i;
 	zoo_stat *stat = state->board.stats;
@@ -781,6 +786,7 @@ GameTickState1:
 	} else {
 		// not paused
 		i = state->current_stat_tick;
+
 		if (i <= state->board.stat_count) {
 			if (state->board.stats[i].cycle != 0
 				&& (state->current_tick % state->board.stats[i].cycle) == (i % state->board.stats[i].cycle)
@@ -809,7 +815,6 @@ GameTickState2:
 				state->current_tick = 1;
 			state->current_stat_tick = 0;
 
-			zoo_input_update(&state->input);
 			return RETURN_NEXT_FRAME;
 		} else {
 			if (zoo_has_hsecs_elapsed(state, &state->tick_counter, state->tick_duration)) {
@@ -819,7 +824,7 @@ GameTickState2:
 				state->current_stat_tick = 0;
 
 				zoo_input_update(&state->input);
-				return RETURN_IMMEDIATE;
+				return RETURN_NEXT_CYCLE;
 			} else {
 				return RETURN_NEXT_CYCLE;
 			}

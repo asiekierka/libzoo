@@ -33,9 +33,24 @@
 #define oop_word_cmp(c) strncmp(state->oop_word, (c), sizeof(state->oop_word) - 1)
 #define oop_word_len() strnlen(state->oop_word, sizeof(state->oop_word) - 1)
 
+//#define LABEL_CACHE_DEBUG
+
 static const char zoo_oop_color_names[8][8] = {
 	"BLACK", "BLUE", "GREEN", "CYAN", "RED", "PURPLE", "YELLOW", "WHITE"
 };
+
+void zoo_stat_free(zoo_stat *stat) {
+	if (!platform_is_rom_ptr(stat->data))
+		free(stat->data);
+
+#ifdef ZOO_USE_LABEL_CACHE
+	if (stat->label_cache_size > 0) {
+		free(stat->label_cache);
+		stat->label_cache = NULL;
+		stat->label_cache_size = 0;
+	}
+#endif
+}
 
 static void zoo_oop_error(zoo_state *state, int16_t stat_id, const char *message) {
 	char msg_full[ZOO_LEN_MESSAGE + 1];
@@ -59,10 +74,10 @@ static ZOO_INLINE void zoo_oop_read_char(zoo_state *state, int16_t stat_id, int1
 	}
 }
 
+GBA_FAST_CODE
 static void zoo_oop_read_word(zoo_state *state, int16_t stat_id, int16_t *position) {
 	int word_pos = 0;
 
-	state->oop_word[word_pos] = 0;
 	do {
 		zoo_oop_read_char(state, stat_id, position);
 	} while (state->oop_char == ' ');
@@ -77,12 +92,12 @@ static void zoo_oop_read_word(zoo_state *state, int16_t stat_id, int16_t *positi
 		) {
 			// TODO: handle overflow
 			state->oop_word[word_pos++] = state->oop_char;
-			state->oop_word[word_pos] = 0;
 
 			zoo_oop_read_char(state, stat_id, position);
 			state->oop_char = zoo_toupper(state->oop_char);
 		}
 	}
+	state->oop_word[word_pos] = 0;
 
 	if (*position > 0) {
 		*position -= 1;
@@ -185,22 +200,26 @@ static void zoo_oop_read_direction(zoo_state *state, int16_t stat_id, int16_t *p
 	}
 }
 
-static int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos) {
+GBA_FAST_CODE
+static int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos, int16_t end_pos) {
 	int16_t pos, word_pos, cmp_pos;
-	int16_t data_len = state->board.stats[stat_id].data_len;
+	int16_t len_str = strlen(str);
+	int16_t data_len = end_pos >= 0 ? (end_pos+1) : (state->board.stats[stat_id].data_len - len_str);
 
 	pos = start_pos;
 
 	while (pos < data_len) {
 		word_pos = 0;
 		cmp_pos = pos;
-		do {
+
+		// libzoo fix: allow finding empty strings
+		if (len_str > 0) do {
 			zoo_oop_read_char(state, stat_id, &cmp_pos);
 			if (zoo_toupper(str[word_pos]) != zoo_toupper(state->oop_char)) {
 				goto NoMatch;
 			}
 			word_pos++;
-		} while (word_pos < strlen(str));
+		} while (word_pos < len_str);
 
 		zoo_oop_read_char(state, stat_id, &cmp_pos);
 		state->oop_char = zoo_toupper(state->oop_char);
@@ -220,10 +239,11 @@ NoMatch:
 	return -1;
 }
 
-static int16_t zoo_oop_find_string(zoo_state *state, int16_t stat_id, const char *str) {
-	return zoo_oop_find_string_from(state, stat_id, str, 0);
+static ZOO_INLINE int16_t zoo_oop_find_string(zoo_state *state, int16_t stat_id, const char *str) {
+	return zoo_oop_find_string_from(state, stat_id, str, 0, -1);
 }
 
+GBA_FAST_CODE
 static bool zoo_oop_iterate_stat(zoo_state *state, int16_t stat_id, int16_t *i_stat, const char *lookup) {
 	int16_t pos;
 	bool found = false;
@@ -267,6 +287,59 @@ static bool zoo_oop_iterate_stat(zoo_state *state, int16_t stat_id, int16_t *i_s
 	return found;
 }
 
+#ifdef ZOO_USE_LABEL_CACHE
+static void zoo_build_label_cache(zoo_state *state, int16_t stat_id) {
+	zoo_stat *stat = &state->board.stats[stat_id];
+	int16_t label_count = 0;
+	int16_t pos, label_pos, last_label_pos;
+
+	if (stat->data != NULL && stat->data_len > 0) {
+		if (stat->label_cache_size > 0) {
+			return;
+		}
+
+		// check existing stats
+		for (pos = 1; pos <= state->board.stat_count; pos++) {
+			if (state->board.stats[pos].data == stat->data && state->board.stats[pos].label_cache_size > 0) {
+				stat->label_cache = state->board.stats[pos].label_cache;
+				stat->label_cache_size = state->board.stats[pos].label_cache_size;
+				return;
+			}
+		}
+
+		// count labels
+		for (pos = 0; pos < (stat->data_len-1); pos++) {
+			if (stat->data[pos] == '\r' && (stat->data[pos+1] == ':' || stat->data[pos+1] == '\'')) {
+				label_count++;
+				last_label_pos = pos;
+				pos++;
+			}
+		}
+
+		// create cache
+		stat->label_cache_size = label_count + 1;
+		if (label_count > 0) {
+			stat->label_cache = malloc(sizeof(zoo_stat_label) * label_count);
+
+			pos = 0;
+			label_pos = 0;
+			for (pos = 0; pos <= last_label_pos; pos++) {
+				if (stat->data[pos] == '\r' && (stat->data[pos+1] == ':' || stat->data[pos+1] == '\'')) {
+					stat->label_cache[label_pos].pos = pos;
+					stat->label_cache[label_pos].zapped = stat->data[pos+1] == '\'';	
+					pos++;
+					label_pos++;
+				}
+			}
+
+			// assert(label_pos == label_count);
+		}
+	} else {
+		stat->label_cache_size = 0;
+	}
+}
+#endif
+
 static bool zoo_oop_find_label(zoo_state *state, int16_t stat_id, const char *send_label, int16_t *i_stat, int16_t *i_data_pos, const char *label_prefix) {
 	int i;
 	char *target_split_pos;
@@ -274,6 +347,12 @@ static bool zoo_oop_find_label(zoo_state *state, int16_t stat_id, const char *se
 	char prefixed_object_message[21+2];
 	bool built_pom = false;
 	bool found_stat = false;
+#ifdef ZOO_USE_LABEL_CACHE
+	int label_cache_pos;
+	int label_cache_size;
+	zoo_stat_label *label_cache;
+	bool label_cache_zapped;
+#endif
 
 	target_split_pos = strchr(send_label, ':');
 	if (target_split_pos == NULL) {
@@ -298,6 +377,34 @@ FindNextStat:
 		if (!strncmp(object_message, "RESTART", sizeof(object_message) - 1)) {
 			*i_data_pos = 0;
 		} else {
+#ifdef ZOO_USE_LABEL_CACHE
+			zoo_build_label_cache(state, *i_stat);
+			label_cache = state->board.stats[*i_stat].label_cache;
+			label_cache_size = state->board.stats[*i_stat].label_cache_size - 1;
+			label_cache_zapped = label_prefix[1] == '\'';
+			*i_data_pos = -1;
+
+			for (label_cache_pos = 0; label_cache_pos < label_cache_size; label_cache_pos++) {
+				// printf("id %d, entry %d: pos %d, %s\n", stat_id, label_cache_pos, label_cache_stat->label_cache[label_cache_pos].pos, label_cache_stat->label_cache[label_cache_pos].zapped ? "zapped" : "not zapped");
+				if (label_cache_zapped == label_cache[label_cache_pos].zapped) {
+					*i_data_pos = zoo_oop_find_string_from(state, *i_stat, object_message,
+						label_cache[label_cache_pos].pos + 2,
+						label_cache[label_cache_pos].pos + 2
+					);
+					if (*i_data_pos >= 2) {
+						// printf("found at %d\n", *i_data_pos);
+						*i_data_pos -= 2;
+						break;
+					} else *i_data_pos = -1;
+				}
+			}
+#ifdef LABEL_CACHE_DEBUG
+			int ni_data_pos = zoo_oop_find_string(state, *i_stat, prefixed_object_message);
+			if (*i_data_pos != ni_data_pos) {
+				printf("%s:%d: discrepancy %d (%d o != %d n) %s\n", __FUNCTION__, __LINE__, *i_stat, ni_data_pos, *i_data_pos, prefixed_object_message);
+			}
+#endif
+#else
 			if (!built_pom) {
 				strncpy(prefixed_object_message, label_prefix, sizeof(prefixed_object_message) - 1);
 				strncat(prefixed_object_message, object_message, sizeof(prefixed_object_message) - 1);
@@ -305,6 +412,8 @@ FindNextStat:
 			}
 
 			*i_data_pos = zoo_oop_find_string(state, *i_stat, prefixed_object_message);
+#endif
+
 			// if lookup target exists, there may be more stats
 			if ((*i_data_pos < 0) && (target_split_pos != NULL)) {
 				goto FindNextStat;
@@ -334,7 +443,7 @@ void zoo_flag_set(zoo_state *state, const char *name) {
 
 	if (zoo_flag_get_id(state, name) < 0) {
 		i = 0;
-		while ((i < (ZOO_MAX_FLAG-1)) && (strnlen(state->world.info.flags[i], ZOO_LEN_FLAG) > 0)) {
+		while ((i < (ZOO_MAX_FLAG-1)) && state->world.info.flags[i][0] != '\0') {
 			i++;
 		}
 		// free or last flag
@@ -402,6 +511,7 @@ static ZOO_INLINE uint8_t zoo_get_color_for_tile_match(zoo_state *state, zoo_til
 	}
 }
 
+GBA_FAST_CODE
 static bool zoo_find_tile_on_board(zoo_state *state, int16_t *x, int16_t *y, zoo_tile tile) {
 	while (true) {
 		*x += 1;
@@ -752,13 +862,22 @@ ReadCommand:
 					zoo_oop_read_word(state, stat_id, position);
 					// state->oop_word is used by zoo_oop_iterate_stat
 					strncpy(buf2, state->oop_word, sizeof(buf2));
-
 					label_stat_id = 0;
 					while (
 						zoo_oop_find_label(state, stat_id, buf2,
 						&label_stat_id, &label_data_pos, "\r:")
 					) {
+#ifdef ZOO_USE_LABEL_CACHE
+						zoo_build_label_cache(state, label_stat_id);
+						for (ix = 0; ix < state->board.stats[label_stat_id].label_cache_size-1; ix++) {
+							if (state->board.stats[label_stat_id].label_cache[ix].pos == label_data_pos) {
+								state->board.stats[label_stat_id].label_cache[ix].zapped = true;
+								break;
+							}
+						}
+#else
 						state->board.stats[label_stat_id].data[label_data_pos + 1] = '\'';
+#endif
 					}
 				} else if (!oop_word_cmp("RESTORE")) {
 					zoo_oop_read_word(state, stat_id, position);
@@ -773,12 +892,41 @@ ReadCommand:
 						zoo_oop_find_label(state, stat_id, buf2,
 						&label_stat_id, &label_data_pos, "\r'")
 					) {
+#ifdef ZOO_USE_LABEL_CACHE
+						zoo_build_label_cache(state, label_stat_id);
+						for (ix = 0; ix < state->board.stats[label_stat_id].label_cache_size-1; ix++) {
+							if (state->board.stats[label_stat_id].label_cache[ix].pos == label_data_pos) {
+								state->board.stats[label_stat_id].label_cache[ix].zapped = false;
+								// Find remaining label_data_pos
+								for (iy = ix + 1; ix < state->board.stats[label_stat_id].label_cache_size-1; ix++) {
+									if (state->board.stats[label_stat_id].label_cache[iy].zapped
+										&& zoo_oop_find_string_from(
+											state, label_stat_id, buf + 2,
+											state->board.stats[label_stat_id].label_cache[iy].pos + 2,
+											state->board.stats[label_stat_id].label_cache[iy].pos + 2
+										)
+									) {
+										state->board.stats[label_stat_id].label_cache[iy].zapped = false;
+									}
+								}
+								break;
+							}
+						}
+#ifdef LABEL_CACHE_DEBUG
+						state->board.stats[label_stat_id].data[label_data_pos + 1] = ':';
+						int ni_data_pos = zoo_oop_find_string(state, label_stat_id, buf);
+						if (label_data_pos != ni_data_pos) {
+							printf("%s:%d: discrepancy %d (%d o != %d n) %s\n", __FUNCTION__, __LINE__, label_stat_id, ni_data_pos, label_data_pos, buf2);
+						}
+#endif
+#else
 						do {
 							state->board.stats[label_stat_id].data[label_data_pos + 1] = ':';
 							// FIX: optimization - no need to check already checked parts of the code
 							// label_data_pos = zoo_oop_find_string(state, label_stat_id, buf);
-							label_data_pos = zoo_oop_find_string_from(state, label_stat_id, buf, label_data_pos);
+							label_data_pos = zoo_oop_find_string_from(state, label_stat_id, buf, label_data_pos + 2, -1);
 						} while (label_data_pos > 0);
+#endif
 					}
 				} else if (!oop_word_cmp("LOCK")) {
 					stat->p2 = 1;
@@ -864,9 +1012,19 @@ ReadCommand:
 					// state->oop_word is used by zoo_oop_iterate_stat
 					strncpy(buf, state->oop_word, sizeof(buf));
 					if (zoo_oop_iterate_stat(state, stat_id, &bind_stat_id, buf)) {
-						free(stat->data);
+						// libzoo fix: add Bind_StatDataInUse check
+						for (ix = 1; ix <= state->board.stat_count; ix++) {
+							if (ix == stat_id) continue;
+							if (state->board.stats[ix].data == stat->data) goto Bind_StatDataInUse;
+						}
+						zoo_stat_free(stat);
+					Bind_StatDataInUse:
 						stat->data = state->board.stats[bind_stat_id].data;
 						stat->data_len = state->board.stats[bind_stat_id].data_len;
+#ifdef ZOO_USE_LABEL_CACHE
+						stat->label_cache = state->board.stats[bind_stat_id].label_cache;
+						stat->label_cache_size = state->board.stats[bind_stat_id].label_cache_size;
+#endif
 						*position = 0;
 					}
 				} else {

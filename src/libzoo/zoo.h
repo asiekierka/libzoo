@@ -30,9 +30,16 @@
 #include <stdint.h>
 #include "zoo_config.h"
 
-
 #ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
 #include <math.h>
+#endif
+
+// platform-specific hacks
+
+#ifdef ZOO_GBA_HACKS
+#define GBA_FAST_CODE __attribute__((section(".iwram"), long_call, target("arm")))
+#else
+#define GBA_FAST_CODE
 #endif
 
 // early defs
@@ -182,6 +189,7 @@ typedef struct s_zoo_io_handle {
 	void *p;
 	int len;
 	int len_orig;
+	uint8_t *(*func_getptr)(struct s_zoo_io_handle *h);
 	uint8_t (*func_getc)(struct s_zoo_io_handle *h);
 	size_t (*func_read)(struct s_zoo_io_handle *h, uint8_t *ptr, size_t len);
 	size_t (*func_putc)(struct s_zoo_io_handle *h, uint8_t v);
@@ -225,6 +233,13 @@ typedef struct {
 	uint8_t color;
 } zoo_tile;
 
+#ifdef ZOO_USE_LABEL_CACHE
+typedef struct {
+	int16_t pos;
+	bool zapped;
+} zoo_stat_label;
+#endif
+
 typedef struct {
 	uint8_t x, y;
 	int16_t step_x, step_y;
@@ -235,6 +250,11 @@ typedef struct {
 	char *data;
 	int16_t data_pos;
 	int16_t data_len;
+
+#ifdef ZOO_USE_LABEL_CACHE
+	zoo_stat_label *label_cache;
+	int16_t label_cache_size; // plus one
+#endif
 } zoo_stat;
 
 typedef struct {
@@ -430,6 +450,14 @@ typedef struct {
 	char oop_strip_name[21];
 } zoo_element_def;
 
+#ifdef ZOO_USE_ROM_POINTERS
+// Global function.
+bool platform_is_rom_ptr(void *ptr);
+#else
+// No ROM pointers.
+#define platform_is_rom_ptr(ptr) 0
+#endif
+
 // zoo.c
 
 void zoo_state_init(zoo_state *state);
@@ -523,6 +551,8 @@ void zoo_input_action_up(zoo_input_state *state, zoo_input_action action);
 void zoo_input_action_set(zoo_input_state *state, zoo_input_action action, bool value);
 
 // zoo_oop.c
+
+void zoo_stat_free(zoo_stat *stat);
 
 int16_t zoo_flag_get_id(zoo_state *state, const char *name);
 void zoo_flag_set(zoo_state *state, const char *name);

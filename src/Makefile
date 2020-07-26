@@ -40,13 +40,22 @@ ifneq ($(or ${ZOO_USE_UI}),)
 ZOO_USE_DRIVER_IO_PATH = 1
 endif
 
-ifneq ($(or ${ZOO_USE_DRIVER_IO_POSIX}),)
+ifneq ($(or ${ZOO_USE_DRIVER_IO_POSIX},${ZOO_USE_DRIVER_IO_ROMFS}),)
 ZOO_USE_DRIVER_IO_PATH = 1
 endif
 
-ifneq ($(or ${ZOO_USE_DRIVER_IO_ROMFS}),)
-ZOO_USE_DRIVER_IO_PATH = 1
+ifneq ($(or ${ZOO_USE_ROM_POINTERS}),)
+# ROM pointer functionality necessiaties that object data be read-only.
+ZOO_USE_LABEL_CACHE = 1
 endif
+
+# compiler flags
+
+OPTIMIZE_CFLAGS ?= -O2 -ffunction-sections -fdata-sections
+OPTIMIZE_LDFLAGS ?= -Wl,--gc-sections
+
+CFLAGS := -g -Wall -Wno-unused $(OPTIMIZE_CFLAGS) $(ARCH_CFLAGS)
+LDFLAGS	:= -g $(OPTIMIZE_LDFLAGS) $(ARCH_LDFLAGS)
 
 # auxillary inclusions
 
@@ -75,19 +84,26 @@ SOURCES += $(SRCDIR)/ui/zoo_sidebar_slim.c
 endif
 
 ifdef ZOO_USE_UI
-SOURCES += \
-  $(SRCDIR)/ui/zoo_ui.c
+SOURCES += $(SRCDIR)/ui/zoo_ui.c
+
+ifdef ZOO_DEBUG_MENU
+CFLAGS += -DZOO_DEBUG_MENU
+SOURCES += $(SRCDIR)/ui/zoo_ui_debug.c
+endif
+endif # ZOO_USE_UI
+
+ifdef ZOO_USE_LABEL_CACHE
+CFLAGS += -DZOO_USE_LABEL_CACHE
+endif
+
+ifdef ZOO_USE_ROM_POINTERS
+CFLAGS += -DZOO_USE_ROM_POINTERS
 endif
 
 # tools
 
 LD := $(CC)
 PYTHON3 := python3
-
-# compiler flags
-
-CFLAGS := -g -Wall -Wno-unused -O2 $(ARCH_CFLAGS)
-LDFLAGS	:= -g $(ARCH_LDFLAGS)
 
 # add include/library directories
 

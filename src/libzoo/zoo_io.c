@@ -86,11 +86,16 @@ static void zoo_io_mem_close(zoo_io_handle *h) {
 
 }
 
+static uint8_t *zoo_io_mem_getptr(zoo_io_handle *h) {
+	return h->p;
+}
+
 zoo_io_handle zoo_io_open_file_mem(uint8_t *ptr, size_t len, zoo_io_mode mode) {
 	zoo_io_handle h;
 	h.p = ptr;
 	h.len = len;
 	h.len_orig = len;
+	h.func_getptr = zoo_io_mem_getptr;
 	h.func_getc = zoo_io_mem_getc;
 	h.func_putc = (mode == MODE_WRITE) ? zoo_io_mem_putc : zoo_io_mem_putc_ro;
 	h.func_read = zoo_io_mem_read;

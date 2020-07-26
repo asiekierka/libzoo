@@ -83,10 +83,18 @@ static void zoo_stat_io_read(zoo_io_handle *h, zoo_stat *stat) {
 	stat->follower = zoo_io_read_short(h);
 	stat->leader = zoo_io_read_short(h);
 	stat->under = zoo_io_read_tile(h);
+#ifdef ZOO_USE_ROM_POINTERS
+	h->func_read(h, &stat->data, 4);
+#else
 	stat->data = NULL; h->func_skip(h, 4);
+#endif
 	stat->data_pos = zoo_io_read_short(h);
 	stat->data_len = zoo_io_read_short(h);
 	h->func_skip(h, 8);
+#ifdef ZOO_USE_LABEL_CACHE
+	stat->label_cache = NULL;
+	stat->label_cache_size = 0;
+#endif
 }
 
 static void zoo_stat_io_write(zoo_io_handle *h, zoo_stat *stat) {
@@ -101,7 +109,11 @@ static void zoo_stat_io_write(zoo_io_handle *h, zoo_stat *stat) {
 	zoo_io_write_short(h, stat->follower);
 	zoo_io_write_short(h, stat->leader);
 	zoo_io_write_tile(h, stat->under);
+#ifdef ZOO_USE_ROM_POINTERS
+	h->func_write(h, &stat->data, 4);
+#else
 	h->func_skip(h, 4); // stat->data
+#endif
 	zoo_io_write_short(h, stat->data_pos);
 	zoo_io_write_short(h, stat->data_len);
 	h->func_skip(h, 8);
@@ -122,8 +134,10 @@ static size_t zoo_board_io_max_len(zoo_state *state) {
 	// stats
 	for (ix = 0; ix <= state->board.stat_count; ix++) {
 		size += 33;
+#ifndef ZOO_USE_ROM_POINTERS
 		if (state->board.stats[ix].data_len > 0)
 			size += state->board.stats[ix].data_len;
+#endif
 	}
 
 	return size;
@@ -185,8 +199,10 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 		}
 		zoo_stat_io_write(h, stat);
 		if (stat->data_len > 0) {
+#ifndef ZOO_USE_ROM_POINTERS
 			h->func_write(h, (uint8_t *) stat->data, stat->data_len);
-			free(stat->data);
+#endif
+			zoo_stat_free(stat);
 		}
 	}
 }
@@ -195,6 +211,9 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 	int ix, iy;
 	zoo_rle_tile rle;
 	zoo_stat *stat;
+#ifdef ZOO_USE_ROM_POINTERS
+	bool is_rom = h->func_getptr != NULL && platform_is_rom_ptr(h->func_getptr(h));
+#endif
 
 	zoo_io_read_pstring(h, 50, state->board.name, sizeof(state->board.name) - 1);
 
@@ -236,9 +255,18 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 	for (ix = 0; ix <= state->board.stat_count; ix++, stat++) {
 		zoo_stat_io_read(h, stat);
 		if (stat->data_len > 0) {
+#ifdef ZOO_USE_ROM_POINTERS
+			if (is_rom) {
+				stat->data = h->func_getptr(h);
+				h->func_skip(h, stat->data_len);
+			}
+			// If not from ROM, stat->data should be correct,
+			// and there should be no text following.
+#else
 			// TODO: malloc check
 			stat->data = malloc(stat->data_len);
 			h->func_read(h, (uint8_t *) stat->data, stat->data_len);
+#endif
 		} else if (stat->data_len < 0) {
 			// TODO: bounds check
 			stat->data = state->board.stats[-stat->data_len].data;
@@ -254,7 +282,8 @@ void zoo_board_close(zoo_state *state) {
 
 	board_id = state->world.info.current_board;
 	if (state->world.board_data[board_id] != NULL) {
-		free(state->world.board_data[board_id]);
+		if (!platform_is_rom_ptr(state->world.board_data[board_id]))
+			free(state->world.board_data[board_id]);
 		state->world.board_data[board_id] = NULL;
 	}
 
@@ -289,18 +318,23 @@ void zoo_board_open(zoo_state *state, int16_t board_id) {
 	state->world.info.current_board = board_id;
 }
 
-//
 void zoo_world_close(zoo_state *state) {
 	int i;
 
 	zoo_board_close(state);
 	for (i = 0; i <= state->world.board_count; i++) {
-		free(state->world.board_data[i]);
+		if (!platform_is_rom_ptr(state->world.board_data[i]))
+			free(state->world.board_data[i]);
+		state->world.board_data[i] = NULL;
 	}
 }
 
 bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
 	int i;
+#ifdef ZOO_USE_ROM_POINTERS
+	bool is_rom = h->func_getptr != NULL && platform_is_rom_ptr(h->func_getptr(h));
+#endif
+
 	zoo_world_close(state);
 
 	state->world.board_count = zoo_io_read_short(h);
@@ -339,6 +373,13 @@ bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
 
 	for (i = 0; i <= state->world.board_count; i++) {
 		state->world.board_len[i] = zoo_io_read_short(h);
+#ifdef ZOO_USE_ROM_POINTERS
+		if (is_rom) {
+			state->world.board_data[i] = h->func_getptr(h);
+			h->func_skip(h, state->world.board_len[i]);
+			continue;
+		}
+#endif
 		state->world.board_data[i] = malloc(state->world.board_len[i]);
 		h->func_read(h, state->world.board_data[i], state->world.board_len[i]);
 	}
