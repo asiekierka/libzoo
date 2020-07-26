@@ -513,18 +513,25 @@ static ZOO_INLINE uint8_t zoo_get_color_for_tile_match(zoo_state *state, zoo_til
 
 GBA_FAST_CODE
 static bool zoo_find_tile_on_board(zoo_state *state, int16_t *x, int16_t *y, zoo_tile tile) {
+	int16_t lx = *x;
+	int16_t ly = *y;
+
 	while (true) {
-		*x += 1;
-		if (*x > ZOO_BOARD_WIDTH) {
-			*x = 1;
-			*y += 1;
-			if (*y > ZOO_BOARD_HEIGHT) {
+		lx += 1;
+		if (lx > ZOO_BOARD_WIDTH) {
+			lx = 1;
+			ly += 1;
+			if (ly > ZOO_BOARD_HEIGHT) {
+				*x = lx;
+				*y = ly;
 				return false;
 			}
 		}
 
-		if (state->board.tiles[*x][*y].element == tile.element) {
-			if ((tile.color == 0) || (zoo_get_color_for_tile_match(state, state->board.tiles[*x][*y]) == tile.color)) {
+		if (state->board.tiles[lx][ly].element == tile.element) {
+			if ((tile.color == 0) || (zoo_get_color_for_tile_match(state, state->board.tiles[lx][ly]) == tile.color)) {
+				*x = lx;
+				*y = ly;
 				return true;
 			}
 		}

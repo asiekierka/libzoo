@@ -28,7 +28,12 @@
 #include <string.h>
 #include "zoo.h"
 
-static const uint16_t zoo_sound_freqs[96] = {
+#define NOTE_MIN 16
+#define NOTE_MAX 112
+#define DRUM_MIN 240
+#define DRUM_MAX 250
+
+static const uint16_t zoo_sound_freqs[NOTE_MAX - NOTE_MIN] = {
 	64,	67,	71,	76,	80,	85,	90,	95,	101,	107,	114,	120,	0,	0,	0,	0,
 	128,	135,	143,	152,	161,	170,	181,	191,	203,	215,	228,	241,	0,	0,	0,	0,
 	256,	271,	287,	304,	322,	341,	362,	383,	406,	430,	456,	483,	0,	0,	0,	0,
@@ -42,7 +47,7 @@ typedef struct {
 	uint16_t data[15];
 } zoo_sound_drum;
 
-static const zoo_sound_drum zoo_sound_drums[10] = {
+static const zoo_sound_drum zoo_sound_drums[DRUM_MAX - DRUM_MIN] = {
 	{ 1, {3200,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0}},
 	{14, {1100,	1200,	1300,	1400,	1500,	1600,	1700,	1800,	1900,	2000,	2100,	2200,	2300,	2400,	0}},
 	{14, {4800,	4800,	8000,	1600,	4800,	4800,	8000,	1600,	4800,	4800,	8000,	1600,	4800,	4800,	8000}},
@@ -64,10 +69,10 @@ static ZOO_INLINE void zoo_nosound(zoo_sound_state *state) {
 static void zoo_default_play_note(zoo_sound_state *state, uint8_t note, uint8_t duration) {
 	if (state->d_sound != NULL && state->d_sound->func_play_freqs != NULL) {
 		state->d_sound->func_play_freqs(state->d_sound, NULL, 0, false);
-		if (note >= 16 && note < 112) {
-			state->d_sound->func_play_freqs(state->d_sound, &zoo_sound_freqs[note - 16], 1, false);
-		} else if (note >= 240 && note < 250) {
-			state->d_sound->func_play_freqs(state->d_sound, zoo_sound_drums[note - 240].data, zoo_sound_drums[note - 240].len, true);
+		if (note >= NOTE_MIN && note < NOTE_MAX) {
+			state->d_sound->func_play_freqs(state->d_sound, &zoo_sound_freqs[note - NOTE_MIN], 1, false);
+		} else if (note >= DRUM_MIN && note < DRUM_MAX) {
+			state->d_sound->func_play_freqs(state->d_sound, zoo_sound_drums[note - DRUM_MIN].data, zoo_sound_drums[note - DRUM_MIN].len, true);
 		} else {
 			// nosound - already called
 		}
@@ -133,7 +138,7 @@ void zoo_sound_tick(zoo_sound_state *state) {
 	}
 }
 
-static const char letter_to_tone[7] = {9, 11, 0, 2, 4, 5, 7};
+static const uint8_t letter_to_tone[7] = {9, 11, 0, 2, 4, 5, 7};
 
 int16_t zoo_sound_parse(const char *input, uint8_t *output, int16_t out_max) {
 	uint8_t note_octave = 3;
