@@ -51,8 +51,8 @@ endif
 
 # compiler flags
 
-OPTIMIZE_CFLAGS ?= -O2 -ffunction-sections -fdata-sections
-OPTIMIZE_LDFLAGS ?= -Wl,--gc-sections
+OPTIMIZE_CFLAGS ?= -O2
+OPTIMIZE_LDFLAGS ?= 
 
 CFLAGS := -g -Wall -Wno-unused $(OPTIMIZE_CFLAGS) $(ARCH_CFLAGS)
 LDFLAGS	:= -g $(OPTIMIZE_LDFLAGS) $(ARCH_LDFLAGS)

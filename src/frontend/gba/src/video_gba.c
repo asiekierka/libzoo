@@ -124,7 +124,6 @@ IWRAM_ARM_CODE static void irq_vblank(void) {
 	REG_BG2VOFS = disp_y_offset;
 	REG_BG3VOFS = disp_y_offset;
 
-
 	keys_down |= ~ki;
 }
 

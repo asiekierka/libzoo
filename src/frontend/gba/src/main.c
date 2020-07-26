@@ -39,6 +39,7 @@ extern u32 __rom_end__;
 
 static zoo_state state;
 static zoo_ui_state ui_state;
+// EWRAM_BSS
 static zoo_io_romfs_driver d_io;
 
 extern volatile uint16_t keys_down;
@@ -120,6 +121,7 @@ int main(void) {
 
 	bool tick_in_progress = false;
 	bool tick_next_frame = false;
+	bool used_start = false;
 
 	while(true) {
 		if (tick_requested) {
@@ -127,13 +129,7 @@ int main(void) {
 #ifdef DEBUG_CONSOLE
 			u32 tick_time = dbg_ticks();
 #endif
-
-			if ((keys_down & KEY_START) && zoo_call_empty(&state.call_stack)) {
-				zoo_ui_main_menu(&ui_state);
-			}
-
 			keys_held = keys_down;
-			keys_down = 0;
 
 			zoo_input_action_set(&state.input, ZOO_ACTION_UP, keys_held & KEY_UP);
 			zoo_input_action_set(&state.input, ZOO_ACTION_LEFT, keys_held & KEY_LEFT);
@@ -142,7 +138,14 @@ int main(void) {
 			zoo_input_action_set(&state.input, ZOO_ACTION_SHOOT, keys_held & KEY_A);
 			zoo_input_action_set(&state.input, ZOO_ACTION_TORCH, keys_held & KEY_B);
 			zoo_input_action_set(&state.input, ZOO_ACTION_OK, keys_held & KEY_A);
-			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & KEY_B);
+			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & (KEY_B | KEY_START | KEY_SELECT));
+
+			if ((keys_down & KEY_START) && zoo_call_empty(&state.call_stack)) {
+				zoo_input_action_pressed(&state.input, ZOO_ACTION_CANCEL);
+				zoo_ui_main_menu(&ui_state);
+			}
+
+			keys_down = 0;
 
 			tick_in_progress = true;
 			while (tick_in_progress) {
