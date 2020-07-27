@@ -288,7 +288,7 @@ static bool zoo_oop_iterate_stat(zoo_state *state, int16_t stat_id, int16_t *i_s
 }
 
 #ifdef ZOO_USE_LABEL_CACHE
-static void zoo_build_label_cache(zoo_state *state, int16_t stat_id) {
+void zoo_build_label_cache(zoo_state *state, int16_t stat_id) {
 	zoo_stat *stat = &state->board.stats[stat_id];
 	int16_t label_count = 0;
 	int16_t pos, label_pos, last_label_pos;

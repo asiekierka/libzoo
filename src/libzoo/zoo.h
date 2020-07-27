@@ -307,6 +307,7 @@ typedef struct {
 	int16_t board_count;
 	void *board_data[ZOO_MAX_BOARD + 2];
 	int16_t board_len[ZOO_MAX_BOARD + 2];
+	bool board_external[ZOO_MAX_BOARD + 2];
 	zoo_world_info info;
 } zoo_world;
 
