@@ -138,6 +138,12 @@ zoo_call *zoo_call_push(zoo_call_stack *stack, zoo_call_type type, uint8_t state
 zoo_call *zoo_call_push_callback(zoo_call_stack *stack, zoo_func_callback func, void *arg);
 void zoo_call_pop(zoo_call_stack *stack);
 
+// error values
+
+#define ZOO_ERROR_NOMEM    -1
+#define ZOO_ERROR_INVAL    -2
+#define ZOO_ERROR_WRONGVER -3
+
 // maths
 
 #define zoo_sq(val) ((val)*(val))
@@ -531,12 +537,23 @@ zoo_tick_retval zoo_tick(zoo_state *state);
 
 // zoo_game_io.c
 
-void zoo_board_close(zoo_state *state);
-void zoo_board_open(zoo_state *state, int16_t board_id);
+// I/O operations
 
-void zoo_world_close(zoo_state *state);
-bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only);
-bool zoo_world_save(zoo_state *state, zoo_io_handle *h);
+size_t zoo_io_board_max_length(zoo_board *board);
+int zoo_io_board_read(zoo_io_handle *h, zoo_board *board);
+int zoo_io_board_write(zoo_io_handle *h, zoo_board *board);
+
+int zoo_io_world_read(zoo_io_handle *h, zoo_world *world, bool title_only);
+int zoo_io_world_write(zoo_io_handle *h, zoo_world *world);
+
+// State management
+
+int zoo_board_close(zoo_state *state);
+int zoo_board_open(zoo_state *state, int16_t board_id);
+
+int zoo_world_close(zoo_state *state);
+int zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only);
+int zoo_world_save(zoo_state *state, zoo_io_handle *h);
 
 // zoo_input.c
 

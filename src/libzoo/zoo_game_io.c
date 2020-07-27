@@ -119,7 +119,7 @@ static void zoo_stat_io_write(zoo_io_handle *h, zoo_stat *stat) {
 	h->func_skip(h, 8);
 }
 
-static size_t zoo_board_io_max_len(zoo_state *state) {
+size_t zoo_io_board_max_length(zoo_board *board) {
 	int ix;
 	size_t size = 0;
 
@@ -132,28 +132,28 @@ static size_t zoo_board_io_max_len(zoo_state *state) {
 	// stat count
 	size += 2;
 	// stats
-	for (ix = 0; ix <= state->board.stat_count; ix++) {
+	for (ix = 0; ix <= board->stat_count; ix++) {
 		size += 33;
 #ifndef ZOO_USE_ROM_POINTERS
-		if (state->board.stats[ix].data_len > 0)
-			size += state->board.stats[ix].data_len;
+		if (board->stats[ix].data_len > 0)
+			size += board->stats[ix].data_len;
 #endif
 	}
 
 	return size;
 }
 
-static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
+int zoo_io_board_write(zoo_io_handle *h, zoo_board *board) {
 	int ix, iy;
 	zoo_rle_tile rle;
 	zoo_stat *stat;
 
-	zoo_io_write_pstring(h, 50, state->board.name, sizeof(state->board.name) - 1);
+	zoo_io_write_pstring(h, 50, board->name, sizeof(board->name) - 1);
 
 	ix = 1;
 	iy = 1;
 	rle.count = 1;
-	rle.tile = state->board.tiles[ix][iy];
+	rle.tile = board->tiles[ix][iy];
 	do {
 		ix++;
 		if (ix > ZOO_BOARD_WIDTH) {
@@ -162,8 +162,8 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 		}
 
 		if (
-			(state->board.tiles[ix][iy].color == rle.tile.color)
-			&& (state->board.tiles[ix][iy].element == rle.tile.element)
+			(board->tiles[ix][iy].color == rle.tile.color)
+			&& (board->tiles[ix][iy].element == rle.tile.element)
 			&& (rle.count < 255)
 			&& (iy <= ZOO_BOARD_HEIGHT)
 		) {
@@ -171,28 +171,28 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 		} else {
 			zoo_io_write_byte(h, rle.count);
 			zoo_io_write_tile(h, rle.tile);
-			rle.tile = state->board.tiles[ix][iy];
+			rle.tile = board->tiles[ix][iy];
 			rle.count = 1;
 		}
 	} while (iy <= ZOO_BOARD_HEIGHT);
 
-	zoo_io_write_byte(h, state->board.info.max_shots);
-	zoo_io_write_byte(h, state->board.info.is_dark);
+	zoo_io_write_byte(h, board->info.max_shots);
+	zoo_io_write_byte(h, board->info.is_dark);
 	for (ix = 0; ix < 4; ix++)
-		zoo_io_write_byte(h, state->board.info.neighbor_boards[ix]);
-	zoo_io_write_byte(h, state->board.info.reenter_when_zapped);
-	zoo_io_write_pstring(h, 58, state->board.info.message, ZOO_LEN_MESSAGE);
-	zoo_io_write_byte(h, state->board.info.start_player_x);
-	zoo_io_write_byte(h, state->board.info.start_player_y);
-	zoo_io_write_short(h, state->board.info.time_limit_sec);
+		zoo_io_write_byte(h, board->info.neighbor_boards[ix]);
+	zoo_io_write_byte(h, board->info.reenter_when_zapped);
+	zoo_io_write_pstring(h, 58, board->info.message, ZOO_LEN_MESSAGE);
+	zoo_io_write_byte(h, board->info.start_player_x);
+	zoo_io_write_byte(h, board->info.start_player_y);
+	zoo_io_write_short(h, board->info.time_limit_sec);
 	h->func_skip(h, 16);
 
-	zoo_io_write_short(h, state->board.stat_count);
-	stat = &state->board.stats[0];
-	for (ix = 0; ix <= state->board.stat_count; ix++, stat++) {
+	zoo_io_write_short(h, board->stat_count);
+	stat = &board->stats[0];
+	for (ix = 0; ix <= board->stat_count; ix++, stat++) {
 		if (stat->data_len > 0) {
 			for (iy = 1; iy < ix; iy++) {
-				if (state->board.stats[iy].data == stat->data) {
+				if (board->stats[iy].data == stat->data) {
 					stat->data_len = -iy;
 				}
 			}
@@ -205,9 +205,11 @@ static void zoo_board_io_close(zoo_state *state, zoo_io_handle *h) {
 			zoo_stat_free(stat);
 		}
 	}
+
+	return 0;
 }
 
-static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
+int zoo_io_board_read(zoo_io_handle *h, zoo_board *board) {
 	int ix, iy;
 	zoo_rle_tile rle;
 	zoo_stat *stat;
@@ -215,7 +217,7 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 	bool is_rom = h->func_getptr != NULL && platform_is_rom_ptr(h->func_getptr(h));
 #endif
 
-	zoo_io_read_pstring(h, 50, state->board.name, sizeof(state->board.name) - 1);
+	zoo_io_read_pstring(h, 50, board->name, sizeof(board->name) - 1);
 
 	ix = 1;
 	iy = 1;
@@ -225,7 +227,7 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 			rle.count = zoo_io_read_byte(h);
 			rle.tile = zoo_io_read_tile(h);
 		}
-		state->board.tiles[ix][iy] = rle.tile;
+		board->tiles[ix][iy] = rle.tile;
 		ix++;
 		if (ix > ZOO_BOARD_WIDTH) {
 			ix = 1;
@@ -234,51 +236,57 @@ static void zoo_board_io_open(zoo_state *state, zoo_io_handle *h) {
 		rle.count--;
 	} while (iy <= ZOO_BOARD_HEIGHT);
 
-	state->board.info.max_shots = zoo_io_read_byte(h);
-	state->board.info.is_dark = zoo_io_read_byte(h);
+	board->info.max_shots = zoo_io_read_byte(h);
+	board->info.is_dark = zoo_io_read_byte(h);
 	for (ix = 0; ix < 4; ix++)
-		state->board.info.neighbor_boards[ix] = zoo_io_read_byte(h);
-	state->board.info.reenter_when_zapped = zoo_io_read_byte(h);
-	zoo_io_read_pstring(h, 58, state->board.info.message, ZOO_LEN_MESSAGE);
-	state->board.info.start_player_x = zoo_io_read_byte(h);
-	state->board.info.start_player_y = zoo_io_read_byte(h);
-	state->board.info.time_limit_sec = zoo_io_read_short(h);
+		board->info.neighbor_boards[ix] = zoo_io_read_byte(h);
+	board->info.reenter_when_zapped = zoo_io_read_byte(h);
+	zoo_io_read_pstring(h, 58, board->info.message, ZOO_LEN_MESSAGE);
+	board->info.start_player_x = zoo_io_read_byte(h);
+	board->info.start_player_y = zoo_io_read_byte(h);
+	board->info.time_limit_sec = zoo_io_read_short(h);
 	h->func_skip(h, 16);
 
-	state->board.stat_count = zoo_io_read_short(h);
-	stat = &state->board.stats[0];
+	board->stat_count = zoo_io_read_short(h);
+	stat = &board->stats[0];
 
-	if (state->board.stat_count > (ZOO_MAX_STAT + 1)) {
-		// TODO: stat_count check
+	if (board->stat_count > (ZOO_MAX_STAT + 1)) {
+		// more stats than we can load
+		return ZOO_ERROR_INVAL;
 	}
 
-	for (ix = 0; ix <= state->board.stat_count; ix++, stat++) {
+	for (ix = 0; ix <= board->stat_count; ix++, stat++) {
 		zoo_stat_io_read(h, stat);
 		if (stat->data_len > 0) {
 #ifdef ZOO_USE_ROM_POINTERS
 			if (is_rom) {
-				stat->data = h->func_getptr(h);
+				stat->data = (char*) h->func_getptr(h);
 				h->func_skip(h, stat->data_len);
 			}
 			// If not from ROM, stat->data should be correct,
 			// and there should be no text following.
 #else
-			// TODO: malloc check
 			stat->data = malloc(stat->data_len);
+			if (stat->data == NULL)
+				return ZOO_ERROR_NOMEM;
 			h->func_read(h, (uint8_t *) stat->data, stat->data_len);
 #endif
 		} else if (stat->data_len < 0) {
 			// TODO: bounds check
-			stat->data = state->board.stats[-stat->data_len].data;
-			stat->data_len = state->board.stats[-stat->data_len].data_len;
+			stat->data = board->stats[-stat->data_len].data;
+			stat->data_len = board->stats[-stat->data_len].data_len;
 		}
 	}
+
+	return 0;
 }
 
-void zoo_board_close(zoo_state *state) {
+int zoo_board_close(zoo_state *state) {
 	zoo_io_handle handle;
 	int16_t board_id;
 	size_t buf_len;
+	int ret;
+	uint8_t *new_ptr;
 
 	board_id = state->world.info.current_board;
 	if (state->world.board_data[board_id] != NULL) {
@@ -287,23 +295,30 @@ void zoo_board_close(zoo_state *state) {
 		state->world.board_data[board_id] = NULL;
 	}
 
-	buf_len = zoo_board_io_max_len(state);
-	// TODO: malloc check
+	buf_len = zoo_io_board_max_length(&state->board);
 	state->world.board_data[board_id] = malloc(buf_len);
+	if (state->world.board_data[board_id] == NULL)
+		return ZOO_ERROR_NOMEM;
 
 	handle = zoo_io_open_file_mem(state->world.board_data[board_id], buf_len, true);
 
-	zoo_board_io_close(state, &handle);
+	ret = zoo_io_board_write(&handle, &state->board);
+	if (ret) return ret;
+
 	if (handle.func_tell(&handle) != buf_len) {
 		state->world.board_len[board_id] = handle.func_tell(&handle);
-		// TODO: realloc check?
-		state->world.board_data[board_id] =
-			realloc(state->world.board_data[board_id], state->world.board_len[board_id]);
+		new_ptr = realloc(state->world.board_data[board_id], state->world.board_len[board_id]);
+		if (new_ptr != NULL)
+			state->world.board_data[board_id] = new_ptr;
 	}
+
+	return 0;
 }
 
-void zoo_board_open(zoo_state *state, int16_t board_id) {
+int zoo_board_open(zoo_state *state, int16_t board_id) {
 	zoo_io_handle handle;
+	int ret;
+
 	if (board_id > state->world.board_count) {
 		board_id = state->world.info.current_board;
 	}
@@ -314,113 +329,148 @@ void zoo_board_open(zoo_state *state, int16_t board_id) {
 		false
 	);
 
-	zoo_board_io_open(state, &handle);
+	ret = zoo_io_board_read(&handle, &state->board);
+	if (ret) return ret;
+
 	state->world.info.current_board = board_id;
+	return 0;
 }
 
-void zoo_world_close(zoo_state *state) {
+int zoo_world_close(zoo_state *state) {
 	int i;
 
-	zoo_board_close(state);
+	i = zoo_board_close(state);
+	if (i) return i;
+
 	for (i = 0; i <= state->world.board_count; i++) {
 		if (!platform_is_rom_ptr(state->world.board_data[i]))
 			free(state->world.board_data[i]);
 		state->world.board_data[i] = NULL;
 	}
+
+	return 0;
 }
 
-bool zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
+int zoo_io_world_read(zoo_io_handle *h, zoo_world *world, bool title_only) {
 	int i;
 #ifdef ZOO_USE_ROM_POINTERS
 	bool is_rom = h->func_getptr != NULL && platform_is_rom_ptr(h->func_getptr(h));
 #endif
 
-	zoo_world_close(state);
-
-	state->world.board_count = zoo_io_read_short(h);
-	if (state->world.board_count < 0) {
-		if (state->world.board_count != -1) {
-			return false;
+	world->board_count = zoo_io_read_short(h);
+	if (world->board_count < 0) {
+		if (world->board_count != -1) {
+			return ZOO_ERROR_WRONGVER;
 		} else {
-			state->world.board_count = zoo_io_read_short(h);
+			world->board_count = zoo_io_read_short(h);
+			if (world->board_count > ZOO_MAX_BOARD)
+				return ZOO_ERROR_INVAL;
 		}
 	}
 
-	state->world.info.ammo = zoo_io_read_short(h);
-	state->world.info.gems = zoo_io_read_short(h);
+	world->info.ammo = zoo_io_read_short(h);
+	world->info.gems = zoo_io_read_short(h);
 	for (i = 0; i < 7; i++)
-		state->world.info.keys[i] = zoo_io_read_byte(h);
-	state->world.info.health = zoo_io_read_short(h);
-	state->world.info.current_board = zoo_io_read_short(h);
-	state->world.info.torches = zoo_io_read_short(h);
-	state->world.info.torch_ticks = zoo_io_read_short(h);
-	state->world.info.energizer_ticks = zoo_io_read_short(h);
+		world->info.keys[i] = zoo_io_read_byte(h);
+	world->info.health = zoo_io_read_short(h);
+	world->info.current_board = zoo_io_read_short(h);
+	world->info.torches = zoo_io_read_short(h);
+	world->info.torch_ticks = zoo_io_read_short(h);
+	world->info.energizer_ticks = zoo_io_read_short(h);
 	h->func_skip(h, 2);
-	state->world.info.score = zoo_io_read_short(h);
-	zoo_io_read_pstring(h, 20, state->world.info.name, sizeof(state->world.info.name) - 1);
+	world->info.score = zoo_io_read_short(h);
+	zoo_io_read_pstring(h, 20, world->info.name, sizeof(world->info.name) - 1);
 	for (i = 0; i < 10; i++)
-		zoo_io_read_pstring(h, 20, state->world.info.flags[i], sizeof(state->world.info.flags[i]) - 1);
-	state->world.info.board_time_sec = zoo_io_read_short(h);
-	state->world.info.board_time_hsec = zoo_io_read_short(h);
-	state->world.info.is_save = zoo_io_read_byte(h);
+		zoo_io_read_pstring(h, 20, world->info.flags[i], sizeof(world->info.flags[i]) - 1);
+	world->info.board_time_sec = zoo_io_read_short(h);
+	world->info.board_time_hsec = zoo_io_read_short(h);
+	world->info.is_save = zoo_io_read_byte(h);
 	h->func_skip(h, 247);
 
 	if (title_only) {
-		state->world.board_count = 0;
-		state->world.info.current_board = 0;
-		state->world.info.is_save = true;
+		world->board_count = 0;
+		world->info.current_board = 0;
+		world->info.is_save = true;
 	}
 
-	for (i = 0; i <= state->world.board_count; i++) {
-		state->world.board_len[i] = zoo_io_read_short(h);
+	for (i = 0; i <= world->board_count; i++) {
+		world->board_len[i] = zoo_io_read_short(h);
 #ifdef ZOO_USE_ROM_POINTERS
 		if (is_rom) {
-			state->world.board_data[i] = h->func_getptr(h);
-			h->func_skip(h, state->world.board_len[i]);
+			world->board_data[i] = h->func_getptr(h);
+			h->func_skip(h, world->board_len[i]);
 			continue;
 		}
 #endif
-		state->world.board_data[i] = malloc(state->world.board_len[i]);
-		h->func_read(h, state->world.board_data[i], state->world.board_len[i]);
+		world->board_data[i] = malloc(world->board_len[i]);
+		if (world->board_data[i] == NULL)
+			return ZOO_ERROR_NOMEM;
+		h->func_read(h, world->board_data[i], world->board_len[i]);
 	}
 
-	state->return_board_id = state->world.info.current_board;
-	zoo_board_open(state, state->return_board_id);
-
-	return true;
+	return 0;
 }
 
-bool zoo_world_save(zoo_state *state, zoo_io_handle *h) {
+int zoo_io_world_write(zoo_io_handle *h, zoo_world *world) {
 	int i;
-	zoo_board_close(state);
 
 	zoo_io_write_short(h, -1);
-	zoo_io_write_short(h, state->world.board_count);
+	zoo_io_write_short(h, world->board_count);
 
-	zoo_io_write_short(h, state->world.info.ammo);
-	zoo_io_write_short(h, state->world.info.gems);
+	zoo_io_write_short(h, world->info.ammo);
+	zoo_io_write_short(h, world->info.gems);
 	for (i = 0; i < 7; i++)
-		zoo_io_write_byte(h, state->world.info.keys[i] ? 1 : 0);
-	zoo_io_write_short(h, state->world.info.health);
-	zoo_io_write_short(h, state->world.info.current_board);
-	zoo_io_write_short(h, state->world.info.torches);
-	zoo_io_write_short(h, state->world.info.torch_ticks);
-	zoo_io_write_short(h, state->world.info.energizer_ticks);
+		zoo_io_write_byte(h, world->info.keys[i] ? 1 : 0);
+	zoo_io_write_short(h, world->info.health);
+	zoo_io_write_short(h, world->info.current_board);
+	zoo_io_write_short(h, world->info.torches);
+	zoo_io_write_short(h, world->info.torch_ticks);
+	zoo_io_write_short(h, world->info.energizer_ticks);
 	zoo_io_write_short(h, 0);
-	zoo_io_write_short(h, state->world.info.score);
-	zoo_io_write_pstring(h, 20, state->world.info.name, sizeof(state->world.info.name) - 1);
+	zoo_io_write_short(h, world->info.score);
+	zoo_io_write_pstring(h, 20, world->info.name, sizeof(world->info.name) - 1);
 	for (i = 0; i < 10; i++)
-		zoo_io_write_pstring(h, 20, state->world.info.flags[i], sizeof(state->world.info.flags[i]) - 1);
-	zoo_io_write_short(h, state->world.info.board_time_sec);
-	zoo_io_write_short(h, state->world.info.board_time_hsec);
-	zoo_io_write_byte(h, state->world.info.is_save ? 1 : 0);
+		zoo_io_write_pstring(h, 20, world->info.flags[i], sizeof(world->info.flags[i]) - 1);
+	zoo_io_write_short(h, world->info.board_time_sec);
+	zoo_io_write_short(h, world->info.board_time_hsec);
+	zoo_io_write_byte(h, world->info.is_save ? 1 : 0);
 	h->func_skip(h, 247);
 
-	for (i = 0; i <= state->world.board_count; i++) {
-		zoo_io_write_short(h, state->world.board_len[i]);
-		h->func_write(h, state->world.board_data[i], state->world.board_len[i]);
+	for (i = 0; i <= world->board_count; i++) {
+		zoo_io_write_short(h, world->board_len[i]);
+		h->func_write(h, world->board_data[i], world->board_len[i]);
 	}
 
-	zoo_board_open(state, state->world.info.current_board);
-	return true;
+	return 0;
+}
+
+int zoo_world_load(zoo_state *state, zoo_io_handle *h, bool title_only) {
+	int ret;
+
+	ret = zoo_world_close(state);
+	if (ret) return ret;
+
+	ret = zoo_io_world_read(h, &state->world, title_only);
+	if (ret) return ret;
+	state->return_board_id = state->world.info.current_board;
+
+	ret = zoo_board_open(state, state->return_board_id);
+	if (ret) return ret;
+
+	return 0;
+}
+
+int zoo_world_save(zoo_state *state, zoo_io_handle *h) {
+	int ret;
+
+	ret = zoo_board_close(state);
+	if (ret) return ret;
+
+	ret = zoo_io_world_write(h, &state->world);
+	if (ret) return ret;
+
+	ret = zoo_board_open(state, state->world.info.current_board);
+	if (ret) return ret;
+
+	return 0;
 }
