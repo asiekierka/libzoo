@@ -18,6 +18,8 @@ SOURCES += \
   $(SRCDIR)/libzoo/zoo_window_classic.c \
   $(SRCDIR)/libzoo/zoo.c
 
+$(SRCDIR)/libzoo/zoo_oop.c : $(BUILDDIR)/libzoo/zoo_oop_token.c
+
 INCLUDE_DIRS += $(INCLUDEDIR)
 
 # automatically generated headers
@@ -128,6 +130,11 @@ $(BUILDDIR)/%.o : $(BUILDDIR)/%.c
 	@echo $(notdir $<)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.c : $(SRCDIR)/%.tok
+	@echo $(notdir $<)
+	@mkdir -p $(@D)
+	$(PYTHON3) $(TOOLSDIR)/tok2c.py $< $@
 
 .PHONY: clean
 

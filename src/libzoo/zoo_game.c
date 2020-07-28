@@ -53,10 +53,12 @@ void zoo_board_change(zoo_state *state, int16_t board_id) {
 	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].element = ZOO_E_PLAYER;
 	state->board.tiles[state->board.stats[0].x][state->board.stats[0].y].color
 		= zoo_element_defs[ZOO_E_PLAYER].color;
-	// TODO: retval check
-	zoo_board_close(state);
-	// TODO: retval check
-	zoo_board_open(state, board_id);
+	
+	state->error_value = zoo_board_close(state);
+	if (state->error_value) return;
+
+	state->error_value = zoo_board_open(state, board_id);
+	if (state->error_value) return;
 }
 
 void zoo_board_create(zoo_state *state) {
@@ -872,9 +874,9 @@ static ZOO_INLINE zoo_tick_retval zoo_tick_inner(zoo_state *state) {
 zoo_tick_retval zoo_tick(zoo_state *state) {
 	zoo_tick_retval ret;
 
-	if (state->error_value != 0) return ERROR;
+	if (state->error_value) return ERROR;
 	ret = zoo_tick_inner(state);
-	if (state->error_value != 0) return ERROR;
+	if (state->error_value) return ERROR;
 
 	if (ret != RETURN_IMMEDIATE) {
 		zoo_input_clear_post_tick(&state->input);

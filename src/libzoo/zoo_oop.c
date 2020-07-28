@@ -29,13 +29,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "zoo.h"
+#include "libzoo/zoo_oop_token.c"
 
 #define oop_word_cmp(c) strncmp(state->oop_word, (c), sizeof(state->oop_word) - 1)
 #define oop_word_len() strnlen(state->oop_word, sizeof(state->oop_word) - 1)
-
-static const char zoo_oop_color_names[][8] = {
-	"BLACK", "BLUE", "GREEN", "CYAN", "RED", "PURPLE", "YELLOW", "WHITE"
-};
 
 void zoo_stat_free(zoo_stat *stat) {
 	if (!platform_is_rom_ptr(stat->data))
@@ -145,43 +142,56 @@ static void zoo_oop_skip_line(zoo_state *state, int16_t stat_id, int16_t *positi
 static bool zoo_oop_parse_direction(zoo_state *state, int16_t stat_id, int16_t *position, int16_t *dx, int16_t *dy) {
 	bool result = true;
 
-	if (!oop_word_cmp("N") || !oop_word_cmp("NORTH")) {
+	switch (zoo_oop_token_search(tok_zoo_oop_token_dir, state->oop_word)) {
+	case TOK_DIR_NORTH: {
 		*dx = 0;
 		*dy = -1;
-	} else if (!oop_word_cmp("S") || !oop_word_cmp("SOUTH")) {
+	} break;
+    case TOK_DIR_SOUTH: {
 		*dx = 0;
 		*dy = 1;
-	} else if (!oop_word_cmp("E") || !oop_word_cmp("EAST")) {
+	} break;
+    case TOK_DIR_EAST: {
 		*dx = 1;
 		*dy = 0;
-	} else if (!oop_word_cmp("W") || !oop_word_cmp("WEST")) {
+	} break;
+    case TOK_DIR_WEST: {
 		*dx = -1;
 		*dy = 0;
-	} else if (!oop_word_cmp("I") || !oop_word_cmp("IDLE")) {
+	} break;
+    case TOK_DIR_IDLE: {
 		*dx = 0;
 		*dy = 0;
-	} else if (!oop_word_cmp("SEEK")) {
+	} break;
+    case TOK_DIR_SEEK: {
 		zoo_calc_direction_seek(state, state->board.stats[stat_id].x, state->board.stats[stat_id].y, dx, dy);
-	} else if (!oop_word_cmp("FLOW")) {
+	} break;
+    case TOK_DIR_FLOW: {
 		*dx = state->board.stats[stat_id].step_x;
 		*dy = state->board.stats[stat_id].step_y;
-	} else if (!oop_word_cmp("RND")) {
+	} break;
+    case TOK_DIR_RND: {
 		zoo_calc_direction_rnd(state, dx, dy);
-	} else if (!oop_word_cmp("RNDNS")) {
+	} break;
+    case TOK_DIR_RNDNS: {
 		*dx = 0;
 		*dy = state->func_random(state, 2) * 2 - 1;
-	} else if (!oop_word_cmp("RNDNE")) {
+	} break;
+    case TOK_DIR_RNDNE: {
 		*dx = state->func_random(state, 2);
 		*dy = (*dx == 0) ? -1 : 0;
-	} else if (!oop_word_cmp("CW")) {
+	} break;
+    case TOK_DIR_CW: {
 		zoo_oop_read_word(state, stat_id, position);
 		result = zoo_oop_parse_direction(state, stat_id, position, dy, dx);
 		*dx = -(*dx);
-	} else if (!oop_word_cmp("CCW")) {
+	} break;
+    case TOK_DIR_CCW: {
 		zoo_oop_read_word(state, stat_id, position);
 		result = zoo_oop_parse_direction(state, stat_id, position, dy, dx);
 		*dy = -(*dy);
-	} else if (!oop_word_cmp("RNDP")) {
+	} break;
+    case TOK_DIR_RNDP: {
 		zoo_oop_read_word(state, stat_id, position);
 		result = zoo_oop_parse_direction(state, stat_id, position, dy, dx);
 		if (state->func_random(state, 2) == 0) {
@@ -189,15 +199,18 @@ static bool zoo_oop_parse_direction(zoo_state *state, int16_t stat_id, int16_t *
 		} else {
 			*dy = -(*dy);
 		}
-	} else if (!oop_word_cmp("OPP")) {
+	} break;
+    case TOK_DIR_OPP: {
 		zoo_oop_read_word(state, stat_id, position);
 		result = zoo_oop_parse_direction(state, stat_id, position, dx, dy);
 		*dx = -(*dx);
 		*dy = -(*dy);
-	} else {
+	} break;
+	default: {
 		*dx = 0;
 		*dy = 0;
 		result = false;
+	}
 	}
 
 	return result;
@@ -401,15 +414,22 @@ static bool zoo_oop_parse_tile(zoo_state *state, int16_t stat_id, int16_t *posit
 	tile->color = 0x00;
 
 	zoo_oop_read_word(state, stat_id, position);
+	i = zoo_oop_token_search(tok_zoo_oop_token_color, state->oop_word);
+	if (i != TOK_COLOR_INVALID) {
+		tile->color = i + 9;
+		zoo_oop_read_word(state, stat_id, position);			
+	}
+	/*
 	for (i = 1; i <= 7; i++) {
-		// zoo_oop_strip_chars(name, zoo_color_names[i], sizeof(name) - 1);
-		// if (!strncmp(name, state->oop_word, 20)) {
+		zoo_oop_strip_chars(name, zoo_color_names[i], sizeof(name) - 1);
+		if (!strncmp(name, state->oop_word, 20)) {
 		if (!strncmp(zoo_oop_color_names[i], state->oop_word, 20)) {
 			tile->color = i + 8;
 			zoo_oop_read_word(state, stat_id, position);
 			break;
 		}
 	}
+	*/
 
 	for (i = 0; i <= ZOO_MAX_ELEMENT; i++) {
 		// zoo_oop_strip_chars(name, zoo_element_defs[i].name, sizeof(name) - 1);
@@ -500,24 +520,25 @@ static bool zoo_oop_check_condition(zoo_state *state, int16_t stat_id, int16_t *
 	// otherwise a zoo_oop_error in "ANY" could lead to invalid data
 	zoo_tile tile = {0, 0};
 
-	if (!oop_word_cmp("NOT")) {
+	switch (zoo_oop_token_search(tok_zoo_oop_token_cond, state->oop_word)) {
+	case TOK_COND_NOT:
 		zoo_oop_read_word(state, stat_id, position);
 		return !zoo_oop_check_condition(state, stat_id, position);
-	} else if (!oop_word_cmp("ALLIGNED")) {
+	case TOK_COND_ALLIGNED:
 		return (state->board.stats[stat_id].x == state->board.stats[0].x)
-			|| (state->board.stats[stat_id].y == state->board.stats[0].y);
-	} else if (!oop_word_cmp("CONTACT")) {
+		|| (state->board.stats[stat_id].y == state->board.stats[0].y);
+	case TOK_COND_CONTACT:
 		return zoo_dist_sq(state->board.stats[stat_id].x - state->board.stats[0].x,
 			state->board.stats[stat_id].y - state->board.stats[0].y) == 1;
-	} else if (!oop_word_cmp("BLOCKED")) {
+	case TOK_COND_BLOCKED:
 		zoo_oop_read_direction(state, stat_id, position, &ix, &iy);
 		return !zoo_element_defs[state->board.tiles
 			[state->board.stats[stat_id].x + ix]
 			[state->board.stats[stat_id].y + iy]
 		.element].walkable;
-	} else if (!oop_word_cmp("ENERGIZED")) {
+	case TOK_COND_ENERGIZED:
 		return state->world.info.energizer_ticks > 0;
-	} else if (!oop_word_cmp("ANY")) {
+	case TOK_COND_ANY:
 		if (!zoo_oop_parse_tile(state, stat_id, position, &tile)) {
 			zoo_oop_error(state, stat_id, "Bad object kind");
 			return false;
@@ -526,7 +547,7 @@ static bool zoo_oop_check_condition(zoo_state *state, int16_t stat_id, int16_t *
 		ix = 0;
 		iy = 1;
 		return zoo_find_tile_on_board(state, &ix, &iy, tile);
-	} else {
+	default:
 		return zoo_flag_get_id(state, state->oop_word) >= 0;
 	}
 }
@@ -688,7 +709,8 @@ ReadCommand:
 				goto ReadInstruction;
 			} else {
 				ins_count++;
-				if (!oop_word_cmp("GO")) {
+				switch (zoo_oop_token_search(tok_zoo_oop_token_ins, state->oop_word)) {
+				case TOK_INS_GO: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 
 					if (!zoo_element_defs[state->board.tiles[stat->x + dx][stat->y + dy].element].walkable) {
@@ -702,7 +724,8 @@ ReadCommand:
 					}
 
 					stop_running = true;
-				} else if (!oop_word_cmp("TRY")) {
+				} break;
+                case TOK_INS_TRY: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 
 					if (!zoo_element_defs[state->board.tiles[stat->x + dx][stat->y + dy].element].walkable) {
@@ -717,50 +740,67 @@ ReadCommand:
 					}
 
 					stop_running = true;
-				} else if (!oop_word_cmp("WALK")) {
+				} break;
+                case TOK_INS_WALK: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 					stat->step_x = dx;
 					stat->step_y = dy;
-				} else if (!oop_word_cmp("SET")) {
+				} break;
+                case TOK_INS_SET: {
 					zoo_oop_read_word(state, stat_id, position);
 					zoo_flag_set(state, state->oop_word);
-				} else if (!oop_word_cmp("CLEAR")) {
+				} break;
+                case TOK_INS_CLEAR: {
 					zoo_oop_read_word(state, stat_id, position);
 					zoo_flag_clear(state, state->oop_word);
-				} else if (!oop_word_cmp("IF")) {
+				} break;
+                case TOK_INS_IF: {
 					zoo_oop_read_word(state, stat_id, position);
 					if (zoo_oop_check_condition(state, stat_id, position)) {
 						goto ReadCommand;
 					}
-				} else if (!oop_word_cmp("SHOOT")) {
+				} break;
+                case TOK_INS_SHOOT: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 					if (zoo_board_shoot(state, ZOO_E_BULLET, stat->x, stat->y, dx, dy, 1)) {
 						zoo_sound_queue_const(&(state->sound), 2, "\x30\x01\x26\x01");
 					}
 					stop_running = true;
-				} else if (!oop_word_cmp("THROWSTAR")) {
+				} break;
+                case TOK_INS_THROWSTAR: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 					if (zoo_board_shoot(state, ZOO_E_STAR, stat->x, stat->y, dx, dy, 1)) {
 					}
 					stop_running = true;
-				} else if (!oop_word_cmp("GIVE") || !oop_word_cmp("TAKE")) {
+				} break;
+				case TOK_INS_GIVE:
+                case TOK_INS_TAKE: {
 					counter_subtract = !oop_word_cmp("TAKE");
 
 					zoo_oop_read_word(state, stat_id, position);
-					if (!oop_word_cmp("HEALTH")) {
+		
+					switch (zoo_oop_token_search(tok_zoo_oop_token_give, state->oop_word)) {
+					case TOK_GIVE_HEALTH: {
 						counter_ptr = &(state->world.info.health);
-					} else if (!oop_word_cmp("AMMO")) {
+					} break;
+               		case TOK_GIVE_AMMO: {
 						counter_ptr = &(state->world.info.ammo);
-					} else if (!oop_word_cmp("GEMS")) {
+					} break;
+                	case TOK_GIVE_GEMS: {
 						counter_ptr = &(state->world.info.gems);
-					} else if (!oop_word_cmp("TORCHES")) {
+					} break;
+               		case TOK_GIVE_TORCHES: {
 						counter_ptr = &(state->world.info.torches);
-					} else if (!oop_word_cmp("SCORE")) {
+					} break;
+                	case TOK_GIVE_SCORE: {
 						counter_ptr = &(state->world.info.score);
-					} else if (!oop_word_cmp("TIME")) {
+					} break;
+                	case TOK_GIVE_TIME: {
 						counter_ptr = &(state->world.info.board_time_sec);
-					} else {
+					} break;
+					default: {
 						counter_ptr = NULL;
+					} break;
 					}
 
 					if (counter_ptr != NULL) {
@@ -778,17 +818,22 @@ ReadCommand:
 					}
 
 					state->func_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
-				} else if (!oop_word_cmp("END")) {
+				} break;
+                case TOK_INS_END: {
 					*position = -1;
 					state->oop_char = '\0';
-				} else if (!oop_word_cmp("ENDGAME")) {
+				} break;
+                case TOK_INS_ENDGAME: {
 					state->world.info.health = 0;
-				} else if (!oop_word_cmp("IDLE")) {
+				} break;
+                case TOK_INS_IDLE: {
 					stop_running = true;
-				} else if (!oop_word_cmp("RESTART")) {
+				} break;
+                case TOK_INS_RESTART: {
 					*position = 0;
 					line_finished = false;
-				} else if (!oop_word_cmp("ZAP")) {
+				} break;
+                case TOK_INS_ZAP: {
 					zoo_oop_read_word(state, stat_id, position);
 					// state->oop_word is used by zoo_oop_iterate_stat
 					strncpy(buf2, state->oop_word, sizeof(buf2));
@@ -803,7 +848,8 @@ ReadCommand:
 						state->board.stats[label_stat_id].data[label_data_pos + 1] = '\'';
 #endif
 					}
-				} else if (!oop_word_cmp("RESTORE")) {
+				} break;
+                case TOK_INS_RESTORE: {
 					zoo_oop_read_word(state, stat_id, position);
 					strncpy(buf, "\r'", sizeof(buf) - 1);
 					strncat(buf, state->oop_word, sizeof(buf) - 1);
@@ -827,18 +873,22 @@ ReadCommand:
 						} while (label_data_pos > 0);
 #endif
 					}
-				} else if (!oop_word_cmp("LOCK")) {
+				} break;
+                case TOK_INS_LOCK: {
 					stat->p2 = 1;
-				} else if (!oop_word_cmp("UNLOCK")) {
+				} break;
+                case TOK_INS_UNLOCK: {
 					stat->p2 = 0;
-				} else if (!oop_word_cmp("SEND")) {
+				} break;
+                case TOK_INS_SEND: {
 					zoo_oop_read_word(state, stat_id, position);
 					// state->oop_word is used by zoo_oop_iterate_stat
 					strncpy(buf2, state->oop_word, sizeof(buf2));
 					if (zoo_oop_send(state, stat_id, buf2, false)) {
 						line_finished = false;
 					}
-				} else if (!oop_word_cmp("BECOME")) {
+				} break;
+                case TOK_INS_BECOME: {
 					if (zoo_oop_parse_tile(state, stat_id, position, &arg_tile)) {
 						replace_stat = true;
 						replace_tile.element = arg_tile.element;
@@ -846,7 +896,8 @@ ReadCommand:
 					} else {
 						zoo_oop_error(state, stat_id, "Bad #BECOME");
 					}
-				} else if (!oop_word_cmp("PUT")) {
+				} break;
+                case TOK_INS_PUT: {
 					zoo_oop_read_direction(state, stat_id, position, &dx, &dy);
 					if (dx == 0 && dy == 0) {
 						zoo_oop_error(state, stat_id, "Bad #PUT");
@@ -866,7 +917,8 @@ ReadCommand:
 
 						zoo_oop_place_tile(state, stat->x + dx, stat->y + dy, arg_tile);
 					}
-				} else if (!oop_word_cmp("CHANGE")) {
+				} break;
+                case TOK_INS_CHANGE: {
 					if (!zoo_oop_parse_tile(state, stat_id, position, &arg_tile)) {
 						zoo_oop_error(state, stat_id, "Bad #CHANGE");
 					}
@@ -883,29 +935,34 @@ ReadCommand:
 					while (zoo_find_tile_on_board(state, &ix, &iy, arg_tile)) {
 						zoo_oop_place_tile(state, ix, iy, arg_tile2);
 					}
-				} else if (!oop_word_cmp("PLAY")) {
+				} break;
+                case TOK_INS_PLAY: {
 					zoo_oop_read_line_to_end(state, stat_id, position, buf, sizeof(buf) - 1);
 					buf2_len = zoo_sound_parse(buf, (uint8_t*) buf2, sizeof(buf2));
 					if (buf2_len > 0) {
 						zoo_sound_queue(&(state->sound), -1, (uint8_t*) buf2, buf2_len);
 					}
 					line_finished = false;
-				} else if (!oop_word_cmp("CYCLE")) {
+				} break;
+                case TOK_INS_CYCLE: {
 					zoo_oop_read_value(state, stat_id, position);
 					if (state->oop_value > 0) {
 						stat->cycle = state->oop_value;
 					}
-				} else if (!oop_word_cmp("CHAR")) {
+				} break;
+                case TOK_INS_CHAR: {
 					zoo_oop_read_value(state, stat_id, position);
 					if (state->oop_value > 0 && state->oop_value <= 255) {
 						stat->p1 = state->oop_value;
 						zoo_board_draw_tile(state, stat->x, stat->y);
 					}
-				} else if (!oop_word_cmp("DIE")) {
+				} break;
+                case TOK_INS_DIE: {
 					replace_stat = true;
 					replace_tile.element = ZOO_E_EMPTY;
 					replace_tile.color = 0x0F;
-				} else if (!oop_word_cmp("BIND")) {
+				} break;
+                case TOK_INS_BIND: {
 					zoo_oop_read_word(state, stat_id, position);
 					bind_stat_id = 0;
 					// state->oop_word is used by zoo_oop_iterate_stat
@@ -926,7 +983,8 @@ ReadCommand:
 #endif
 						*position = 0;
 					}
-				} else {
+				} break;
+				default: {
 					strncpy(buf, state->oop_word, sizeof(buf) - 1);
 					if (zoo_oop_send(state, stat_id, buf, false)) {
 						line_finished = false;
@@ -935,6 +993,7 @@ ReadCommand:
 						strncat(buf2, buf, sizeof(buf2) - 1);
 						zoo_oop_error(state, stat_id, buf2);
 					}
+				} break;
 				}
 			}
 
