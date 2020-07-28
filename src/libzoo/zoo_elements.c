@@ -36,6 +36,8 @@
 	(c)->args.touch.source_stat_id = source_stat_id; \
 	(c)->args.touch.dx = dx; \
 	(c)->args.touch.dy = dy
+#define CALL_OOM_CHECK(state, val) \
+	if ((val) == NULL) { (state)->error_value = ZOO_ERROR_NOMEM; return; }
 
 static void zoo_default_tick(zoo_state *state, int16_t stat_id) {
 
@@ -919,6 +921,7 @@ static void zoo_e_object_tick(zoo_state *state, int16_t stat_id) {
 	if (state->object_window_request) {
 		// push self
 		call = zoo_call_push(&state->call_stack, TICK_FUNC, 1);
+		CALL_OOM_CHECK(state, call);
 		call->args.tick.func = zoo_e_object_tick;
 		call->args.tick.stat_id = stat_id;
 		// push text window
@@ -966,6 +969,7 @@ static void zoo_e_duplicator_tick(zoo_state *state, int16_t stat_id) {
 		if (target_tile->element == ZOO_E_PLAYER) {
 			// push self
 			call = zoo_call_push(&state->call_stack, TICK_FUNC, 1);
+			CALL_OOM_CHECK(state, call);
 			call->args.tick.func = zoo_e_duplicator_tick;
 			call->args.tick.stat_id = stat_id;
 			// touch
@@ -1045,6 +1049,7 @@ static void zoo_e_scroll_touch(zoo_state *state, int16_t x, int16_t y, int16_t s
 	if (state->object_window_request) {
 		// push self
 		call = zoo_call_push(&state->call_stack, TOUCH_FUNC, 1);
+		CALL_OOM_CHECK(state, call);
 		call->args.touch.func = zoo_e_scroll_touch;
 		CALL_SET_TOUCH_ARGS(call);
 		// push text window
@@ -1283,6 +1288,7 @@ static void zoo_e_board_edge_touch(zoo_state *state, int16_t x, int16_t y, int16
 		if (state->board.tiles[entry_x][entry_y].element != ZOO_E_PLAYER) {
 			// push self
 			call = zoo_call_push(&state->call_stack, TOUCH_FUNC, 1);
+			CALL_OOM_CHECK(state, call);
 			call->args.touch.func = zoo_e_board_edge_touch;
 			CALL_SET_TOUCH_ARGS(call);
 			call->args.touch.extra.board_edge.neighbor_id = neighbor_id;
@@ -1452,6 +1458,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 		} else {
 			// push self
 			call = zoo_call_push(&(state->call_stack), TICK_FUNC, 1);
+			CALL_OOM_CHECK(state, call);
 			call->args.tick.func = zoo_e_player_tick;
 			call->args.tick.stat_id = stat_id;
 			// touch
@@ -1548,10 +1555,6 @@ PlayerTickState1:
 
 static void zoo_e_monitor_tick(zoo_state *state, int16_t stat_id) {
 	// TODO
-}
-
-void zoo_reset_message_flags(zoo_state *state) {
-	memset(&(state->msg_flags), 1, sizeof(zoo_state_message));
 }
 
 #include "zoo_element_defs.inc"

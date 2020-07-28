@@ -83,7 +83,9 @@ typedef enum {
 	// cycle complete - return next cycle
 	RETURN_NEXT_CYCLE,
 	// exit the current mode
-	EXIT
+	EXIT,
+	// error condition - check state->error_value
+	ERROR
 } zoo_tick_retval;
 
 typedef void (*zoo_func_element_draw)(struct s_zoo_state *state, int16_t x, int16_t y, uint8_t *ch);
@@ -260,6 +262,9 @@ typedef struct {
 #ifdef ZOO_USE_LABEL_CACHE
 	zoo_stat_label *label_cache;
 	int16_t label_cache_size; // plus one
+#ifdef ZOO_NO_OBJECT_CODE_WRITES
+	char label_cache_chr2; // #zap restart emulation
+#endif
 #endif
 } zoo_stat;
 
@@ -411,6 +416,8 @@ typedef struct s_zoo_state {
 	bool object_window_request;
 	zoo_call_stack call_stack;
 	uint8_t game_tick_state; // not in call_stack to save performance
+
+	int16_t error_value;
 
 	uint32_t random_seed;
 	// TODO: does this need to be overrideable?
@@ -578,6 +585,12 @@ void zoo_flag_clear(zoo_state *state, const char *name);
 
 bool zoo_oop_send(zoo_state *state, int16_t stat_id, const char *send_label, bool ignore_lock);
 void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const char *default_name);
+
+// zoo_oop_label_cache.c
+
+void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id);
+void zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, int16_t *i_stat, int16_t *i_data_pos, bool zapped);
+void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label);
 
 // zoo_window.c
 

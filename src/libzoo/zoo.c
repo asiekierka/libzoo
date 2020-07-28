@@ -71,36 +71,6 @@ bool zoo_world_return_title(zoo_state *state) {
 	return true;
 }
 
-zoo_call *zoo_call_push(zoo_call_stack *stack, zoo_call_type type, uint8_t state) {
-	// TODO: malloc check
-	zoo_call *new_call;
-
-	new_call = malloc(sizeof(zoo_call));
-	new_call->next = stack->call;
-	new_call->type = type;
-	new_call->state = state;
-	stack->call = new_call;
-
-	return new_call;
-}
-
-zoo_call *zoo_call_push_callback(zoo_call_stack *stack, zoo_func_callback func, void *arg) {
-	zoo_call *c = zoo_call_push(stack, CALLBACK, 0);
-
-	c->args.cb.func = func;
-	c->args.cb.arg = arg;
-
-	return c;
-}
-
-void zoo_call_pop(zoo_call_stack *stack) {
-	zoo_call *old_call;
-
-	old_call = stack->call;
-	stack->call = old_call->next;
-	free(old_call);
-}
-
 static int16_t zoo_default_random(zoo_state *state, int16_t max) {
 	state->random_seed = (state->random_seed * 134775813) + 1;
 	return state->random_seed % max;

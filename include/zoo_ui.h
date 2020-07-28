@@ -1,8 +1,8 @@
 #ifndef __ZOO_UI_H__
 #define __ZOO_UI_H__
 
-#include "../libzoo/zoo.h"
-#include "../drivers/zoo_io_path.h"
+#include "zoo.h"
+#include "zoo_io_path.h"
 
 struct s_zoo_ui_state;
 

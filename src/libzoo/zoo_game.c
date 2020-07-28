@@ -111,6 +111,10 @@ void zoo_board_create(zoo_state *state) {
 	state->board.stats[0].data_len = 0;
 }
 
+void zoo_reset_message_flags(zoo_state *state) {
+	memset(&(state->msg_flags), 1, sizeof(zoo_state_message));
+}
+
 void zoo_world_create(zoo_state *state) {
 	int16_t i;
 
@@ -787,9 +791,9 @@ GameTickState1:
 		}
 	} else {
 		// not paused
-		i = state->current_stat_tick;
+		if (state->current_stat_tick <= state->board.stat_count) {
+			i = state->current_stat_tick;
 
-		if (i <= state->board.stat_count) {
 			if (state->board.stats[i].cycle != 0
 				&& (state->current_tick % state->board.stats[i].cycle) == (i % state->board.stats[i].cycle)
 			) {
@@ -866,7 +870,12 @@ static ZOO_INLINE zoo_tick_retval zoo_tick_inner(zoo_state *state) {
 }
 
 zoo_tick_retval zoo_tick(zoo_state *state) {
-	zoo_tick_retval ret = zoo_tick_inner(state);
+	zoo_tick_retval ret;
+
+	if (state->error_value != 0) return ERROR;
+	ret = zoo_tick_inner(state);
+	if (state->error_value != 0) return ERROR;
+
 	if (ret != RETURN_IMMEDIATE) {
 		zoo_input_clear_post_tick(&state->input);
 	}

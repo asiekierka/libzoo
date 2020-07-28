@@ -1,10 +1,12 @@
 # base defines
 
+INCLUDEDIR := $(BASEDIR)/include
 SRCDIR := $(BASEDIR)/src
 TOOLSDIR := $(BASEDIR)/tools
 
 SOURCES := $(foreach srcf,$(SOURCES),$(abspath $(srcf)))
 SOURCES += \
+  $(SRCDIR)/libzoo/zoo_callstack.c \
   $(SRCDIR)/libzoo/zoo_elements.c \
   $(SRCDIR)/libzoo/zoo_game_io.c \
   $(SRCDIR)/libzoo/zoo_game.c \
@@ -16,10 +18,7 @@ SOURCES += \
   $(SRCDIR)/libzoo/zoo_window_classic.c \
   $(SRCDIR)/libzoo/zoo.c
 
-INCLUDE_DIRS += \
-  $(SRCDIR)/libzoo \
-  $(SRCDIR)/drivers \
-  $(SRCDIR)/ui
+INCLUDE_DIRS += $(INCLUDEDIR)
 
 # automatically generated headers
 INCLUDE_DIRS += $(BUILDDIR)
@@ -94,6 +93,7 @@ endif # ZOO_USE_UI
 
 ifdef ZOO_USE_LABEL_CACHE
 CFLAGS += -DZOO_USE_LABEL_CACHE
+SOURCES += $(SRCDIR)/libzoo/zoo_oop_label_cache.c
 endif
 
 ifdef ZOO_USE_ROM_POINTERS

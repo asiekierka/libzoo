@@ -21,10 +21,6 @@ static ZOO_INLINE void zoo_ui_dbg_memfree(zoo_state *zoo) {
 	zoo_ui_debug_printf(false, "free mem = %d bytes\n", platform_debug_free_memory());
 }
 
-#ifdef ZOO_USE_LABEL_CACHE
-extern void zoo_build_label_cache(zoo_state *state, int16_t stat_id);
-#endif
-
 static ZOO_INLINE void zoo_ui_dbg_memtest(zoo_state *zoo) {
 	// Load every board.
 	int curr_board = zoo->world.info.current_board;
@@ -37,7 +33,7 @@ static ZOO_INLINE void zoo_ui_dbg_memtest(zoo_state *zoo) {
 		zoo_ui_debug_printf(false, "opening board %d, free mem = %d bytes\n", i, platform_debug_free_memory());
 #ifdef ZOO_USE_LABEL_CACHE
 		for (j = 0; j <= zoo->board.stat_count; j++)
-			zoo_build_label_cache(zoo, j);
+			zoo_oop_label_cache_build(zoo, j);
 #endif
 		zoo_board_close(zoo);
 	}
