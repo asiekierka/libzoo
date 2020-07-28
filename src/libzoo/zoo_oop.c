@@ -32,7 +32,6 @@
 #include "libzoo/zoo_oop_token.c"
 
 #define oop_word_cmp(c) strncmp(state->oop_word, (c), sizeof(state->oop_word) - 1)
-#define oop_word_len() strnlen(state->oop_word, sizeof(state->oop_word) - 1)
 
 void zoo_stat_free(zoo_stat *stat) {
 	if (!platform_is_rom_ptr(stat->data))
@@ -623,12 +622,14 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	//
 	zoo_text_window text_window;
 
-	strncpy(name, default_name, sizeof(name) - 1);
+	// libzoo fix: done on demand
+	// strncpy(name, default_name, sizeof(name) - 1);
+	
 	stat = &state->board.stats[stat_id];
 
 	if (state->call_stack.state == 1) {
 		// returning from object window
-		if (strnlen(state->object_window.hyperlink, sizeof(state->object_window.hyperlink) - 1) > 0) {
+		if (state->object_window.hyperlink[0] != '\0') {
 			if (zoo_oop_send(state, stat_id, state->object_window.hyperlink, false)) {
 				// continue
 				goto StartParsing;
@@ -705,7 +706,7 @@ ReadCommand:
 			if (!oop_word_cmp("THEN")) {
 				zoo_oop_read_word(state, stat_id, position);
 			}
-			if (oop_word_len() == 0) {
+			if (state->oop_word[0] == '\0') {
 				goto ReadInstruction;
 			} else {
 				ins_count++;
@@ -1031,8 +1032,8 @@ ReadCommand:
 		if (state->oop_char == '@') {
 			zoo_oop_read_line_to_end(state, stat_id, &name_position, name, sizeof(name) - 1);
 		}
-		if (strnlen(name, sizeof(name) - 1) == 0) {
-			strncpy(name, "Interaction", sizeof(name) - 1);
+		if (name[0] == '\0') {
+			strncpy(name, default_name != NULL ? default_name : "Interaction", sizeof(name) - 1);
 		}
 
 		strncpy(text_window.title, name, sizeof(text_window.title) - 1);

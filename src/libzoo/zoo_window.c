@@ -47,7 +47,11 @@ void zoo_window_append(zoo_text_window *window, const char *text) {
 	memcpy(buffer, text, buflen);
 	buffer[buflen] = '\0';
 
-	window->lines = realloc(window->lines, sizeof(char*) * (window->line_count + 1));
+	if (window->line_count > 0) {
+		window->lines = realloc(window->lines, sizeof(char*) * (window->line_count + 1));
+	} else {
+		window->lines = malloc(sizeof(char*));
+	}
 	window->lines[(window->line_count)++] = buffer;
 }
 
