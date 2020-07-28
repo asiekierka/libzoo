@@ -85,14 +85,10 @@ static void zoo_io_stat_read(zoo_io_handle *h, zoo_stat *stat) {
 	stat->follower = zoo_io_read_short(h);
 	stat->leader = zoo_io_read_short(h);
 	stat->under = zoo_io_read_tile(h);
-	stat->data = NULL; h->func_skip(h, 4);
+	h->func_skip(h, 4); // stat->data
 	stat->data_pos = zoo_io_read_short(h);
 	stat->data_len = zoo_io_read_short(h);
 	h->func_skip(h, 8);
-#ifdef ZOO_USE_LABEL_CACHE
-	stat->label_cache = NULL;
-	stat->label_cache_size = 0;
-#endif
 }
 
 static void zoo_io_stat_write(zoo_io_handle *h, zoo_stat *stat) {
@@ -126,9 +122,6 @@ static void zoo_io_packed_stat_read(zoo_io_handle *h, zoo_stat *stat) {
 			stat->step_x = (int8_t) zoo_io_read_byte(h);
 			stat->step_y = (int8_t) zoo_io_read_byte(h);
 		}
-	} else {
-		stat->step_x = 0;
-		stat->step_y = 0;
 	}
 	stat->cycle = (flags & 0x08) ? zoo_io_read_short(h) : (uint8_t)zoo_io_read_byte(h);
 	stat->p1 = zoo_io_read_byte(h);
@@ -137,25 +130,19 @@ static void zoo_io_packed_stat_read(zoo_io_handle *h, zoo_stat *stat) {
 	if (flags & 0x02) {
 		stat->follower = zoo_io_read_short(h);
 		stat->leader = zoo_io_read_short(h);
-	} else {
-		stat->follower = -1;
-		stat->leader = -1;
 	}
 	stat->under = zoo_io_read_tile(h);
-	stat->data = NULL;
 	if (flags & 0x04) {
 #ifdef ZOO_USE_ROM_POINTERS
 		h->func_read(h, &stat->data, 4);
 #endif
 		stat->data_pos = zoo_io_read_short(h);
 		stat->data_len = zoo_io_read_short(h);
-	} else {
-		stat->data_pos = 0;
-		stat->data_len = 0;
 	}
-#ifdef ZOO_USE_LABEL_CACHE
-	stat->label_cache = NULL;
-	stat->label_cache_size = 0;
+#ifdef ZOO_NO_OBJECT_CODE_WRITES
+	if (flags & 0x20) {
+		stat->label_cache_chr2 = zoo_io_read_byte(h);
+	}
 #endif
 }
 
@@ -166,6 +153,9 @@ static void zoo_io_packed_stat_write(zoo_io_handle *h, zoo_stat *stat) {
 	if (stat->data_len != 0) flags |= 0x04;
 	if (stat->cycle < 0 || stat->cycle > 255) flags |= 0x08;
 	if (stat->step_x < -128 || stat->step_x > 127 || stat->step_y < -128 || stat->step_y > 127) flags |= 0x10;
+#ifdef ZOO_NO_OBJECT_CODE_WRITES
+	if (stat->label_cache_chr2 != 0) flags |= 0x20;
+#endif
 
 	zoo_io_write_byte(h, flags);
 
@@ -197,6 +187,11 @@ static void zoo_io_packed_stat_write(zoo_io_handle *h, zoo_stat *stat) {
 		zoo_io_write_short(h, stat->data_pos);
 		zoo_io_write_short(h, stat->data_len);
 	}
+#ifdef ZOO_NO_OBJECT_CODE_WRITES
+	if (flags & 0x20) {
+		zoo_io_write_byte(h, stat->label_cache_chr2);
+	}
+#endif
 }
 
 size_t zoo_io_board_max_length(zoo_board *board) {
@@ -214,8 +209,9 @@ size_t zoo_io_board_max_length(zoo_board *board) {
 	// stats
 	for (ix = 0; ix <= board->stat_count; ix++) {
 		size += 33;
-#ifdef ZOO_USE_LABEL_CACHE
-		size += board->stats[ix].label_cache_size * sizeof(zoo_stat_label);
+#ifdef ZOO_STORE_LABEL_CACHE
+		if (board->stats[ix].data_len > 0)
+			size += board->stats[ix].label_cache_size * 3;
 #endif
 #ifndef ZOO_USE_ROM_POINTERS
 		if (board->stats[ix].data_len > 0)
@@ -286,8 +282,7 @@ static int zoo_io_board_write_internal(zoo_io_handle *h, zoo_board *board, bool 
 		else zoo_io_packed_stat_write(h, stat);
 
 		if (stat->data_len > 0) {
-#ifdef ZOO_USE_ROM_POINTERS
-#ifdef ZOO_USE_LABEL_CACHE
+#ifdef ZOO_STORE_LABEL_CACHE
 			if (!external) {
 				zoo_io_write_short(h, stat->label_cache_size);
 				for (iy = 0; iy < stat->label_cache_size; iy++) {
@@ -295,7 +290,6 @@ static int zoo_io_board_write_internal(zoo_io_handle *h, zoo_board *board, bool 
 					zoo_io_write_byte(h, stat->label_cache[iy].zapped);
 				}
 			}
-#endif
 #else
 			h->func_write(h, (uint8_t *) stat->data, stat->data_len);
 #endif
@@ -358,6 +352,8 @@ static int zoo_io_board_read_internal(zoo_io_handle *h, zoo_board *board, bool e
 	}
 
 	for (ix = 0; ix <= board->stat_count; ix++, stat++) {
+		zoo_stat_clear(stat);
+
 		if (external) zoo_io_stat_read(h, stat);
 		else zoo_io_packed_stat_read(h, stat);
 
@@ -369,26 +365,26 @@ static int zoo_io_board_read_internal(zoo_io_handle *h, zoo_board *board, bool e
 			} else {
 				// If not from ROM, stat->data should be correct,
 				// and there should be no text following.
-#ifdef ZOO_USE_LABEL_CACHE
-				if (!external) {
-					stat->label_cache_size = zoo_io_read_short(h);
-					if (stat->label_cache_size > 0) {
-						stat->label_cache = malloc(sizeof(zoo_stat_label) * stat->label_cache_size);
-						if (stat->label_cache == NULL)
-							return ZOO_ERROR_NOMEM;
-					}
-					for (iy = 0; iy < stat->label_cache_size; iy++) {
-						stat->label_cache[iy].pos = zoo_io_read_short(h);
-						stat->label_cache[iy].zapped = zoo_io_read_byte(h);
-					}
-				}
-#endif
 			}
 #else
 			stat->data = malloc(stat->data_len);
 			if (stat->data == NULL)
 				return ZOO_ERROR_NOMEM;
 			h->func_read(h, (uint8_t *) stat->data, stat->data_len);
+#endif
+#ifdef ZOO_STORE_LABEL_CACHE
+			if (!external) {
+				stat->label_cache_size = zoo_io_read_short(h);
+				if (stat->label_cache_size > 0) {
+					stat->label_cache = malloc(sizeof(zoo_stat_label) * stat->label_cache_size);
+					if (stat->label_cache == NULL)
+						return ZOO_ERROR_NOMEM;
+				}
+				for (iy = 0; iy < stat->label_cache_size; iy++) {
+					stat->label_cache[iy].pos = zoo_io_read_short(h);
+					stat->label_cache[iy].zapped = zoo_io_read_byte(h);
+				}
+			}
 #endif
 		} else if (stat->data_len < 0) {
 			// TODO: bounds check

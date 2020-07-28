@@ -40,6 +40,7 @@
 #ifndef ZOO_USE_LABEL_CACHE
 #error Label cache required for ROM pointer support!
 #endif
+#define ZOO_STORE_LABEL_CACHE
 #define ZOO_NO_OBJECT_CODE_WRITES
 #endif
 

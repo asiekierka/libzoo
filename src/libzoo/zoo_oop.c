@@ -50,6 +50,12 @@ void zoo_stat_free(zoo_stat *stat) {
 #endif
 }
 
+void zoo_stat_clear(zoo_stat *stat) {
+	memset(stat, 0, sizeof(zoo_stat));
+	stat->follower = -1;
+	stat->leader = -1;
+}
+
 static void zoo_oop_error(zoo_state *state, int16_t stat_id, const char *message) {
 	char msg_full[ZOO_LEN_MESSAGE + 1];
 
@@ -100,12 +106,12 @@ static void zoo_oop_read_word(zoo_state *state, int16_t stat_id, int16_t *positi
 			zoo_oop_read_char(state, stat_id, position);
 			state->oop_char = zoo_toupper(state->oop_char);
 		}
+
+		if (*position > 0) {
+			*position -= 1;
+		}
 	}
 	state->oop_word[word_pos] = 0;
-
-	if (*position > 0) {
-		*position -= 1;
-	}
 }
 
 static void zoo_oop_read_value(zoo_state *state, int16_t stat_id, int16_t *position) {
@@ -213,17 +219,14 @@ int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *
 	pos = start_pos;
 
 	while (pos < data_len) {
-		word_pos = 0;
 		cmp_pos = pos;
 
-		// libzoo fix: allow finding empty strings
-		if (len_str > 0) do {
+		for (word_pos = 0; word_pos < len_str; word_pos++) {
 			zoo_oop_read_char(state, stat_id, &cmp_pos);
 			if (zoo_toupper(str[word_pos]) != zoo_toupper(state->oop_char)) {
 				goto NoMatch;
 			}
-			word_pos++;
-		} while (word_pos < len_str);
+		}
 
 		zoo_oop_read_char(state, stat_id, &cmp_pos);
 		state->oop_char = zoo_toupper(state->oop_char);
@@ -323,7 +326,7 @@ FindNextStat:
 			*i_data_pos = 0;
 		} else {
 #ifdef ZOO_USE_LABEL_CACHE
-			zoo_oop_label_cache_search(state, stat_id, object_message, i_stat, i_data_pos, label_prefix[1] == '\'');
+			*i_data_pos = zoo_oop_label_cache_search(state, *i_stat, object_message, label_prefix[1] == '\'');
 #else
 			if (!built_pom) {
 				strncpy(prefixed_object_message, label_prefix, sizeof(prefixed_object_message) - 1);
@@ -814,7 +817,7 @@ ReadCommand:
 						&label_stat_id, &label_data_pos, "\r'")
 					) {
 #ifdef ZOO_USE_LABEL_CACHE
-						zoo_oop_label_cache_zap(state, label_stat_id, label_data_pos, false, true, buf2);
+						zoo_oop_label_cache_zap(state, label_stat_id, label_data_pos, false, true, buf + 2);
 #else
 						do {
 							state->board.stats[label_stat_id].data[label_data_pos + 1] = ':';

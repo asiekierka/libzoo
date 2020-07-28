@@ -92,37 +92,37 @@ void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id) {
 int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos, int16_t end_pos);
 
 GBA_FAST_CODE
-void zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, int16_t *i_stat, int16_t *i_data_pos, bool zapped) {
-	int label_cache_pos;
+int16_t zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, bool zapped) {
+	int i;
 	int label_cache_size;
 	zoo_stat_label *label_cache;
-	bool label_cache_zapped;
+	int16_t pos;
 
-	zoo_oop_label_cache_build(state, *i_stat);
-	label_cache = state->board.stats[*i_stat].label_cache;
-	label_cache_size = state->board.stats[*i_stat].label_cache_size - 1;
-	*i_data_pos = -1;
+	zoo_oop_label_cache_build(state, stat_id);
+	label_cache = state->board.stats[stat_id].label_cache;
+	label_cache_size = state->board.stats[stat_id].label_cache_size - 1;
 
-	for (label_cache_pos = 0; label_cache_pos < label_cache_size; label_cache_pos++) {
-		// printf("id %d, entry %d: pos %d, %s\n", stat_id, label_cache_pos, label_cache_stat->label_cache[label_cache_pos].pos, label_cache_stat->label_cache[label_cache_pos].zapped ? "zapped" : "not zapped");
-		if (zapped == label_cache[label_cache_pos].zapped) {
-			*i_data_pos = zoo_oop_find_string_from(state, *i_stat, object_message,
-				label_cache[label_cache_pos].pos + 2,
-				label_cache[label_cache_pos].pos + 2
+	for (i = 0; i < label_cache_size; i++) {
+		// printf("id %d, entry %d: pos %d, %s\n", stat_id, i, label_cache[i].pos, label_cache[i].zapped ? "zapped" : "not zapped");
+		if (zapped == label_cache[i].zapped) {
+			pos = zoo_oop_find_string_from(state, stat_id, object_message,
+				label_cache[i].pos + 2,
+				label_cache[i].pos + 2
 			);
-			if (*i_data_pos >= 2) {
-				// printf("found at %d\n", *i_data_pos);
-				*i_data_pos -= 2;
-				break;
-			} else *i_data_pos = -1;
+			if (pos >= 2) {
+				return pos - 2;
+			}
 		}
 	}
+
+	return -1;
 }
 
 GBA_FAST_CODE
 void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label) {
 	zoo_stat *stat = &state->board.stats[stat_id];
 	int ix;
+	int16_t pos;
 
 #ifdef ZOO_NO_OBJECT_CODE_WRITES
 	// Emulate #ZAP/RESTORE restart. (writes)
@@ -144,15 +144,14 @@ void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_da
 	if (recurse) {
 		// Find remaining positions
 		for (ix++; ix < stat->label_cache_size-1; ix++) {
-			if ((stat->label_cache[ix].zapped != zapped)
-				&& zoo_oop_find_string_from(
-					state, stat_id, label, stat->label_cache[ix].pos + 2, stat->label_cache[ix].pos + 2
-				)
-			) {
-				stat->label_cache[ix].zapped = zapped;
+			if (stat->label_cache[ix].zapped != zapped) {
+				pos = stat->label_cache[ix].pos;
+				if (zoo_oop_find_string_from(state, stat_id, label, pos + 2, pos + 2) >= 0) {
+					stat->label_cache[ix].zapped = zapped;
 #ifndef ZOO_NO_OBJECT_CODE_WRITES
-				stat->data[label_data_pos + 1] = zapped ? '\'' : ':';
+					stat->data[stat->label_cache[ix].pos + 1] = zapped ? '\'' : ':';
 #endif
+				}
 			}
 		}
 	}

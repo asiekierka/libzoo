@@ -577,6 +577,7 @@ void zoo_input_action_set(zoo_input_state *state, zoo_input_action action, bool 
 
 // zoo_oop.c
 
+void zoo_stat_clear(zoo_stat *stat);
 void zoo_stat_free(zoo_stat *stat);
 
 int16_t zoo_flag_get_id(zoo_state *state, const char *name);
@@ -589,7 +590,7 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 // zoo_oop_label_cache.c
 
 void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id);
-void zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, int16_t *i_stat, int16_t *i_data_pos, bool zapped);
+int16_t zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, bool zapped);
 void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label);
 
 // zoo_window.c
