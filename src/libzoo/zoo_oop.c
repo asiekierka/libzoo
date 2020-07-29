@@ -118,7 +118,7 @@ static void zoo_oop_read_value(zoo_state *state, int16_t stat_id, int16_t *posit
 		zoo_oop_read_char(state, stat_id, position);
 	} while (state->oop_char == ' ');
 
-	// FIX: toupper is not necessary here
+	// libzoo fix: toupper is not necessary here
 	while (state->oop_char >= '0' && state->oop_char <= '9') {
 		word[word_pos++] = state->oop_char;
 		zoo_oop_read_char(state, stat_id, position);
@@ -311,8 +311,14 @@ static bool zoo_oop_iterate_stat(zoo_state *state, int16_t stat_id, int16_t *i_s
 static bool zoo_oop_find_label(zoo_state *state, int16_t stat_id, const char *send_label, int16_t *i_stat, int16_t *i_data_pos, const char *label_prefix) {
 	int i;
 	char *target_split_pos;
-	char target_lookup[21], object_message[21];
+	// libzoo note: In regular ZZT, this is limited to 20 characters.
+	// However, as OOP words are *also* limited to 20 characters,
+	// this should hopefully not pose a practical problem.
+	const char *object_message;
+	char target_lookup[21];
+#ifndef ZOO_USE_LABEL_CACHE
 	char prefixed_object_message[21+2];
+#endif
 	bool built_pom = false;
 	bool found_stat = false;
 
@@ -320,7 +326,7 @@ static bool zoo_oop_find_label(zoo_state *state, int16_t stat_id, const char *se
 	if (target_split_pos == NULL) {
 		// if there is no target, we only check stat_id
 		if (*i_stat < stat_id) {
-			strncpy(object_message, send_label, sizeof(object_message) - 1);
+			object_message = send_label;
 			*i_stat = stat_id;
 			found_stat = true;
 		}
@@ -330,13 +336,13 @@ static bool zoo_oop_find_label(zoo_state *state, int16_t stat_id, const char *se
 		memcpy(target_lookup, send_label, i);
 		target_lookup[i] = 0;
 
-		strncpy(object_message, target_split_pos + 1, sizeof(object_message) - 1);
+		object_message = target_split_pos + 1;
 FindNextStat:
 		found_stat = zoo_oop_iterate_stat(state, stat_id, i_stat, target_lookup);
 	}
 
 	if (found_stat) {
-		if (!strncmp(object_message, "RESTART", sizeof(object_message) - 1)) {
+		if (!strcmp(object_message, "RESTART")) {
 			*i_data_pos = 0;
 		} else {
 #ifdef ZOO_USE_LABEL_CACHE
@@ -517,7 +523,7 @@ static void zoo_oop_place_tile(zoo_state *state, int16_t x, int16_t y, zoo_tile 
 
 static bool zoo_oop_check_condition(zoo_state *state, int16_t stat_id, int16_t *position) {
 	int16_t ix, iy;
-	// FIX: consistent initalization
+	// libzoo fix: consistent initalization
 	// otherwise a zoo_oop_error in "ANY" could lead to invalid data
 	zoo_tile tile = {0, 0};
 
@@ -874,7 +880,7 @@ ReadCommand:
 #else
 						do {
 							state->board.stats[label_stat_id].data[label_data_pos + 1] = ':';
-							// FIX: optimization - no need to check already checked parts of the code
+							// libzoo fix: optimization - no need to check already checked parts of the code
 							// label_data_pos = zoo_oop_find_string(state, label_stat_id, buf);
 							label_data_pos = zoo_oop_find_string_from(state, label_stat_id, buf, label_data_pos + 2, -1);
 						} while (label_data_pos > 0);
