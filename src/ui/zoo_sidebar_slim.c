@@ -67,7 +67,7 @@ static void write_number_torch_bg(zoo_state *state, int16_t x, int16_t y, uint8_
 	torch_pos = state->world.info.torch_ticks > 0
 		? (state->world.info.torch_ticks + 39) / 40
 		: 0;
-	if (torch_pos > (x + 5)) torch_pos = (x + 5);
+	if (torch_pos > 5) torch_pos = 5;
 
 	for (i = pos; i < sizeof(s); i++) {
 		int16_t nx = x + i - pos;
