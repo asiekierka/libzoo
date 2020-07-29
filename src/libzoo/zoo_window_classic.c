@@ -50,7 +50,8 @@ void zoo_window_set_position(int16_t x, int16_t y, int16_t width, int16_t height
 static void zoo_window_draw_title(zoo_text_window *window, zoo_state *state, uint8_t color, const char *title) {
 	int16_t i;
 	int16_t il = strlen(title);
-	int16_t is = window_x + ((window_width - il) >> 1);
+	int16_t is = window_x + ((window_width + 1 - il) >> 1);
+
 	for (i = window_x + 2; i < (window_x + window_width - 2); i++) {
 		if (i >= is && i < (is+il)) {
 			state->d_video->func_write(state->d_video, i, window_y + 1, color, title[i - is]);
@@ -75,13 +76,13 @@ static const char draw_patterns[4][5] = {
 static void zoo_window_draw_border(zoo_text_window *window, zoo_state *state, int16_t y, const char *pattern) {
 	int16_t ix;
 
-	state->d_video->func_write(state->d_video, window_x, y, 0x0F, pattern[0]);		
-	state->d_video->func_write(state->d_video, window_x + 1, y, 0x0F, pattern[1]);		
+	state->d_video->func_write(state->d_video, window_x, y, 0x0F, pattern[0]);
+	state->d_video->func_write(state->d_video, window_x + 1, y, 0x0F, pattern[1]);
 	for (ix = 2; ix < window_width - 2; ix++) {
-		state->d_video->func_write(state->d_video, window_x + ix, y, 0x0F, pattern[2]);		
+		state->d_video->func_write(state->d_video, window_x + ix, y, 0x0F, pattern[2]);
 	}
-	state->d_video->func_write(state->d_video, window_x + window_width - 2, y, 0x0F, pattern[3]);		
-	state->d_video->func_write(state->d_video, window_x + window_width - 1, y, 0x0F, pattern[4]);		
+	state->d_video->func_write(state->d_video, window_x + window_width - 2, y, 0x0F, pattern[3]);
+	state->d_video->func_write(state->d_video, window_x + window_width - 1, y, 0x0F, pattern[4]);
 }
 
 static void zoo_window_draw_open(zoo_text_window *window, zoo_state *state) {
@@ -150,7 +151,8 @@ static void zoo_window_draw_line(zoo_text_window *window, zoo_state *state, int1
 			case '$':
 				str++;
 				text_color = 0x1F;
-				text_x = (text_width - strlen(str)) / 2;
+				// (window_width - 8 - strlen(str)) / 2
+				text_x = (text_width - 1 - strlen(str)) >> 1;
 				break;
 		}
 	} else if (window->viewing_file) {

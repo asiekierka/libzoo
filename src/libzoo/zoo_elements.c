@@ -53,6 +53,7 @@ static void zoo_default_draw(zoo_state *state, int16_t x, int16_t y, uint8_t *ch
 
 static void zoo_e_message_timer_tick(zoo_state *state, int16_t stat_id) {
 	int i, ix;
+	uint8_t col;
 	TICK_GET_SELF;
 
 	if (stat->x == 0) {
@@ -60,11 +61,12 @@ static void zoo_e_message_timer_tick(zoo_state *state, int16_t stat_id) {
 			state->func_write_message(state, stat->p2, state->board.info.message);
 		} else if (state->d_video->func_write != NULL) {
 			ix = strnlen(state->board.info.message, ZOO_LEN_MESSAGE);
-			state->d_video->func_write(state->d_video, ((60 - ix) >> 1), 24, 9 + (stat->p2 % 7), ' ');
+			col = 9 + (stat->p2 % 7);
+			state->d_video->func_write(state->d_video, ((60 - ix) >> 1), 24, col, ' ');
 			for (i = 0; i < ix; i++) {
-				state->d_video->func_write(state->d_video, ((60 - ix) >> 1) + 1 + i, 24, 9 + (stat->p2 % 7), state->board.info.message[i]);
+				state->d_video->func_write(state->d_video, ((60 - ix) >> 1) + 1 + i, 24, col, state->board.info.message[i]);
 			}
-			state->d_video->func_write(state->d_video, ((60 - ix) >> 1) + 1 + ix, 24, 9 + (stat->p2 % 7), ' ');
+			state->d_video->func_write(state->d_video, ((60 - ix) >> 1) + 1 + ix, 24, col, ' ');
 		}
 		stat->p2--;
 		if (stat->p2 <= 0) {

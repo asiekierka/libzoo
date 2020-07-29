@@ -395,7 +395,7 @@ void zoo_display_message(zoo_state *state, int16_t duration, char *message) {
 		zoo_board_draw_border(state);
 	}
 
-	if (strlen(message) > 0) {
+	if (message[0] != '\0') {
 		zoo_stat_add(state, 0, 0, ZOO_E_MESSAGE_TIMER, 0, 1, &zoo_stat_template_default);
 		state->board.stats[state->board.stat_count].p2 = duration / (state->tick_duration + 1);
 		strncpy(state->board.info.message, message, sizeof(state->board.info.message) - 1);
