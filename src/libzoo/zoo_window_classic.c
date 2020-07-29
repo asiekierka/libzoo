@@ -325,5 +325,8 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 }
 
 void zoo_window_open(zoo_state *state, zoo_text_window *window) {
+	window->state = 0;
+	window->counter = 0;
+
 	zoo_call_push_callback(&(state->call_stack), (zoo_func_callback) zoo_window_classic_tick, window);
 }

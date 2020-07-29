@@ -225,19 +225,21 @@ static void zoo_oop_read_direction(zoo_state *state, int16_t stat_id, int16_t *p
 GBA_FAST_CODE
 int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos, int16_t end_pos) {
 	int16_t pos, word_pos, cmp_pos;
-	int16_t len_str = strlen(str);
-	int16_t data_len = end_pos >= 0 ? (end_pos+1) : (state->board.stats[stat_id].data_len - len_str);
+	int16_t data_len = end_pos >= 0 ? (end_pos+1) : state->board.stats[stat_id].data_len;
+	const char *ptr_str;
 
 	pos = start_pos;
 
 	while (pos < data_len) {
 		cmp_pos = pos;
+		ptr_str = str;
 
-		for (word_pos = 0; word_pos < len_str; word_pos++) {
+		while (*ptr_str != '\0') {
 			zoo_oop_read_char(state, stat_id, &cmp_pos);
-			if (zoo_toupper(str[word_pos]) != zoo_toupper(state->oop_char)) {
+			if (zoo_toupper(*ptr_str) != zoo_toupper(state->oop_char)) {
 				goto NoMatch;
 			}
+			ptr_str++;
 		}
 
 		zoo_oop_read_char(state, stat_id, &cmp_pos);
@@ -596,6 +598,11 @@ bool zoo_oop_send(zoo_state *state, int16_t stat_id, const char *send_label, boo
 	return result;
 }
 
+#define INIT_TEXT_WINDOW() \
+	if (text_window.line_count < 0) { \
+		memset(&text_window, 0, sizeof(text_window)); \
+	}
+
 void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const char *default_name) {
 	char buf[256];
 	char buf2[256];
@@ -647,8 +654,7 @@ void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const
 	}
 
 StartParsing:
-	// TODO: do we need this?
-	memset(&text_window, 0, sizeof(text_window));
+	text_window.line_count = -1;
 	stop_running = false;
 	repeat_ins_next_tick = false;
 	replace_stat = false;
@@ -1013,6 +1019,7 @@ ReadCommand:
 		default: {	// text
 			buf[0] = state->oop_char;
 			zoo_oop_read_line_to_end(state, stat_id, position, buf + 1, sizeof(buf) - 2);
+			INIT_TEXT_WINDOW();
 			zoo_window_append(&text_window, buf);
 		} break;
 		}
