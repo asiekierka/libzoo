@@ -116,6 +116,7 @@ int main(void) {
 	state.d_io = (zoo_io_driver *) &d_io;
 
 	zoo_ui_init(&ui_state, &state);
+	zoo_video_gba_set_blinking(true);
 	zoo_video_gba_show();
 
 	irq_add(II_TIMER0, irq_timer_pit);

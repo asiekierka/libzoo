@@ -734,6 +734,10 @@ static zoo_tick_retval zoo_game_tick(zoo_state *state) {
 
 		state->func_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_PAUSED);
 		zoo_input_update(&state->input);
+		// libzoo note: I *think* this should be here.
+		// It should fix a scenario where, after being paused,
+		// you move twice.
+		zoo_input_clear(&state->input);
 
 		if (state->input.delta_x != 0 || state->input.delta_y != 0) {
 			// push self

@@ -53,14 +53,31 @@ static const u16 default_palette[] = {
 
 static zoo_state *inst_state;
 static uint16_t disp_y_offset;
+static bool blinking_enabled = false;
+static uint8_t blink_ticks;
 
 volatile uint16_t keys_down = 0;
 volatile uint16_t keys_held = 0;
 
-static void vram_write_tile_1bpp(const uint8_t *data, uint32_t *vram_pos, uint8_t invert_mask, uint8_t shift) {
+IWRAM_ARM_CODE
+static void vram_update_bgcnt(void) {
+#ifdef ZOO_GBA_ENABLE_BLINKING
+	int fg_cbb = (blinking_enabled && (blink_ticks & 16)) ? 1 : 0;
+#else
+	int fg_cbb = 0;
+#endif
+
+	REG_BG0CNT = BG_PRIO(3) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 0) | BG_4BPP | BG_SIZE0;
+	REG_BG1CNT = BG_PRIO(2) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 1) | BG_4BPP | BG_SIZE0;
+	REG_BG2CNT = BG_PRIO(1) | BG_CBB(fg_cbb) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 2) | BG_4BPP | BG_SIZE0;
+	REG_BG3CNT = BG_PRIO(0) | BG_CBB(fg_cbb) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 3) | BG_4BPP | BG_SIZE0;
+}
+
+IWRAM_ARM_CODE
+static void vram_write_tile_1bpp(const uint8_t *data, uint32_t *vram_pos) {
 	for (int iy = 0; iy < 8; iy++, data++) {
 		uint32_t out = 0;
-		uint8_t in = ((*data) ^ invert_mask) >> shift;
+		uint8_t in = *data;
 		out |= ((in >> 7) & 1) << 28;
 		out |= ((in >> 6) & 1) << 24;
 		out |= ((in >> 5) & 1) << 20;
@@ -80,17 +97,25 @@ static void vram_write_tile_1bpp(const uint8_t *data, uint32_t *vram_pos, uint8_
 IWRAM_ARM_CODE static void vram_write_char(zoo_video_driver *drv, int16_t x, int16_t y, uint8_t col, uint8_t chr) {
 	GET_VRAM_PTRS;
 
+#ifdef ZOO_GBA_ENABLE_BLINKING
+	*tile_bg_ptr = '\xDB' | (((col >> 4) & 0x07) << 12);
+	*tile_fg_ptr = chr | ((col & 0x80) << 1) | (col << 12);
+#else
 	*tile_bg_ptr = '\xDB' | (((col >> 4) & 0x07) << 12);
 	*tile_fg_ptr = chr | (col << 12);
+#endif
 }
 
 static void vram_read_char(zoo_video_driver *drv, int16_t x, int16_t y, uint8_t *col, uint8_t *chr) {
 	GET_VRAM_PTRS;
-	
-	// TODO: this does not preserve the blinking bit
-	// this is fine for as long as we ignore it.
+
+#ifdef ZOO_GBA_ENABLE_BLINKING	
+	*chr = (*tile_fg_ptr & 0xFF);
+	*col = (*tile_fg_ptr >> 12) | ((*tile_bg_ptr >> 8) & 0x70) | ((*tile_fg_ptr >> 1) & 0x80);
+#else
 	*chr = (*tile_fg_ptr & 0xFF);
 	*col = (*tile_fg_ptr >> 12) | ((*tile_bg_ptr >> 8) & 0x70);
+#endif
 }
 
 IWRAM_ARM_CODE static void irq_vcount(void) {
@@ -125,6 +150,14 @@ IWRAM_ARM_CODE static void irq_vblank(void) {
 	REG_BG3VOFS = disp_y_offset;
 
 	keys_down |= ~ki;
+
+#ifdef ZOO_GBA_ENABLE_BLINKING
+	if (blinking_enabled) {
+		if (((blink_ticks++) & 15) == 0) {
+			vram_update_bgcnt();
+		}
+	}
+#endif
 }
 
 static zoo_video_driver d_video_gba = {
@@ -141,6 +174,11 @@ void zoo_video_gba_show(void) {
 
 	VBlankIntrWait();
 	REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_BG3;
+}
+
+void zoo_video_gba_set_blinking(bool val) {
+	blinking_enabled = val;
+	vram_update_bgcnt();
 }
 
 #ifdef DEBUG_CONSOLE
@@ -213,8 +251,18 @@ void zoo_video_gba_install(zoo_state *state, const uint8_t *charset_bin) {
 
 	// load 4x6 charset
 	for (int i = 0; i < 256; i++) {
-		vram_write_tile_1bpp(charset_bin + i*8, ((uint32_t*) (MEM_VRAM + i*32)), 0, 0);
+		vram_write_tile_1bpp(charset_bin + i*8, ((uint32_t*) (MEM_VRAM + i*32)));
 	}
+#ifdef ZOO_GBA_ENABLE_BLINKING
+	// 32KB is used to faciliate blinking:
+	// chars 0-255: charset, not blinking
+	// chars 256-511: charset, blinking, visible
+	// chars 512-767: [blink] charset, not blinking
+	// chars 768-1023: [blink] empty space, not visible
+	memcpy32(((uint32_t*) (MEM_VRAM + (256*32))), ((uint32_t*) (MEM_VRAM)), 256 * 32);
+	memcpy32(((uint32_t*) (MEM_VRAM + (512*32))), ((uint32_t*) (MEM_VRAM)), 256 * 32);
+	memset32(((uint32_t*) (MEM_VRAM + (768*32))), 0x0000000, 256 * 32);
+#endif
 
 	// load palette
 	for (int i = 0; i < 16; i++) {
@@ -223,10 +271,7 @@ void zoo_video_gba_install(zoo_state *state, const uint8_t *charset_bin) {
 	}
 
 	// initialize background registers
-	REG_BG0CNT = BG_PRIO(3) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 0) | BG_4BPP | BG_SIZE0;
-	REG_BG1CNT = BG_PRIO(2) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 1) | BG_4BPP | BG_SIZE0;
-	REG_BG2CNT = BG_PRIO(1) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 2) | BG_4BPP | BG_SIZE0;
-	REG_BG3CNT = BG_PRIO(0) | BG_CBB(0) | BG_SBB((MAP_ADDR_OFFSET >> 11) + 3) | BG_4BPP | BG_SIZE0;
+	vram_update_bgcnt();
 	REG_BG0HOFS = 4;
 	REG_BG0VOFS = 0;
 	REG_BG1HOFS = 0;
