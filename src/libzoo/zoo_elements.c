@@ -1421,7 +1421,7 @@ static void zoo_e_player_tick(zoo_state *state, int16_t stat_id) {
 	}
 
 	if (state->input.delta_x != 0 || state->input.delta_y != 0) {
-		if (zoo_input_action_pressed(&state->input, ZOO_ACTION_SHOOT)) {
+		if (zoo_input_action_held(&state->input, ZOO_ACTION_SHOOT)) {
 			if (state->board.info.max_shots == 0) {
 				if (state->msg_flags.no_shooting) {
 					zoo_display_message(state, 200, "Can't shoot in this place!");
@@ -1494,7 +1494,7 @@ PlayerTickState1:
 		}
 	}
 
-	if (zoo_input_action_pressed_once(&state->input, ZOO_ACTION_TORCH)) {
+	if (zoo_input_action_pressed(&state->input, ZOO_ACTION_TORCH)) {
 		if (state->world.info.torch_ticks <= 0) {
 			if (state->world.info.torches > 0) {
 				if (state->board.info.is_dark) {

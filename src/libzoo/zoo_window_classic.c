@@ -228,7 +228,6 @@ static bool zoo_window_hyperlink(zoo_text_window *window, zoo_state *state, char
 			if (zoo_window_open_file(state->d_io, window, pointer_str + 1)) {
 				window->viewing_file = true;
 				zoo_window_draw_text(window, state, false);
-				zoo_input_clear_post_tick(&state->input);
 				return false;
 			}
 		}
@@ -273,8 +272,12 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 		case WINDOW_STATE_TICK:
 			zoo_input_update(&state->input);
 
-			window->line_pos += state->input.delta_y;
-			window->line_pos += state->input.delta_x * 4;
+			if (zoo_input_action_pressed(&state->input, ZOO_ACTION_LEFT)) window->line_pos -= 4;
+			else if (zoo_input_action_pressed(&state->input, ZOO_ACTION_UP)) window->line_pos--;
+
+			if (zoo_input_action_pressed(&state->input, ZOO_ACTION_RIGHT)) window->line_pos += 4;
+			else if (zoo_input_action_pressed(&state->input, ZOO_ACTION_DOWN)) window->line_pos++;
+
 			if (window->line_pos < 0) window->line_pos = 0;
 			if (window->line_pos >= window->line_count) window->line_pos = window->line_count - 1;
 
@@ -282,8 +285,8 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 				zoo_window_draw_text(window, state, false);
 			}
 
-			act_ok = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_OK);
-			act_cancel = zoo_input_action_pressed_once(&state->input, ZOO_ACTION_CANCEL);
+			act_ok = zoo_input_action_pressed(&state->input, ZOO_ACTION_OK);
+			act_cancel = zoo_input_action_pressed(&state->input, ZOO_ACTION_CANCEL);
 			if (act_ok || act_cancel) {
 				window->state = WINDOW_STATE_ANIM_CLOSE;
 				window->accepted = act_ok;
@@ -310,11 +313,10 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 					if (!window->manual_close) {
 						zoo_window_close(window);
 					}
-
-					zoo_input_clear_post_tick(&state->input);
 					return EXIT;
 				} else {
 					window->state = WINDOW_STATE_START;
+					zoo_input_clear(&state->input);
 					return RETURN_IMMEDIATE;
 				}
 			} else {
@@ -323,7 +325,7 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			break;
 	}
 
-	return RETURN_NEXT_CYCLE;
+	return RETURN_NEXT_FRAME;
 }
 
 void zoo_window_open(zoo_state *state, zoo_text_window *window) {

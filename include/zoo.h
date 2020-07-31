@@ -355,6 +355,12 @@ typedef struct s_zoo_input_state {
 
 	bool actions_down[ZOO_ACTION_MAX];
 	bool actions_held[ZOO_ACTION_MAX];
+	uint8_t actions_order[ZOO_ACTION_MAX];
+	uint8_t actions_count[ZOO_ACTION_MAX];
+
+	uint8_t pressed_count;
+	uint8_t repeat_start;
+	uint8_t repeat_end;
 } zoo_input_state;
 
 typedef struct s_zoo_text_window {
@@ -566,12 +572,12 @@ int zoo_world_save(zoo_state *state, zoo_io_handle *h);
 // zoo_input.c
 
 bool zoo_input_action_pressed(zoo_input_state *state, zoo_input_action action);
-bool zoo_input_action_pressed_once(zoo_input_state *state, zoo_input_action action);
+bool zoo_input_action_held(zoo_input_state *state, zoo_input_action action);
 void zoo_input_update(zoo_input_state *state);
-void zoo_input_clear_post_tick(zoo_input_state *state);
+void zoo_input_clear(zoo_input_state *state);
+void zoo_input_tick(zoo_input_state *state);
 
 void zoo_input_action_down(zoo_input_state *state, zoo_input_action action);
-void zoo_input_action_once(zoo_input_state *state, zoo_input_action action);
 void zoo_input_action_up(zoo_input_state *state, zoo_input_action action);
 void zoo_input_action_set(zoo_input_state *state, zoo_input_action action, bool value);
 

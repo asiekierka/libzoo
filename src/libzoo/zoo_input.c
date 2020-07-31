@@ -24,42 +24,14 @@
 #include <string.h>
 #include "zoo.h"
 
-static void zoo_input_movement_update(zoo_input_state *state) {
-	zoo_input_action move_action = ZOO_ACTION_MAX;
-	zoo_input_action i;
+void zoo_input_update(zoo_input_state *state) {
+	int i, max_order = -1;
+	int move_action = ZOO_ACTION_MAX;
 
-	// check for new arrow key presses
-	if (move_action == ZOO_ACTION_MAX) {
-		for (i = ZOO_ACTION_UP; i <= ZOO_ACTION_DOWN; i++) {
-			if (state->actions_down[i]) {
-				state->actions_down[i] = false;
-				move_action = i;
-			}
-		}
-	}
-
-	// continue moving in existing direction
-	if (move_action == ZOO_ACTION_MAX) {
-	 	if (state->delta_x == 0) {
-			if (state->delta_y < 0) { move_action = ZOO_ACTION_UP; }
-			else if (state->delta_y > 0) { move_action = ZOO_ACTION_DOWN; }
-		} else if (state->delta_y == 0) {
-			if (state->delta_x < 0) { move_action = ZOO_ACTION_LEFT; }
-			else if (state->delta_x > 0) { move_action = ZOO_ACTION_RIGHT; }
-		}
-
-		if (move_action != ZOO_ACTION_MAX && !state->actions_held[move_action]) {
-			move_action = ZOO_ACTION_MAX;
-		}
-	}
-
-	// check for old arrow key presses
-	if (move_action == ZOO_ACTION_MAX) {
-		for (i = ZOO_ACTION_UP; i <= ZOO_ACTION_DOWN; i++) {
-			if (state->actions_held[i]) {
-				move_action = i;
-				break;
-			}
+	for (i = ZOO_ACTION_UP; i <= ZOO_ACTION_DOWN; i++) {
+		if (state->actions_down[i] && state->actions_order[i] > max_order) {
+			max_order = state->actions_order[i];
+			move_action = i;
 		}
 	}
 
@@ -87,15 +59,27 @@ static void zoo_input_movement_update(zoo_input_state *state) {
 	}
 }
 
-void zoo_input_update(zoo_input_state *state) {
-	zoo_input_movement_update(state);
-	state->updated = true;
+void zoo_input_clear(zoo_input_state *state) {
+	int i;
+
+	// update counts
+	for (i = 0; i < ZOO_ACTION_MAX; i++) {
+		state->actions_down[i] = false;
+	}
 }
 
-void zoo_input_clear_post_tick(zoo_input_state *state) {
-	if (state->updated) {
-		memset(state->actions_down, 0, sizeof(state->actions_down));
-		state->updated = false;
+void zoo_input_tick(zoo_input_state *state) {
+	int i;
+
+	// update counts
+	for (i = 0; i < ZOO_ACTION_MAX; i++) {
+		if (state->actions_held[i]) {
+			state->actions_count[i]++;
+			if (state->actions_count[i] >= state->repeat_end) {
+				state->actions_count[i] = state->repeat_start;
+				state->actions_down[i] = true;
+			}
+		}
 	}
 }
 
@@ -103,42 +87,47 @@ bool zoo_input_action_pressed(zoo_input_state *state, zoo_input_action action) {
 	if (state->actions_down[action]) {
 		state->actions_down[action] = false;
 		return true;
-	} else if (state->actions_held[action]) {
-		return true;
 	} else {
 		return false;
 	}
 }
 
-bool zoo_input_action_pressed_once(zoo_input_state *state, zoo_input_action action) {
-	if (state->actions_down[action]) {
-		state->actions_down[action] = false;
-		return true;
-	} else {
-		return false;
-	}
+bool zoo_input_action_held(zoo_input_state *state, zoo_input_action action) {
+	return state->actions_held[action];
 }
 
 void zoo_input_action_down(zoo_input_state *state, zoo_input_action action) {
-	state->actions_down[action] = true;
-	state->actions_held[action] = true;
-}
-
-void zoo_input_action_once(zoo_input_state *state, zoo_input_action action) {
-	state->actions_down[action] = true;
+	if (!state->actions_held[action]) {
+		state->actions_down[action] = true;
+		state->actions_held[action] = true;
+		state->actions_count[action] = 0;
+		state->actions_order[action] = state->pressed_count++;
+	}
 }
 
 void zoo_input_action_up(zoo_input_state *state, zoo_input_action action) {
-	state->actions_held[action] = false;
+	uint8_t old_order;
+	int i;
+
+	if (state->actions_held[action]) {
+		state->actions_held[action] = false;
+		old_order = state->actions_order[action];
+		state->actions_order[action] = 0;
+
+		for (i = 0; i < ZOO_ACTION_MAX; i++) {
+			if (state->actions_order[i] > old_order) {
+				state->actions_order[i]--;
+			}
+		}
+
+		state->pressed_count--;
+	}
 }
 
 void zoo_input_action_set(zoo_input_state *state, zoo_input_action action, bool value) {
 	if (value) {
-		if (!state->actions_held[action]) {
-			state->actions_down[action] = true;
-			state->actions_held[action] = true;
-		}
+		zoo_input_action_down(state, action);
 	} else {
-		state->actions_held[action] = false;
+		zoo_input_action_up(state, action);
 	}
 }

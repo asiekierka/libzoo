@@ -76,6 +76,7 @@ IWRAM_ARM_CODE static void irq_timer_pit(void) {
 	tick_requested = true;
 	zoo_tick_advance_pit(&state);
 	zoo_sound_tick(&(state.sound));
+	zoo_input_tick(&(state.input));
 }
 
 #define dbg_ticks() (REG_TM2CNT_L | (REG_TM3CNT_L << 16))

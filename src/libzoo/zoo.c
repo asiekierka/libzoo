@@ -143,7 +143,12 @@ void zoo_state_init(zoo_state *state) {
 	state->func_draw_sidebar = zoo_default_draw_sidebar;
 
 	state->tick_speed = 4;
+
 	zoo_sound_state_init(&(state->sound));
+
+	state->input.repeat_start = 4;
+	state->input.repeat_end = 6;
+
 	zoo_world_create(state);
 	zoo_game_start(state, GS_TITLE);
 }

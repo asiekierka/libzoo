@@ -58,9 +58,8 @@ static int playfield_pitch;
 static SDL_mutex *playfield_mutex;
 static bool playfield_changed;
 static bool stop_tick_thread = false;
-static SDL_TimerID tick_thread_timer;
-
-static zoo_input_state input;
+static SDL_TimerID tick_thread_game;
+static SDL_TimerID tick_thread_pit;
 
 #ifdef __BIG_ENDIAN__
 #define SOFT_PIXEL_FORMAT SDL_PIXELFORMAT_ARGB32
@@ -101,7 +100,7 @@ static void init_audio(void) {
 		pcm_driver.frequency = audio_spec.freq;
 		pcm_driver.channels = audio_spec.channels;
 		pcm_driver.volume = 200;
-		pcm_driver.latency = 2;
+		pcm_driver.latency = 1;
 		pcm_driver.format_signed = true;
 
 		zoo_sound_pcm_init(&pcm_driver);
@@ -119,43 +118,53 @@ static void exit_audio(void) {
 
 // game logic
 
-static uint32_t ticks = 0;
-
-static uint32_t sdl_timer_tick(uint32_t interval, void *param) {
-	ticks++;
-	int tick_start = SDL_GetTicks();
-	int tick_delay = ZOO_PIT_TICK_MS;
-	bool ticking = true;
-	int tick_time;
-
-	SDL_LockMutex(audio_mutex);
-	zoo_tick_advance_pit(&state);
-	zoo_sound_tick(&(state.sound));
-	zoo_sound_pcm_tick(&pcm_driver);
-	SDL_UnlockMutex(audio_mutex);
-
-	SDL_LockMutex(playfield_mutex);
+static uint32_t sdl_pit_tick(uint32_t interval, void *param) {
 	if (stop_tick_thread) {
 		// cease
 		return 1000;
 	}
 
+	SDL_LockMutex(playfield_mutex);
+
+	SDL_LockMutex(audio_mutex);
+	zoo_tick_advance_pit(&state);
+	zoo_sound_tick(&state.sound);
+	zoo_sound_pcm_tick(&pcm_driver);
+	SDL_UnlockMutex(audio_mutex);
+
+	zoo_input_tick(&state.input);
+
+	SDL_UnlockMutex(playfield_mutex);
+
+	return ZOO_PIT_TICK_MS;
+}
+
+static uint32_t sdl_game_tick(uint32_t interval, void *param) {
+	int tick_delay = ZOO_PIT_TICK_MS;
+	bool ticking = true;
+
+	if (stop_tick_thread) {
+		// cease
+		return 1000;
+	}
+	
+	SDL_LockMutex(playfield_mutex);
 	while (ticking) {
 		switch (zoo_tick(&state)) {
 			case RETURN_IMMEDIATE:
 				break;
 			case RETURN_NEXT_FRAME:
-				SDL_UnlockMutex(playfield_mutex);
 				tick_delay = 16;
 				ticking = false;
+				break;
 			case RETURN_NEXT_CYCLE:
-				SDL_UnlockMutex(playfield_mutex);
 				ticking = false;
+				break;
 		}
 	}
+	SDL_UnlockMutex(playfield_mutex);
 
-	tick_time = SDL_GetTicks() - tick_start;
-	return (tick_time >= tick_delay) ? 1 : (tick_delay - tick_time);
+	return tick_delay;
 }
 
 void sdl_draw_char(zoo_video_driver *drv, int16_t x, int16_t y, uint8_t col, uint8_t chr) {
@@ -252,7 +261,8 @@ int main(int argc, char **argv) {
 
 	init_audio();
 
-	tick_thread_timer = SDL_AddTimer(ZOO_PIT_TICK_MS, sdl_timer_tick, NULL);
+	tick_thread_pit = SDL_AddTimer(ZOO_PIT_TICK_MS, sdl_pit_tick, NULL);
+	tick_thread_game = SDL_AddTimer(1, sdl_game_tick, NULL);
 
 	// run
 	bool cont_loop = true;
@@ -333,7 +343,8 @@ int main(int argc, char **argv) {
 
 	SDL_LockMutex(playfield_mutex);
 	stop_tick_thread = true;
-	SDL_RemoveTimer(tick_thread_timer);
+	SDL_RemoveTimer(tick_thread_pit);
+	SDL_RemoveTimer(tick_thread_game);
 	SDL_UnlockMutex(playfield_mutex);
 
 	exit_audio();

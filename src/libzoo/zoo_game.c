@@ -816,26 +816,21 @@ GameTickState2:
 	}
 
 	if (state->current_stat_tick > state->board.stat_count) {
-		if (state->tick_duration == 0) {
-			// workaround for fast game speeds to avoid high CPU usage
+		if (zoo_has_hsecs_elapsed(state, &state->tick_counter, state->tick_duration)) {
 			state->current_tick++;
 			if (state->current_tick > 420)
 				state->current_tick = 1;
 			state->current_stat_tick = 0;
 
-			return RETURN_NEXT_FRAME;
-		} else {
-			if (zoo_has_hsecs_elapsed(state, &state->tick_counter, state->tick_duration)) {
-				state->current_tick++;
-				if (state->current_tick > 420)
-					state->current_tick = 1;
-				state->current_stat_tick = 0;
+			zoo_input_update(&state->input);
+			zoo_input_clear(&state->input);
 
-				zoo_input_update(&state->input);
-				return RETURN_NEXT_CYCLE;
-			} else {
-				return RETURN_NEXT_CYCLE;
-			}
+			// workaround for fast game speeds to avoid high CPU usage
+			if (state->tick_duration == 0)
+				return RETURN_NEXT_FRAME;
+			return RETURN_NEXT_CYCLE;
+		} else {
+			return RETURN_NEXT_CYCLE;
 		}
 	}
 
@@ -878,8 +873,5 @@ zoo_tick_retval zoo_tick(zoo_state *state) {
 	ret = zoo_tick_inner(state);
 	if (state->error_value) return ERROR;
 
-	if (ret != RETURN_IMMEDIATE) {
-		zoo_input_clear_post_tick(&state->input);
-	}
 	return ret;
 }
