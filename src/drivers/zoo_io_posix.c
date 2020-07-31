@@ -87,7 +87,16 @@ static bool zoo_io_scan_dir_posix(zoo_io_path_driver *drv, const char *name, zoo
 
 	while ((dent = readdir(dir)) != NULL) {
 		strncpy(ent.name, dent->d_name, ZOO_PATH_MAX);
-#ifdef _PSP_FW_VERSION
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		// TODO: unhackify
+		FILE *test_file = fopen(dent->d_name, "rb");
+		if (test_file != NULL) {
+			ent.type = TYPE_FILE;
+			fclose(test_file);
+		} else {
+			ent.type = TYPE_DIR;
+		}
+#elif defined(_PSP_FW_VERSION)
 		// TODO: unhackify
 		ent.type = FIO_SO_ISDIR(dent->d_stat.st_mode) ? TYPE_DIR : TYPE_FILE;
 #else
