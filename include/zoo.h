@@ -23,6 +23,8 @@
  * SOFTWARE.
  */
 
+// zoo.h - public libzoo includes
+
 #ifndef __ZOO_H__
 #define __ZOO_H__
 
@@ -32,14 +34,6 @@
 
 #ifdef ZOO_CONFIG_USE_DOUBLE_FOR_MS
 #include <math.h>
-#endif
-
-// platform-specific hacks
-
-#ifdef ZOO_GBA_HACKS
-#define GBA_FAST_CODE __attribute__((section(".iwram"), long_call, target("arm")))
-#else
-#define GBA_FAST_CODE
 #endif
 
 // early defs
@@ -470,14 +464,6 @@ typedef struct {
 	char oop_strip_name[21];
 } zoo_element_def;
 
-#ifdef ZOO_USE_ROM_POINTERS
-// Global function.
-bool platform_is_rom_ptr(void *ptr);
-#else
-// No ROM pointers.
-#define platform_is_rom_ptr(ptr) 0
-#endif
-
 // zoo.c
 
 void zoo_state_init(zoo_state *state);
@@ -496,8 +482,6 @@ int16_t zoo_hsecs_to_pit_ticks(int16_t hsecs);
 
 // zoo_element.c
 
-extern const zoo_element_def zoo_element_defs[ZOO_MAX_ELEMENT + 1];
-
 void zoo_element_move(zoo_state *state, int16_t old_x, int16_t old_y, int16_t new_x, int16_t new_y);
 void zoo_element_push(zoo_state *state, int16_t x, int16_t y, int16_t dx, int16_t dy);
 
@@ -506,15 +490,6 @@ void zoo_draw_player_surroundings(zoo_state *state, int16_t x, int16_t y, int16_
 void zoo_reset_message_flags(zoo_state *state);
 
 // zoo_game.c
-
-extern const char zoo_line_chars[16];
-extern const char zoo_color_names[8][8];
-extern const zoo_stat zoo_stat_template_default;
-
-extern const int16_t zoo_diagonal_delta_x[8];
-extern const int16_t zoo_diagonal_delta_y[8];
-extern const int16_t zoo_neighbor_delta_x[4];
-extern const int16_t zoo_neighbor_delta_y[4];
 
 void zoo_board_change(zoo_state *state, int16_t board_id);
 void zoo_board_create(zoo_state *state);
@@ -592,12 +567,6 @@ void zoo_flag_clear(zoo_state *state, const char *name);
 
 bool zoo_oop_send(zoo_state *state, int16_t stat_id, const char *send_label, bool ignore_lock);
 void zoo_oop_execute(zoo_state *state, int16_t stat_id, int16_t *position, const char *default_name);
-
-// zoo_oop_label_cache.c
-
-void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id);
-int16_t zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, bool zapped);
-void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label);
 
 // zoo_window.c
 

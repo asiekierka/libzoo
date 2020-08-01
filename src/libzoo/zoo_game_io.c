@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 #define zoo_io_read_byte(h) (h)->func_getc((h))
 

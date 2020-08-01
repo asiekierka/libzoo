@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 const char zoo_line_chars[16] = "\xF9\xD0\xD2\xBA\xB5\xBC\xBB\xB9\xC6\xC8\xC9\xCC\xCD\xCA\xCB\xCE";
 // FIX: preserve 1-indexing and fix messages for black keys/doors

@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 void zoo_input_update(zoo_input_state *state) {
 	int i, max_order = -1;

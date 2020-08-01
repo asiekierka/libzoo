@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 #define TICK_GET_SELF zoo_stat *stat = &state->board.stats[stat_id]
 #define CALL_STATE_GET_SELF uint8_t call_state = state->call_stack.state; state->call_stack.state = 0

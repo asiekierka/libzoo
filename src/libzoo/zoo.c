@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 bool zoo_world_reload(zoo_state *state) {
 	char filename[33];

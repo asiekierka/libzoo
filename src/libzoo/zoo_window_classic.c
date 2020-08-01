@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 #define WINDOW_STATE_START 0
 #define WINDOW_STATE_ANIM_OPEN 1

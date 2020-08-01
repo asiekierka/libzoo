@@ -24,7 +24,7 @@ all: $(OUTPUT).gba
 include $(DEVKITARM)/gba_rules
 
 ARCH :=	-mcpu=arm7tdmi -mtune=arm7tdmi -mthumb -mthumb-interwork
-ARCH_CFLAGS := -fomit-frame-pointer $(ARCH) -DZOO_GBA_HACKS
+ARCH_CFLAGS := -fomit-frame-pointer $(ARCH) -DZOO_PLATFORM_GBA
 ARCH_LDFLAGS := -specs=gba.specs $(ARCH)
 
 INCLUDE_DIRS := $(DEVKITPRO)/libtonc/include

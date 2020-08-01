@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 #define NOTE_MIN 16
 #define NOTE_MAX 112

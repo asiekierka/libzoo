@@ -17,7 +17,7 @@ OUTEXT :=
 all: $(OUTPUT)
 
 # arch settings
-ARCH_CFLAGS := $(shell sdl2-config --cflags)
+ARCH_CFLAGS := $(shell sdl2-config --cflags) -DZOO_PLATFORM_SDL
 ARCH_LDFLAGS := $(shell sdl2-config --libs)
 
 include $(abspath ${BASEDIR})/src/Makefile

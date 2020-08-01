@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo_ui.h"
+#include "zoo_ui_internal.h"
 
 // utility methods
 

@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 #define ZOO_WINDOW_LINE_MAX 50
 

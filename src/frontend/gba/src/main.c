@@ -85,6 +85,8 @@ IWRAM_ARM_CODE static void irq_timer_pit(void) {
 #define DBG_TICK_TIME_LEN 16
 static u32 dbg_tick_times[DBG_TICK_TIME_LEN];
 static u16 dbg_tick_time_pos = 0;
+
+void zoo_ui_debug_printf(bool status, const char *format, ...);
 #endif
 
 int main(void) {

@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 #include "libzoo/zoo_oop_token.c"
 
 #define oop_word_cmp(c) strncmp(state->oop_word, (c), sizeof(state->oop_word) - 1)

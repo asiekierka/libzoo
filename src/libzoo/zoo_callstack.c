@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 zoo_call *zoo_call_push(zoo_call_stack *stack, zoo_call_type type, uint8_t state) {
 	zoo_call *new_call;

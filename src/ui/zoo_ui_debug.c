@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "zoo_ui.h"
+#include "../libzoo/zoo_internal.h"
+#include "zoo_ui_internal.h"
 
 extern int platform_debug_free_memory(void);
 extern void platform_debug_puts(const char *str, bool status);

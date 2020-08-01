@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "zoo.h"
+#include "zoo_internal.h"
 
 static uint8_t zoo_io_mem_getc(zoo_io_handle *h) {
 	uint8_t **ptr = (uint8_t **) &h->p;
