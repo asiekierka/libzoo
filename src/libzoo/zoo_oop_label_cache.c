@@ -88,6 +88,25 @@ void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id) {
 	}
 }
 
+static void zoo_oop_label_cache_free(zoo_state *state, int16_t stat_id) {
+	zoo_stat *stat = &state->board.stats[stat_id];
+	void *ptr;
+	int pos;
+
+	if (stat->label_cache_size > 0) {
+		ptr = stat->label_cache;
+		free(ptr);
+
+		for (pos = 1; pos <= state->board.stat_count; pos++) {
+			stat = &state->board.stats[pos];
+			if (stat->label_cache_size > 0 && stat->label_cache == ptr) {
+				free(stat->label_cache);
+				stat->label_cache_size = 0;
+			}
+		}
+	}
+}
+
 // FIXME: exposes internal
 int16_t zoo_oop_find_string_from(zoo_state *state, int16_t stat_id, const char *str, int16_t start_pos, int16_t end_pos);
 
@@ -126,8 +145,10 @@ void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_da
 
 #ifdef ZOO_NO_OBJECT_CODE_WRITES
 	// Emulate #ZAP/RESTORE restart. (writes)
-	if (label_data_pos == 0)
+	if (label_data_pos == 0) {
 		stat->label_cache_chr2 = zapped ? '\'' : ':';
+		zoo_oop_label_cache_free(state, stat_id);
+	}
 #endif
 
 	zoo_oop_label_cache_build(state, stat_id);
