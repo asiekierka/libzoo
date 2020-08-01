@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "../libzoo/zoo_internal.h" // zoo_element_defs
 #include "zoo_sidebar.h"
 
 static void zoo_sidebar_draw_string(zoo_state *state, uint8_t x, uint8_t y, uint8_t col, const char *text) {

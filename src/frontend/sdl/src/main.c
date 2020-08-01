@@ -149,6 +149,9 @@ static uint32_t sdl_game_tick(uint32_t interval, void *param) {
 	}
 	
 	SDL_LockMutex(playfield_mutex);
+
+	zoo_ui_tick(&ui_state);
+
 	while (ticking) {
 		switch (zoo_tick(&state)) {
 			case RETURN_IMMEDIATE:
@@ -183,6 +186,26 @@ void sdl_render(void) {
 	SDL_UnlockMutex(playfield_mutex);
 
 	SDL_RenderPresent(renderer);
+}
+
+static uint16_t sdl_to_zoo_keycode(SDL_KeyCode code) {
+	if (code >= 0 && code < 128) {
+		return code;
+	} else if (code >= SDLK_F1 && code <= SDLK_F10) {
+		return ((code - SDLK_F1) + ZOO_KEY_F1);
+	} else switch (code) {
+		case SDLK_UP: return ZOO_KEY_UP;
+		case SDLK_LEFT: return ZOO_KEY_LEFT;
+		case SDLK_RIGHT: return ZOO_KEY_RIGHT;
+		case SDLK_DOWN: return ZOO_KEY_DOWN;
+		case SDLK_PAGEUP: return ZOO_KEY_PAGE_UP;
+		case SDLK_PAGEDOWN: return ZOO_KEY_PAGE_DOWN;
+		case SDLK_INSERT: return ZOO_KEY_INSERT;
+		case SDLK_DELETE: return ZOO_KEY_DELETE;
+		case SDLK_HOME: return ZOO_KEY_HOME;
+		case SDLK_END: return ZOO_KEY_END;
+		default: return 0;
+	}
 }
 
 // main
@@ -271,66 +294,20 @@ int main(int argc, char **argv) {
 		SDL_LockMutex(playfield_mutex);
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
-				case SDL_KEYDOWN:
+				case SDL_KEYDOWN: {
 					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
-					switch (event.key.keysym.sym) {
-						case SDLK_LEFT:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_LEFT);
-							break;
-						case SDLK_RIGHT:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_RIGHT);
-							break;
-						case SDLK_UP:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_UP);
-							break;
-						case SDLK_DOWN:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_DOWN);
-							break;
-						case SDLK_t:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_TORCH);
-							break;
-						case SDLK_RETURN:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_OK);
-							break;
-						case SDLK_ESCAPE:
-							zoo_input_action_down(&(state.input), ZOO_ACTION_CANCEL);
-							break;
-						case SDLK_F1:
-							if (zoo_call_empty(&state.call_stack)) {
-								zoo_ui_main_menu(&ui_state);
-							}
-							break;
+					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym);
+					if (kcode != 0) {
+						zoo_ui_input_key(&state, &ui_state.input, kcode, true);
 					}
-					break;
-				case SDL_KEYUP:
+				} break;
+				case SDL_KEYUP: {
 					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
-					switch (event.key.keysym.sym) {
-						case SDLK_LEFT:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_LEFT);
-							break;
-						case SDLK_RIGHT:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_RIGHT);
-							break;
-						case SDLK_UP:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_UP);
-							break;
-						case SDLK_DOWN:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_DOWN);
-							break;
-						case SDLK_t:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_TORCH);
-							break;
-						case SDLK_RETURN:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_OK);
-							break;
-						case SDLK_ESCAPE:
-							zoo_input_action_up(&(state.input), ZOO_ACTION_CANCEL);
-							break;
-						case SDLK_b:
-							state.sound.enabled = !state.sound.enabled;
-							break;
+					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym);
+					if (kcode != 0) {
+						zoo_ui_input_key(&state, &ui_state.input, kcode, false);
 					}
-					break;
+				} break;
 				case SDL_QUIT:
 					cont_loop = false;
 					break;

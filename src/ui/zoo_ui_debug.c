@@ -42,7 +42,6 @@ static ZOO_INLINE void zoo_ui_dbg_memtest(zoo_state *zoo) {
 	zoo_board_open(zoo, curr_board);
 }
 
-
 static zoo_tick_retval zoo_ui_debug_menu_cb(zoo_state *zoo, zoo_ui_state *cb_state) {
 	char hyperlink[21];
 	strncpy(hyperlink, cb_state->window.hyperlink, sizeof(hyperlink));

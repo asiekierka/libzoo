@@ -282,17 +282,20 @@ static int zoo_io_board_write_internal(zoo_io_handle *h, zoo_board *board, bool 
 		else zoo_io_packed_stat_write(h, stat);
 
 		if (stat->data_len > 0) {
-#ifdef ZOO_STORE_LABEL_CACHE
 			if (!external) {
+#ifndef ZOO_USE_ROM_POINTERS
+				h->func_write(h, (uint8_t *) stat->data, stat->data_len);
+#endif
+#ifdef ZOO_STORE_LABEL_CACHE
 				zoo_io_write_short(h, stat->label_cache_size);
 				for (iy = 0; iy < stat->label_cache_size; iy++) {
 					zoo_io_write_short(h, stat->label_cache[iy].pos);
 					zoo_io_write_byte(h, stat->label_cache[iy].zapped);
 				}
-			}
-#else
-			h->func_write(h, (uint8_t *) stat->data, stat->data_len);
 #endif
+			} else {
+				h->func_write(h, (uint8_t *) stat->data, stat->data_len);
+			}
 			zoo_stat_free(stat);
 		}
 	}
@@ -362,9 +365,14 @@ static int zoo_io_board_read_internal(zoo_io_handle *h, zoo_board *board, bool e
 			if (is_rom) {
 				stat->data = (char*) h->func_getptr(h);
 				h->func_skip(h, stat->data_len);
-			} else {
-				// If not from ROM, stat->data should be correct,
+			} else if (!external) {
+				// If not from external ROM, stat->data should be correct,
 				// and there should be no text following.
+			} else {
+				stat->data = malloc(stat->data_len);
+				if (stat->data == NULL)
+					return ZOO_ERROR_NOMEM;
+				h->func_read(h, (uint8_t *) stat->data, stat->data_len);
 			}
 #else
 			stat->data = malloc(stat->data_len);
@@ -544,6 +552,7 @@ static void zoo_resave_board(int i, zoo_world *world, bool external) {
 	memcpy(&state.world, world, sizeof(zoo_world));
 	zoo_board_open(&state, i);
 	zoo_board_close_internal(&state, external);
+	memcpy(world, &state.world, sizeof(zoo_world));
 }
 
 int zoo_io_world_write(zoo_io_handle *h, zoo_world *world) {

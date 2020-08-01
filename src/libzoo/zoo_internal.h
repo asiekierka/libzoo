@@ -67,4 +67,15 @@ void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id);
 int16_t zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, bool zapped);
 void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label);
 
+// zoo_window_classic.c
+
+typedef enum {
+    ZOO_WINDOW_PATTERN_TOP,
+    ZOO_WINDOW_PATTERN_BOTTOM,
+    ZOO_WINDOW_PATTERN_INNER,
+    ZOO_WINDOW_PATTERN_SEPARATOR
+} zoo_window_pattern_type;
+
+void zoo_window_draw_pattern(zoo_state *state, int16_t x, int16_t y, int16_t width, uint8_t color, zoo_window_pattern_type ptype);
+
 #endif /* __ZOO_H__ */

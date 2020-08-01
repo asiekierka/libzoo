@@ -68,21 +68,22 @@ static const char draw_patterns[4][5] = {
 	{' ', '\xC6', '\xCD', '\xB5', ' '} // separator
 };
 
-#define PAT_TOP 0
-#define PAT_BOTTOM 1
-#define PAT_INNER 2
-#define PAT_SEP 3
-
-static void zoo_window_draw_border(zoo_text_window *window, zoo_state *state, int16_t y, const char *pattern) {
+void zoo_window_draw_pattern(zoo_state *state, int16_t x, int16_t y, int16_t width, uint8_t color, zoo_window_pattern_type ptype) {
 	int16_t ix;
+	zoo_video_driver *d_video = state->d_video;
+	const char *pattern = draw_patterns[ptype];
 
-	state->d_video->func_write(state->d_video, window_x, y, 0x0F, pattern[0]);
-	state->d_video->func_write(state->d_video, window_x + 1, y, 0x0F, pattern[1]);
-	for (ix = 2; ix < window_width - 2; ix++) {
-		state->d_video->func_write(state->d_video, window_x + ix, y, 0x0F, pattern[2]);
+	d_video->func_write(d_video, x, y, color, pattern[0]);
+	d_video->func_write(d_video, x + 1, y, color, pattern[1]);
+	for (ix = 2; ix < width - 2; ix++) {
+		d_video->func_write(d_video, x + ix, y, color, pattern[2]);
 	}
-	state->d_video->func_write(state->d_video, window_x + window_width - 2, y, 0x0F, pattern[3]);
-	state->d_video->func_write(state->d_video, window_x + window_width - 1, y, 0x0F, pattern[4]);
+	d_video->func_write(d_video, x + width - 2, y, color, pattern[3]);
+	d_video->func_write(d_video, x + width - 1, y, color, pattern[4]);
+}
+
+static ZOO_INLINE void zoo_window_draw_border(zoo_text_window *window, zoo_state *state, int16_t y, zoo_window_pattern_type ptype) {
+	zoo_window_draw_pattern(state, window_x, y, window_width, 0x0F, ptype);
 }
 
 static void zoo_window_draw_open(zoo_text_window *window, zoo_state *state) {
@@ -92,25 +93,25 @@ static void zoo_window_draw_open(zoo_text_window *window, zoo_state *state) {
 	int16_t y2 = window_y + window_height - window->counter - 2;
 	int16_t y3 = window_y + window_height - window->counter - 1;
 
-	zoo_window_draw_border(window, state, y0, draw_patterns[PAT_TOP]);
-	zoo_window_draw_border(window, state, y1, draw_patterns[PAT_INNER]);
-	zoo_window_draw_border(window, state, y2, draw_patterns[PAT_INNER]);
-	zoo_window_draw_border(window, state, y3, draw_patterns[PAT_BOTTOM]);
+	zoo_window_draw_border(window, state, y0, ZOO_WINDOW_PATTERN_TOP);
+	zoo_window_draw_border(window, state, y1, ZOO_WINDOW_PATTERN_INNER);
+	zoo_window_draw_border(window, state, y2, ZOO_WINDOW_PATTERN_INNER);
+	zoo_window_draw_border(window, state, y3, ZOO_WINDOW_PATTERN_BOTTOM);
 }
 
 static void zoo_window_draw_open_finish(zoo_text_window *window, zoo_state *state) {
-	zoo_window_draw_border(window, state, window_y + 2, draw_patterns[PAT_SEP]);
+	zoo_window_draw_border(window, state, window_y + 2, ZOO_WINDOW_PATTERN_SEPARATOR);
 	zoo_window_draw_title(window, state, 0x1E, window->title);
 }
 
 static void zoo_window_draw_open_all(zoo_text_window *window, zoo_state *state) {
 	int16_t iy;
 
-	zoo_window_draw_border(window, state, window_y, draw_patterns[PAT_TOP]);
+	zoo_window_draw_border(window, state, window_y, ZOO_WINDOW_PATTERN_TOP);
 	for (iy = 1; iy < window_height - 1; iy++) {
-		zoo_window_draw_border(window, state, window_y + iy, draw_patterns[iy == 2 ? PAT_SEP : PAT_INNER]);	
+		zoo_window_draw_border(window, state, window_y + iy, iy == 2 ? ZOO_WINDOW_PATTERN_SEPARATOR : ZOO_WINDOW_PATTERN_INNER);	
 	}
-	zoo_window_draw_border(window, state, window_y + window_height - 1, draw_patterns[PAT_BOTTOM]);
+	zoo_window_draw_border(window, state, window_y + window_height - 1, ZOO_WINDOW_PATTERN_BOTTOM);
 }
 
 static void zoo_window_draw_line(zoo_text_window *window, zoo_state *state, int16_t line_pos, bool no_formatting) {
@@ -196,8 +197,8 @@ static void zoo_window_draw_close(zoo_text_window *window, zoo_state *state) {
 		y0 = window_y + iy;
 		y1 = window_y + window_height - iy - 1;
 
-		zoo_window_draw_border(window, state, y0, draw_patterns[PAT_TOP]);
-		zoo_window_draw_border(window, state, y1, draw_patterns[PAT_BOTTOM]);
+		zoo_window_draw_border(window, state, y0, ZOO_WINDOW_PATTERN_TOP);
+		zoo_window_draw_border(window, state, y1, ZOO_WINDOW_PATTERN_BOTTOM);
 	}
 
 	// restore line at counter
@@ -303,6 +304,7 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			if ((++window->counter) > WINDOW_ANIM_MAX) {
 				CloseWindow:
 				should_close = true;
+				zoo_free_display(state, window->screen_copy);
 				if (window->accepted) {
 					curr_str = zoo_window_line_selected(window);
 					if (curr_str != NULL && curr_str[0] == '!') {

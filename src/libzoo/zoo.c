@@ -123,6 +123,12 @@ void zoo_restore_display(zoo_state *state, void *data, int16_t width, int16_t he
 	}
 }
 
+void zoo_free_display(zoo_state *state, void *data) {
+	if (data != NULL) {
+		free(data);
+	}
+}
+
 static void zoo_default_video_write(zoo_video_driver *drv, int16_t x, int16_t y, uint8_t a, uint8_t b) {
 	// pass
 }

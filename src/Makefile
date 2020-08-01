@@ -85,7 +85,11 @@ SOURCES += $(SRCDIR)/ui/zoo_sidebar_slim.c
 endif
 
 ifdef ZOO_USE_UI
-SOURCES += $(SRCDIR)/ui/zoo_ui.c
+SOURCES += $(SRCDIR)/ui/zoo_ui.c \
+	$(SRCDIR)/ui/zoo_ui_file_select.c \
+	$(SRCDIR)/ui/zoo_ui_input.c \
+	$(SRCDIR)/ui/zoo_ui_prompt.c \
+	$(SRCDIR)/ui/zoo_ui_util.c
 
 ifdef ZOO_DEBUG_MENU
 CFLAGS += -DZOO_DEBUG_MENU
