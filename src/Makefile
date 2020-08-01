@@ -114,6 +114,9 @@ LDFLAGS_LIBS := $(foreach dir,$(LIB_DIRS),-L$(abspath $(dir))) $(LIB_FLAGS)
 
 # final definitions
 
+CFLAGS_DEPS += -MT $@ -MMD -MP -MF $(BUILDDIR)/$*.d
+
+EARLY_OBJECTS := $(OBJECTS)
 OBJECTS += $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o))
 
 $(OUTPUT)$(OUTEXT) : $(OBJECTS)
@@ -121,15 +124,15 @@ $(OUTPUT)$(OUTEXT) : $(OBJECTS)
 	@mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $(OBJECTS) $(LDFLAGS_LIBS) -o $@
 
-$(BUILDDIR)/%.o : $(SRCDIR)/%.c
+$(BUILDDIR)/%.o : $(SRCDIR)/%.c $(BUILDDIR)/%.d $(EARLY_OBJECTS)
 	@echo $(notdir $<)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS_DEPS) $(CFLAGS) -c $< -o $@
 
-$(BUILDDIR)/%.o : $(BUILDDIR)/%.c
+$(BUILDDIR)/%.o : $(BUILDDIR)/%.c $(BUILDDIR)/%.d
 	@echo $(notdir $<)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS_DEPS) $(CFLAGS) -c $< -o $@
 
 $(BUILDDIR)/%.c : $(SRCDIR)/%.tok
 	@echo $(notdir $<)
@@ -140,3 +143,8 @@ $(BUILDDIR)/%.c : $(SRCDIR)/%.tok
 
 clean:
 	rm -rf $(BUILDDIR) $(OUTPUT).*
+
+DEPFILES := $(OBJECTS:.o=.d)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
