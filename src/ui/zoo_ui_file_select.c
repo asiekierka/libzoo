@@ -55,6 +55,7 @@ void zoo_ui_filesel_call(zoo_ui_state *state, const char *title, const char *ext
 	zoo_ui_init_select_window(state, title);
 	strcpy(state->filesel_extension, extension != NULL ? extension : "");
 	d_io->func_dir_scan(d_io, d_io->path, zoo_ui_filesel_dir_scan_cb, state);
+	zoo_window_sort(state->zoo, &state->window);
 	zoo_call_push_callback(&(state->zoo->call_stack), cb, state);
 	zoo_window_open(state->zoo, &state->window);
 }

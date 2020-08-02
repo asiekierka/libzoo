@@ -30,7 +30,19 @@
 
 #include "zoo.h"
 
-// platform-specific hacks
+// platform/compiler-specific hacks
+
+#if __STDC_VERSION__ >= 199901L
+#define ZOO_INLINE inline
+#else
+#define ZOO_INLINE
+#endif
+
+#if defined(__GNUC__) && defined(ZOO_OPTIMIZE)
+#define ZOO_FILE_OPTIMIZE_SIZE _Pragma("GCC optimize (\"Os\")")
+#else
+#define ZOO_FILE_OPTIMIZE_SIZE
+#endif
 
 #ifdef ZOO_PLATFORM_GBA
 #define GBA_FAST_CODE __attribute__((section(".iwram"), long_call, target("arm")))
@@ -66,6 +78,10 @@ extern const int16_t zoo_neighbor_delta_y[4];
 void zoo_oop_label_cache_build(zoo_state *state, int16_t stat_id);
 int16_t zoo_oop_label_cache_search(zoo_state *state, int16_t stat_id, const char *object_message, bool zapped);
 void zoo_oop_label_cache_zap(zoo_state *state, int16_t stat_id, int16_t label_data_pos, bool zapped, bool recurse, const char *label);
+
+// zoo_window.c
+
+void zoo_window_sort(zoo_state *state, zoo_text_window *window);
 
 // zoo_window_classic.c
 

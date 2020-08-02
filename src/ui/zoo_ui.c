@@ -68,7 +68,7 @@ static zoo_tick_retval zoo_ui_save_world_cb(zoo_ui_state *state, const char *fil
 	zoo_io_handle h;
 	int ret;
 
-	if (!accepted) return RETURN_IMMEDIATE;
+	if (!accepted) return EXIT;
 
 	strncpy(full_filename, filename, ZOO_PATH_MAX);
 	strncat(full_filename, ".SAV", ZOO_PATH_MAX);
@@ -81,7 +81,7 @@ static zoo_tick_retval zoo_ui_save_world_cb(zoo_ui_state *state, const char *fil
 	}
 	h.func_close(&h);
 
-	return RETURN_IMMEDIATE;
+	return EXIT;
 }
 
 void zoo_ui_save_world(zoo_ui_state *state) {
@@ -90,16 +90,86 @@ void zoo_ui_save_world(zoo_ui_state *state) {
 
 // game operations - CHEAT
 
+#ifdef ZOO_UI_CHEAT_HISTORY
+static void zoo_ui_cheat_add_history(zoo_ui_state *state, const char *cmd) {
+	int i;
+	for (i = 0; i < ZOO_UI_CHEAT_HISTORY_SIZE; i++) {
+		if (!strcmp(cmd, state->cheat_history[i])) {
+			return;
+		}
+	}
+
+	if (state->cheat_history[ZOO_UI_CHEAT_HISTORY_SIZE - 1] != NULL) {
+		free(state->cheat_history[ZOO_UI_CHEAT_HISTORY_SIZE - 1]);
+	}
+
+	memmove(state->cheat_history + 1, state->cheat_history, sizeof(char*) * (ZOO_UI_CHEAT_HISTORY_SIZE - 1));
+	state->cheat_history[0] = malloc(strlen(cmd) + 1);
+	strcpy(state->cheat_history[0], cmd);
+}
+#endif
+
 static zoo_tick_retval zoo_ui_cheat_cb(zoo_ui_state *state, const char *cmd, bool accepted) {
 	if (!accepted) return RETURN_IMMEDIATE;
 
 	zoo_game_debug_command(state->zoo, cmd);
+#ifdef ZOO_UI_CHEAT_HISTORY
+	zoo_ui_cheat_add_history(state, cmd);
+#endif
+
 	return RETURN_IMMEDIATE;
 }
 
-void zoo_ui_cheat(zoo_ui_state *state) {
+static void zoo_ui_cheat_prompt(zoo_ui_state *state) {
 	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 4, 18, 50, "Command?", "", zoo_ui_cheat_cb);
 }
+
+#ifdef ZOO_UI_CHEAT_HISTORY
+static zoo_tick_retval zoo_ui_cheat_window_cb(zoo_state *zoo, zoo_ui_state *cb_state) {
+	char hyperlink[51];
+	strncpy(hyperlink, cb_state->window.hyperlink, sizeof(hyperlink));
+	zoo_window_close(&cb_state->window);
+
+	if (hyperlink[0] == 'Z') {
+		// new cheat
+		zoo_ui_cheat_prompt(cb_state);
+	} else {
+		// old cheat
+		zoo_game_debug_command(zoo, cb_state->cheat_history[(hyperlink[0] - '0') % ZOO_UI_CHEAT_HISTORY_SIZE]);
+	}
+
+	return EXIT;
+}
+
+void zoo_ui_cheat(zoo_ui_state *state) {
+	int i;
+	char line[51];
+
+	if (state->cheat_history[0] != NULL) {
+		// cheat history stored, build window
+		zoo_ui_init_select_window(state, "Select Command");
+		for (i = 0; i < ZOO_UI_CHEAT_HISTORY_SIZE; i++) {
+			if (state->cheat_history[i] == NULL) {
+				break;
+			}
+			line[0] = '!';
+			line[1] = i + '0';
+			line[2] = ';';
+			strncpy(line + 3, state->cheat_history[i], sizeof(line) - 1 - 3);
+			zoo_window_append(&state->window, line);
+		}
+		zoo_window_append(&state->window, "!Z;New command");
+		zoo_call_push_callback(&(state->zoo->call_stack), (zoo_func_callback) zoo_ui_cheat_window_cb, state);
+		zoo_window_open(state->zoo, &state->window);
+	} else {
+		zoo_ui_cheat_prompt(state);
+	}
+}
+#else
+void zoo_ui_cheat(zoo_ui_state *state) {
+	zoo_ui_cheat_prompt(state);
+}
+#endif
 
 // main menu
 

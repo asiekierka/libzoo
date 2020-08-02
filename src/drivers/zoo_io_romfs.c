@@ -2,6 +2,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include "../libzoo/zoo_internal.h"
 #include "zoo_io_romfs.h"
 
 // TODO: add support for directories

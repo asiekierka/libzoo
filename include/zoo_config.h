@@ -27,13 +27,6 @@
 #define ZOO_CONFIG_SOUND_PCM_BUFFER_LEN 32 // ~1.5 seconds of audio
 #endif
 
-// Compiler options
-#if __STDC_VERSION__ >= 199901L
-#define ZOO_INLINE inline
-#else
-#define ZOO_INLINE
-#endif
-
 // Feature flags
 #ifdef ZOO_USE_ROM_POINTERS
 // If we can't write to object code memory, we must enable some workarounds.

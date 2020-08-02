@@ -265,6 +265,7 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 				zoo_window_draw_open_finish(window, state);
 			FinishOpenWindow:
 				zoo_window_draw_text(window, state, false);
+				zoo_input_clear(&state->input);
 				window->state = WINDOW_STATE_TICK;
 			} else {
 				return RETURN_NEXT_FRAME;
@@ -304,7 +305,6 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 			if ((++window->counter) > WINDOW_ANIM_MAX) {
 				CloseWindow:
 				should_close = true;
-				zoo_free_display(state, window->screen_copy);
 				if (window->accepted) {
 					curr_str = zoo_window_line_selected(window);
 					if (curr_str != NULL && curr_str[0] == '!') {
@@ -312,11 +312,14 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 					}
 				}
 				if (should_close) {
+					zoo_free_display(state, window->screen_copy);
 					if (!window->manual_close) {
 						zoo_window_close(window);
 					}
 					return EXIT;
 				} else {
+					zoo_restore_display(state, window->screen_copy, window_width, window_height, 0, 0, window_width, window_height, window_x, window_y);
+					zoo_free_display(state, window->screen_copy);
 					window->state = WINDOW_STATE_START;
 					zoo_input_clear(&state->input);
 					return RETURN_IMMEDIATE;
@@ -328,6 +331,32 @@ static zoo_tick_retval zoo_window_classic_tick(zoo_state *state, zoo_text_window
 	}
 
 	return RETURN_NEXT_FRAME;
+}
+
+static const char *zw_text_ptr(const char *line) {
+	char *tmp;
+
+	switch (line[0]) {
+		case '!':
+		case ':':
+			tmp = strchr(line, ';');
+			if (tmp != NULL) return tmp + 1;
+			else return line + 1;
+		case '$':
+			return line + 1;
+		default:
+			return line;
+	}
+}
+
+static int zw_sort_compare(const void *line_a, const void *line_b) {
+	const char *str_a = zw_text_ptr(*((const char**) line_a));
+	const char *str_b = zw_text_ptr(*((const char**) line_b));
+	return strcasecmp(str_a, str_b);
+}
+
+void zoo_window_sort(zoo_state *state, zoo_text_window *window) {
+	return qsort(window->lines, window->line_count, sizeof(char*), zw_sort_compare);
 }
 
 void zoo_window_open(zoo_state *state, zoo_text_window *window) {

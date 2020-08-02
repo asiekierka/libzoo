@@ -25,7 +25,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "../libzoo/zoo_internal.h"
 #include "zoo_ui_internal.h"
 
 static void zoo_ui_prompt_string_draw(zoo_state *zoo, zoo_ui_prompt_state *state) {
@@ -173,6 +172,6 @@ void zoo_ui_popup_prompt_string(zoo_ui_state *state, zoo_ui_prompt_mode mode, ui
     zoo_ui_prompt_string_draw(state->zoo, prompt);
 
 #ifdef ZOO_UI_OSK
-    zoo_osk_open(state, &prompt->osk, 14, 4);
+    zoo_osk_open(state, &prompt->osk, 12, 3);
 #endif
 }

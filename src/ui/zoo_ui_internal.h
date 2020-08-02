@@ -1,7 +1,11 @@
 #ifndef __ZOO_UI_INTERNAL_H__
 #define __ZOO_UI_INTERNAL_H__
 
+#include "../libzoo/zoo_internal.h"
 #include "zoo_ui.h"
+
+// all UI files are size-optimized
+ZOO_FILE_OPTIMIZE_SIZE
 
 struct s_zoo_ui_state;
 

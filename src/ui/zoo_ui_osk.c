@@ -27,10 +27,10 @@
 
 #define ZOO_OSK_SHIFT 128
 
-#define ZOO_OSK_WIDTH 29
-#define ZOO_OSK_HEIGHT 6
-#define ZOO_OSK_OX 2
-#define ZOO_OSK_OY 1
+#define ZOO_OSK_WIDTH 33
+#define ZOO_OSK_HEIGHT 8
+#define ZOO_OSK_OX 4
+#define ZOO_OSK_OY 2
 
 static const zoo_osk_entry osk_entries_default[] = {
 	{0,  0, '1', '!'},
@@ -90,11 +90,11 @@ static void zoo_osk_draw(zoo_state *state, zoo_osk_state *osk, bool redraw) {
 	zoo_video_driver *d_video = state->d_video;
 
 	if (redraw) {
-		for (iy = 0; iy < ZOO_OSK_HEIGHT; iy++) {
-			for (ix = 0; ix < ZOO_OSK_WIDTH; ix++) {
-				d_video->func_write(d_video, osk->x + ix, osk->y + iy, 0x1F, ' ');
-			}
+		zoo_window_draw_pattern(state, osk->x, osk->y, ZOO_OSK_WIDTH, 0x1F, ZOO_WINDOW_PATTERN_TOP);
+		for (iy = 1; iy < ZOO_OSK_HEIGHT - 1; iy++) {
+			zoo_window_draw_pattern(state, osk->x, osk->y + iy, ZOO_OSK_WIDTH, 0x1F, ZOO_WINDOW_PATTERN_INNER);
 		}
+		zoo_window_draw_pattern(state, osk->x, osk->y + ZOO_OSK_HEIGHT - 1, ZOO_OSK_WIDTH, 0x1F, ZOO_WINDOW_PATTERN_BOTTOM);
 	}
 
 	i = 0;
