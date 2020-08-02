@@ -45,7 +45,6 @@ void zoo_ui_input_key(zoo_state *zoo, zoo_ui_input_state *inp, uint16_t key, boo
 	for (i = 0; i < ZOO_ACTION_MAX; i++) {
 		if (inp->action_to_kbd_button[i] == key) {
 			zoo_input_action_set(&zoo->input, i, pressed);
-			break;
 		}
 	}
 

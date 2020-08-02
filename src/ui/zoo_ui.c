@@ -88,6 +88,19 @@ void zoo_ui_save_world(zoo_ui_state *state) {
 	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 3, 18, 50, "Save name? (.SAV)", state->zoo->world.info.name, zoo_ui_save_world_cb);
 }
 
+// game operations - CHEAT
+
+static zoo_tick_retval zoo_ui_cheat_cb(zoo_ui_state *state, const char *cmd, bool accepted) {
+	if (!accepted) return;
+
+	zoo_game_debug_command(state->zoo, cmd);
+	return RETURN_IMMEDIATE;
+}
+
+void zoo_ui_cheat(zoo_ui_state *state) {
+	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 3, 18, 50, "Command?", "", zoo_ui_cheat_cb);
+}
+
 // main menu
 
 static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_state) {
@@ -107,6 +120,8 @@ static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_stat
 		zoo_ui_load_world(cb_state, true);
 	} else if (!strcmp(hyperlink, "save")) {
 		zoo_ui_save_world(cb_state);
+	} else if (!strcmp(hyperlink, "cheat")) {
+		zoo_ui_cheat(cb_state);
 	} else if (!strcmp(hyperlink, "quit"))  {
 		if (cb_state->zoo->game_state == GS_PLAY)  {
 			zoo_world_return_title(zoo);
@@ -122,6 +137,10 @@ static zoo_tick_retval zoo_ui_main_menu_cb(zoo_state *zoo, zoo_ui_state *cb_stat
 
 void zoo_ui_main_menu(struct s_zoo_ui_state *state) {
 	zoo_ui_init_select_window(state, "Main Menu");
+
+	if (state->zoo->game_state == GS_PLAY) {
+		zoo_window_append(&state->window, "!cheat;Input command");
+	}
 	
 	if (state->zoo->game_state != GS_PLAY) {
 		zoo_window_append(&state->window, "!play;Play world");

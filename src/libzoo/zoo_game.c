@@ -599,6 +599,63 @@ void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y) {
 	zoo_board_enter(state);
 }
 
+void zoo_game_debug_command(zoo_state *state, char *in_cmd) {
+	int i, ix, iy;
+	bool toggle = true;
+	char cmd[51];
+
+	for (i = 0; i < strlen(in_cmd) && i < sizeof(cmd); i++) {
+		cmd[i] = zoo_toupper(in_cmd[i]);
+	}
+	cmd[50] = '\0';
+
+	if ((cmd[0] == '+') || (cmd[0] == '-')) {
+		if (cmd[0] == '-') {
+			toggle = false;
+		}
+
+		strcpy(cmd, cmd + 1);
+
+		if (toggle) {
+			zoo_flag_set(state, cmd);
+		} else {
+			zoo_flag_clear(state, cmd);
+		}
+	}
+
+	// debug_enabled = zoo_flag_get_id(state, "DEBUG") >= 0;
+
+	if (!strcmp(cmd, "HEALTH")) {
+		state->world.info.health += 50;
+	} else if (!strcmp(cmd, "AMMO")) {
+		state->world.info.ammo += 5;
+	} else if (!strcmp(cmd, "KEYS")) {
+		for (i = 0; i < 7; i++) {
+			state->world.info.keys[i] = true;
+		}
+	} else if (!strcmp(cmd, "TORCHES")) {
+		state->world.info.torches += 3;
+	} else if (!strcmp(cmd, "TIME")) {
+		state->world.info.board_time_sec -= 30;
+	} else if (!strcmp(cmd, "GEMS")) {
+		state->world.info.gems += 5;
+	} else if (!strcmp(cmd, "DARK")) {
+		state->board.info.is_dark = toggle;
+		zoo_board_draw(state);
+	} else if (!strcmp(cmd, "ZAP")) {
+		for (i = 0; i < 4; i++) {
+			ix = state->board.stats[0].x + zoo_neighbor_delta_x[i];
+			iy = state->board.stats[0].y + zoo_neighbor_delta_y[i];
+			zoo_board_damage_tile(state, ix, iy);
+			state->board.tiles[ix][iy].element = ZOO_E_EMPTY;
+			zoo_board_draw_tile(state, ix, iy);
+		}
+	}
+
+	zoo_sound_queue_const(&(state->sound), 10, "\x27\x04");
+	state->func_draw_sidebar(state, ZOO_SIDEBAR_UPDATE_ALL);
+}
+
 void zoo_game_start(zoo_state *state, zoo_game_state game_state) {
 	state->game_state = game_state;
 

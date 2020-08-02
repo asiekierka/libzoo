@@ -188,9 +188,38 @@ void sdl_render(void) {
 	SDL_RenderPresent(renderer);
 }
 
-static uint16_t sdl_to_zoo_keycode(SDL_KeyCode code) {
-	if (code >= 0 && code < 128) {
-		return code;
+static SDL_KeyCode as_shifted(SDL_KeyCode kcode) {
+	if (kcode >= 'a' && kcode <= 'z') {
+		return kcode - 32;
+	} else switch(kcode) {
+		case '1': return '!';
+		case '2': return '@';
+		case '3': return '#';
+		case '4': return '$';
+		case '5': return '%';
+		case '6': return '^';
+		case '7': return '&';
+		case '8': return '*';
+		case '9': return '(';
+		case '0': return ')';
+		case '-': return '_';
+		case '=': return '+';
+		case '[': return '{';
+		case ']': return '}';
+		case ';': return ':';
+		case '\'': return '"';
+		case '\\': return '|';
+		case ',': return '<';
+		case '.': return '>';
+		case '/': return '?';
+		case '`': return '~';
+		default: return kcode;
+	}
+}
+
+static uint16_t sdl_to_zoo_keycode(SDL_KeyCode code, bool shift) {
+	if (code > 0 && code < 128) {
+		return shift ? as_shifted(code) : code;
 	} else if (code >= SDLK_F1 && code <= SDLK_F10) {
 		return ((code - SDLK_F1) + ZOO_KEY_F1);
 	} else switch (code) {
@@ -296,14 +325,14 @@ int main(int argc, char **argv) {
 			switch (event.type) {
 				case SDL_KEYDOWN: {
 					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
-					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym);
+					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym, event.key.keysym.mod & KMOD_SHIFT);
 					if (kcode != 0) {
 						zoo_ui_input_key(&state, &ui_state.input, kcode, true);
 					}
 				} break;
 				case SDL_KEYUP: {
 					zoo_input_action_set(&(state.input), ZOO_ACTION_SHOOT, (event.key.keysym.mod & KMOD_SHIFT));
-					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym);
+					uint16_t kcode = sdl_to_zoo_keycode(event.key.keysym.sym, event.key.keysym.mod & KMOD_SHIFT);
 					if (kcode != 0) {
 						zoo_ui_input_key(&state, &ui_state.input, kcode, false);
 					}
