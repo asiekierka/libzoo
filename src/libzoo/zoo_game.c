@@ -599,12 +599,12 @@ void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y) {
 	zoo_board_enter(state);
 }
 
-void zoo_game_debug_command(zoo_state *state, char *in_cmd) {
+void zoo_game_debug_command(zoo_state *state, const char *in_cmd) {
 	int i, ix, iy;
 	bool toggle = true;
 	char cmd[51];
 
-	for (i = 0; i < strlen(in_cmd) && i < sizeof(cmd); i++) {
+	for (i = 0; i <= strlen(in_cmd) && i < sizeof(cmd); i++) {
 		cmd[i] = zoo_toupper(in_cmd[i]);
 	}
 	cmd[50] = '\0';

@@ -109,7 +109,7 @@ void zoo_restore_display(zoo_state *state, void *data, int16_t width, int16_t he
 		return state->d_video->func_restore_display(state->d_video, data, width, height, srcx, srcy, srcwidth, srcheight, dstx, dsty);
 	} else if (data != NULL && state->d_video->func_write != NULL) {
 		data8 = ((uint8_t *) data) + (srcy * width * 2) + (srcx * 2);
-		for (iy = 0; iy < srcheight; iy++, data8 += (width * 2)) {
+		for (iy = 0; iy < srcheight; iy++) {
 			for (ix = 0; ix < srcwidth; ix++, data8 += 2) {
 				state->d_video->func_write(state->d_video, dstx + ix, dsty + iy, data8[0], data8[1]);
 			}

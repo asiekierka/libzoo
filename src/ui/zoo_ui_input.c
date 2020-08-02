@@ -32,7 +32,6 @@ void zoo_ui_input_init(zoo_ui_input_state *inp) {
 	zoo_ui_input_key_map(inp, ZOO_ACTION_DOWN, ZOO_KEY_DOWN);
 	zoo_ui_input_key_map(inp, ZOO_ACTION_LEFT, ZOO_KEY_LEFT);
 	zoo_ui_input_key_map(inp, ZOO_ACTION_RIGHT, ZOO_KEY_RIGHT);
-	zoo_ui_input_key_map(inp, ZOO_ACTION_SHOOT, ZOO_KEY_SHIFT);
 	zoo_ui_input_key_map(inp, ZOO_ACTION_TORCH, 't');
 	zoo_ui_input_key_map(inp, ZOO_ACTION_OK, ZOO_KEY_ENTER);
 	zoo_ui_input_key_map(inp, ZOO_ACTION_CANCEL, ZOO_KEY_ESCAPE);

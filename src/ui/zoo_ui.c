@@ -68,7 +68,7 @@ static zoo_tick_retval zoo_ui_save_world_cb(zoo_ui_state *state, const char *fil
 	zoo_io_handle h;
 	int ret;
 
-	if (!accepted) return;
+	if (!accepted) return RETURN_IMMEDIATE;
 
 	strncpy(full_filename, filename, ZOO_PATH_MAX);
 	strncat(full_filename, ".SAV", ZOO_PATH_MAX);
@@ -85,20 +85,20 @@ static zoo_tick_retval zoo_ui_save_world_cb(zoo_ui_state *state, const char *fil
 }
 
 void zoo_ui_save_world(zoo_ui_state *state) {
-	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 3, 18, 50, "Save name? (.SAV)", state->zoo->world.info.name, zoo_ui_save_world_cb);
+	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 4, 18, 50, "Save name? (.SAV)", state->zoo->world.info.name, zoo_ui_save_world_cb);
 }
 
 // game operations - CHEAT
 
 static zoo_tick_retval zoo_ui_cheat_cb(zoo_ui_state *state, const char *cmd, bool accepted) {
-	if (!accepted) return;
+	if (!accepted) return RETURN_IMMEDIATE;
 
 	zoo_game_debug_command(state->zoo, cmd);
 	return RETURN_IMMEDIATE;
 }
 
 void zoo_ui_cheat(zoo_ui_state *state) {
-	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 3, 18, 50, "Command?", "", zoo_ui_cheat_cb);
+	zoo_ui_popup_prompt_string(state, ZOO_UI_PROMPT_ANY, 4, 18, 50, "Command?", "", zoo_ui_cheat_cb);
 }
 
 // main menu

@@ -142,7 +142,7 @@ int main(void) {
 			zoo_input_action_set(&state.input, ZOO_ACTION_SHOOT, keys_held & KEY_A);
 			zoo_input_action_set(&state.input, ZOO_ACTION_TORCH, keys_held & KEY_B);
 			zoo_input_action_set(&state.input, ZOO_ACTION_OK, keys_held & KEY_A);
-			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & (KEY_B | KEY_START | KEY_SELECT));
+			zoo_input_action_set(&state.input, ZOO_ACTION_CANCEL, keys_held & KEY_B);
 
 			if ((keys_down & KEY_START) && zoo_call_empty(&state.call_stack)) {
 				zoo_input_action_pressed(&state.input, ZOO_ACTION_CANCEL);

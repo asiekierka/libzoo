@@ -146,6 +146,7 @@ void zoo_call_pop(zoo_call_stack *stack);
 #define zoo_dist_sq(a, b) (zoo_sq((a)) + zoo_sq((b)))
 #define zoo_dist_sq2(a, b) (zoo_sq((a)) + 2*zoo_sq((b)))
 #define zoo_signum(val) ( ((val) > 0) ? 1 : ( ((val) < 0) ? -1 : 0 ) )
+#define zoo_abs(val) ( ((val) < 0) ? (-(val)) : (val) )
 #define zoo_difference(a, b) ( ((a) >= (b)) ? ((a) - (b)) : ((b) - (a)) )
 #define zoo_toupper(c) (((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c))
 
@@ -519,7 +520,7 @@ void zoo_calc_direction_seek(zoo_state *state, int16_t x, int16_t y, int16_t *dx
 void zoo_board_enter(zoo_state *state);
 void zoo_board_passage_teleport(zoo_state *state, int16_t x, int16_t y);
 
-void zoo_game_debug_command(zoo_state *state, char *in_cmd);
+void zoo_game_debug_command(zoo_state *state, const char *cmd);
 
 void zoo_game_start(zoo_state *state, zoo_game_state game_state);
 void zoo_game_stop(zoo_state *state);

@@ -48,6 +48,10 @@ static zoo_tick_retval zoo_ui_prompt_string_cb(zoo_state *zoo, zoo_ui_prompt_sta
     bool changed = false;
     zoo_tick_retval ret_cb;
 
+#ifdef ZOO_UI_OSK
+    zoo_osk_tick(state->ui, &state->osk);
+#endif
+
 	while ((key = zoo_ui_input_key_pop(&state->ui->input)) != 0) {
         if (key & ZOO_KEY_RELEASED) continue;
 
@@ -92,6 +96,11 @@ static zoo_tick_retval zoo_ui_prompt_string_cb(zoo_state *zoo, zoo_ui_prompt_sta
             }
         } else if (key == ZOO_KEY_ENTER || key == ZOO_KEY_ESCAPE) {
             ret_cb = state->callback(state->ui, key == ZOO_KEY_ESCAPE ? state->orig_buffer : state->buffer, key != ZOO_KEY_ESCAPE);
+            
+#ifdef ZOO_UI_OSK
+            zoo_osk_close(state->ui, &state->osk);
+#endif
+
             zoo_restore_display(state->ui->zoo, state->screen_copy, 60, 25, 0, 0, 60, 25, 0, 0);
             zoo_free_display(state->ui->zoo, state->screen_copy);
             free(state);
@@ -141,6 +150,11 @@ void zoo_ui_popup_prompt_string(zoo_ui_state *state, zoo_ui_prompt_mode mode, ui
     if (width > ZOO_UI_PROMPT_WIDTH) width = ZOO_UI_PROMPT_WIDTH;
     width = inner_width + 14;
 
+    zoo_ui_prompt_state_init(state, prompt, answer, inner_x, inner_y, inner_width);
+    prompt->arrow_color = prompt->text_color = color;
+    prompt->mode = mode;
+    prompt->callback = cb;
+
     zoo_window_draw_pattern(state->zoo, x, y    , width, color, ZOO_WINDOW_PATTERN_TOP);
     zoo_window_draw_pattern(state->zoo, x, y + 1, width, color, ZOO_WINDOW_PATTERN_INNER);
     zoo_window_draw_pattern(state->zoo, x, y + 2, width, color, ZOO_WINDOW_PATTERN_SEPARATOR);
@@ -152,14 +166,13 @@ void zoo_ui_popup_prompt_string(zoo_ui_state *state, zoo_ui_prompt_mode mode, ui
         state->zoo->d_video->func_write(state->zoo->d_video, x + ((width - question_len) >> 1) + i, y + 1, color, question[i]);
     }
 
-    zoo_ui_prompt_state_init(state, prompt, answer, inner_x, inner_y, inner_width);
-    prompt->arrow_color = prompt->text_color = color;
-    prompt->mode = mode;
-    prompt->callback = cb;
-
     // TODO: move elsewhere (general key buffer reset)
     while (zoo_ui_input_key_pop(&state->input) != 0);
     zoo_call_push_callback(&state->zoo->call_stack, (zoo_func_callback) zoo_ui_prompt_string_cb, prompt);
 
     zoo_ui_prompt_string_draw(state->zoo, prompt);
+
+#ifdef ZOO_UI_OSK
+    zoo_osk_open(state, &prompt->osk, 14, 4);
+#endif
 }

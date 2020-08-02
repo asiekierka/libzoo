@@ -84,6 +84,11 @@ ifdef ZOO_USE_UI_SIDEBAR_SLIM
 SOURCES += $(SRCDIR)/ui/zoo_sidebar_slim.c
 endif
 
+ifdef ZOO_USE_UI_OSK
+SOURCES += $(SRCDIR)/ui/zoo_ui_osk.c
+CFLAGS += -DZOO_UI_OSK
+endif
+
 ifdef ZOO_USE_UI
 SOURCES += $(SRCDIR)/ui/zoo_ui.c \
 	$(SRCDIR)/ui/zoo_ui_file_select.c \

@@ -9,6 +9,33 @@ struct s_zoo_ui_state;
 
 void zoo_ui_filesel_call(struct s_zoo_ui_state *state, const char *title, const char *extension, zoo_func_callback cb);
 
+// zoo_ui_osk.c
+
+#ifdef ZOO_UI_OSK
+typedef struct {
+	int8_t x;
+	int8_t y;
+	uint8_t normal; // if < 32 || >= 128, shifted has visual char; if 0, done
+	uint8_t shifted;
+} zoo_osk_entry;
+
+typedef struct {
+	const zoo_osk_entry *entries;
+
+	uint8_t x;
+	uint8_t y;
+	int16_t e_pos;
+
+	bool active;
+	bool shifted;
+	void *screen_copy;
+} zoo_osk_state;
+
+void zoo_osk_open(zoo_ui_state *ui, zoo_osk_state *osk, uint8_t x, uint8_t y);
+void zoo_osk_close(zoo_ui_state *ui, zoo_osk_state *osk);
+void zoo_osk_tick(zoo_ui_state *ui, zoo_osk_state *osk);
+#endif
+
 // zoo_ui_prompt_string.c
 
 typedef enum {
@@ -35,6 +62,10 @@ typedef struct {
 
     bool first_key_press;
     zoo_ui_prompt_string_callback callback;
+
+#ifdef ZOO_UI_OSK
+    zoo_osk_state osk;
+#endif
 
     void *screen_copy;
 } zoo_ui_prompt_state;
