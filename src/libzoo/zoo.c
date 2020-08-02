@@ -24,14 +24,14 @@
 #include <string.h>
 #include "zoo_internal.h"
 
-bool zoo_world_reload(zoo_state *state) {
+int zoo_world_reload(zoo_state *state) {
 	char filename[33];
 	zoo_io_handle h;
-	bool ret = false;
+	int ret = 0;
 
-	if (strlen(state->world.info.name) <= 0) {
+	if (state->world.info.name[0] == '\0') {
 		// TODO: is this an unsaved world? what does RoZ do on unsaved worlds?
-		return true;
+		return 0;
 	}
 
 	if (state->d_io != NULL) {
@@ -45,14 +45,14 @@ bool zoo_world_reload(zoo_state *state) {
 	return ret;
 }
 
-bool zoo_world_play(zoo_state *state) {
-	bool ret = true;
+int zoo_world_play(zoo_state *state) {
+	int ret = 0;
 
 	if (state->world.info.is_save) {
 		ret = zoo_world_reload(state);
 	}
 
-	if (ret) {
+	if (!ret) {
 		zoo_game_start(state, GS_PLAY);
 
 		zoo_board_change(state, state->return_board_id);
@@ -64,11 +64,11 @@ bool zoo_world_play(zoo_state *state) {
 	return ret;
 }
 
-bool zoo_world_return_title(zoo_state *state) {
+int zoo_world_return_title(zoo_state *state) {
 	zoo_board_change(state, 0);
 	zoo_game_start(state, GS_TITLE);
 	zoo_redraw(state);
-	return true;
+	return 0;
 }
 
 static int16_t zoo_default_random(zoo_state *state, int16_t max) {

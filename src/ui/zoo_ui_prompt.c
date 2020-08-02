@@ -116,6 +116,7 @@ static void zoo_ui_prompt_state_init(zoo_ui_state *state, zoo_ui_prompt_state *p
     prompt->mode = ZOO_UI_PROMPT_ANY;
     prompt->ui = state;
     prompt->screen_copy = zoo_store_display(state->zoo, 0, 0, 60, 25);
+    prompt->first_key_press = true;
     strncpy(prompt->orig_buffer, answer, width);
     prompt->orig_buffer[width] = '\0';
     strcpy(prompt->buffer, prompt->orig_buffer);
@@ -128,6 +129,9 @@ void zoo_ui_popup_prompt_string(zoo_ui_state *state, zoo_ui_prompt_mode mode, ui
     uint16_t inner_y = y + 4;
     uint16_t inner_width = width - 14;
     uint8_t color = 0x4F;
+    int question_len = strlen(question);
+    int i;
+
     zoo_ui_prompt_state *prompt = malloc(sizeof(zoo_ui_prompt_state));
     if (prompt == NULL) {
         cb(state, answer, false);
@@ -143,6 +147,10 @@ void zoo_ui_popup_prompt_string(zoo_ui_state *state, zoo_ui_prompt_mode mode, ui
     zoo_window_draw_pattern(state->zoo, x, y + 3, width, color, ZOO_WINDOW_PATTERN_INNER);
     zoo_window_draw_pattern(state->zoo, x, y + 4, width, color, ZOO_WINDOW_PATTERN_INNER);
     zoo_window_draw_pattern(state->zoo, x, y + 5, width, color, ZOO_WINDOW_PATTERN_BOTTOM);
+
+    for (i = 0; i < question_len; i++) {
+        state->zoo->d_video->func_write(state->zoo->d_video, x + ((width - question_len) >> 1) + i, y + 1, color, question[i]);
+    }
 
     zoo_ui_prompt_state_init(state, prompt, answer, inner_x, inner_y, inner_width);
     prompt->arrow_color = prompt->text_color = color;

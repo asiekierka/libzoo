@@ -468,9 +468,9 @@ typedef struct {
 
 void zoo_state_init(zoo_state *state);
 void zoo_redraw(zoo_state *state);
-bool zoo_world_reload(zoo_state *state);
-bool zoo_world_play(zoo_state *state);
-bool zoo_world_return_title(zoo_state *state);
+int zoo_world_reload(zoo_state *state);
+int zoo_world_play(zoo_state *state);
+int zoo_world_return_title(zoo_state *state);
 
 void* zoo_store_display(zoo_state *state, int16_t x, int16_t y, int16_t width, int16_t height);
 void zoo_restore_display(zoo_state *state, void *data, int16_t width, int16_t height, int16_t srcx, int16_t srcy, int16_t srcwidth, int16_t srcheight, int16_t dstx, int16_t dsty);
